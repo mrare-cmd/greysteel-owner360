@@ -564,7 +564,7 @@ tr.hidden-row td{opacity:.45}
     <div class="mark">O</div>
     <span class="brand-name">Greysteel</span><span class="brand-sep">|</span>
     <span class="brand-page">Owner 360</span>
-    <span id="verBadge" title="Page version">v1</span>
+    <span id="verBadge" title="Page version">v2</span>
   </div>
   <nav class="tabs">
     <button class="tab active" data-view="owners"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span class="tl">Owners</span></button>
@@ -753,7 +753,7 @@ function title(t) {
   if (!(/[a-z]/.test(t) && /[A-Z]/.test(t)))                 /* ALL CAPS or all lower: title-case it */
     t = t.toLowerCase().replace(/\b([a-z])/g, function (c) { return c.toUpperCase(); });
   return t
-    .replace(/\b(Llc|Lp|Llp|Lllp|Ii|Iii|Iv|Vi|Vii|Viii|Ix|Xi|Nw|Ne|Sw|Se|Dc|Va|Md|Hud|Usa|Lc|Pllc|Reit|Hoc|Mhp|Cih|Jbg|Ubs|Uip|Bdc|Nhp|Nht|Ahc)\b/g, function (w) { return w.toUpperCase(); })
+    .replace(/\b(Llc|Lp|Llp|Lllp|Ii|Iii|Iv|Vi|Vii|Viii|Ix|Xi|Nw|Ne|Sw|Se|Dc|Va|Md|Hud|Usa|Lc|Pllc|Reit|Hoc|Mhp|Cih|Nnrha|Prha|Nrha|Dcha|Jbg|Ubs|Uip|Bdc|Nhp|Nht|Ahc)\b/g, function (w) { return w.toUpperCase(); })
     .replace(/\b(\d+)(St|Nd|Rd|Th)\b/g, function (a, n, x) { return n + x.toLowerCase(); });
 }
 function uniq(a) { var seen = {}, out = []; for (var i = 0; i < a.length; i++) { var k = a[i]; if (k && !seen[k]) { seen[k] = 1; out.push(k); } } return out; }
@@ -772,7 +772,7 @@ function hash(str) {
    "Jubilee Housing Limited Partnership", "JUBILEE HOUSING LP" and
    "Jubilee Housing, L.P." are one entity. Suffixes go, words stay. */
 var JUNK_NAME = /^(INDIVIDUAL|INDIVIDUALS|PRIVATE INVESTOR|PRIVATE BUYER|UNKNOWN|NOT AVAILABLE|N ?A|NONE|OWNER|CURRENT OWNER|OWNER OF RECORD|TBD|VARIOUS|MULTIPLE|PRIVATE|UNDISCLOSED|CONFIDENTIAL|NOT DISCLOSED|SEE NOTES?)$/;
-var SUFFIX = /\s+(L ?L ?C|L ?L ?P|P ?L ?L ?C|L ?P|L ?C|INC|INCORPORATED|CORP|CORPORATION|CO|COMPANY|LTD|LIMITED|LIMITED PARTNERSHIP|LTD PARTNERSHIP|LTD PTNSHP|LIMITED PTNSHP|LIMITED LIABILITY COMPANY|LIMITED LIABILITY CO|PARTNERSHIP|PTNSHP|LLLP|L ?L ?L ?P|PC|P ?C|TRUSTEES?|ET AL|ETAL|THE)$/;
+var SUFFIX = /\s+(L ?L ?C|L ?L ?P|P ?L ?L ?C|L ?P|L ?C|INC|INCORPORATED|CORP|CORPORATION|CO|COMPANY|LTD|LIMITED|LIMITED PARTNERSHIP|LTD PARTNERSHIP|LTD PTNSHP|LIMITED PTNSHP|LTD PARTNERSHP|LIMITED PARTNERSHP|LTD PARTNRSHP|LTD PRTNRSHP|LTD PTNRSHP|PARTNERSHP|PARTNRSHP|LTD PTSHP|LIMITED LIABILITY COMPANY|LIMITED LIABILITY CO|PARTNERSHIP|PTNSHP|LLLP|L ?L ?L ?P|PC|P ?C|TRUSTEES?|ET AL|ETAL|THE)$/;
 function nameKey(n) {
   var t = s(n).toUpperCase();
   if (!t) return "";
@@ -805,7 +805,7 @@ function isPerson(n) {
 
 /* public owners: grouped on exact identity only, never through a shared
    office (housing authorities sit in every JV and would chain sponsors) */
-var PUBLIC_RE = /\b(HOUSING AUTHORITY|REDEVELOPMENT AND HOUSING|HOUSING OPPORTUNIT(Y|IES) COMMISSION|HOUSING COMMISSION|HOUSING FINANCE AGENCY|UNITED STATES|USA|COMMONWEALTH OF|STATE OF|CITY OF|COUNTY OF|COUNTY COUNCIL|COUNTY GOVERNMENT|BOARD OF EDUCATION|DEPARTMENT OF|SECRETARY OF HOUSING|FEDERAL NATIONAL|FANNIE MAE|FREDDIE MAC|WASHINGTON METROPOLITAN AREA TRANSIT|WMATA|REVENUE AUTHORITY|ECONOMIC DEVELOPMENT AUTHORITY)\b|^(DISTRICT OF COLUMBIA|MONTGOMERY COUNTY|PRINCE GEORGES COUNTY|PRHA|NRHA|HRHA|DCHA|HOC|CITY OF [A-Z ]+|[A-Z ]+ CITY)$/;
+var PUBLIC_RE = /\b(HOUSING AUTHORITY|REDEVELOPMENT AND HOUSING|HOUSING OPPORTUNIT(Y|IES) COMMISSION|HOUSING COMMISSION|HOUSING FINANCE AGENCY|UNITED STATES|USA|COMMONWEALTH OF|STATE OF|CITY OF|COUNTY OF|COUNTY COUNCIL|COUNTY GOVERNMENT|BOARD OF EDUCATION|DEPARTMENT OF|SECRETARY OF HOUSING|FEDERAL NATIONAL|FANNIE MAE|FREDDIE MAC|WASHINGTON METROPOLITAN AREA TRANSIT|WMATA|REVENUE AUTHORITY|ECONOMIC DEVELOPMENT AUTHORITY)\b|^(DISTRICT OF COLUMBIA|MONTGOMERY COUNTY|PRINCE GEORGES COUNTY|PRHA|NRHA|HRHA|CRHA|DCHA|HOC|CITY OF [A-Z ]+|(NORFOLK|PORTSMOUTH|CHESAPEAKE|HAMPTON|SUFFOLK|NEWPORT NEWS|VIRGINIA BEACH) CITY)$/;
 function ownerKind(names, hudTypes) {
   var all = names.join(" | ");
   if (names.some(function (n) { return PUBLIC_RE.test(n); })) return "Public";
@@ -932,7 +932,7 @@ function build(input, log) {
       addRec({src: "R", reg: reg, line: s(r.address_line_1), city: s(r.address_city), zip: zip5(r.address_postal_code),
         lat: num(r.latitude), lng: num(r.longitude), units: ru, unitsEst: est,
         yb: int(r.year_built), name: "",
-        owner: {name: s(r.reported_owner_name), mail: {line1: s(r.reported_mailing_address_line_1), zip: zip5(r.reported_mailing_address_postal_code),
+        owner: {name: s(r.reported_owner_name), mail: {line1: s(r.reported_mailing_address_line_1) + (s(r.reported_mailing_std_unit_nbr) && !/(STE|SUITE|#|UNIT|FL)/i.test(s(r.reported_mailing_address_line_1)) ? " STE " + s(r.reported_mailing_std_unit_nbr) : ""), zip: zip5(r.reported_mailing_address_postal_code),
                 full: s(r.reported_mailing_address_full)}, co: co ? co[1].toLowerCase() : "", start: day(r.sale_recorded_date), src: "Reonomy"},
         contacts: contacts, contactCo: s(r.contact_company_name),
         d: {link: s(r.link), owner: s(r.owner_profile_link), apn: s(r.apn), sale: day(r.sale_recorded_date), price: num(r.sale_amount),
@@ -1024,7 +1024,7 @@ function build(input, log) {
         lat: ll ? ll[0] : null, lng: ll ? ll[1] : null, units: int(g(r, "property_total_unit_count")) || int(g(r, "Total Units")),
         yb: null, name: s(g(r, "Property Name")),
         owner: ownerName ? {name: ownerName, pid: s(g(r, "owner_participant_id")), type: s(g(r, "owner_company_type")),
-               mail: {line1: s(g(r, "owner_address_line1")), zip: zip5(g(r, "owner_zip_code")),
+               mail: {line1: s(g(r, "owner_address_line1")) + (s(g(r, "owner_address_line2")) ? " " + s(g(r, "owner_address_line2")) : ""), zip: zip5(g(r, "owner_zip_code")),
                       full: [s(g(r, "owner_address_line1")), s(g(r, "owner_address_line2")), s(g(r, "owner_city_name")), s(g(r, "owner_state_code")), s(g(r, "owner_zip_code"))].filter(Boolean).join(", ")},
                email: s(g(r, "owner_contact_email_text")).toLowerCase(), phone: phone(g(r, "owner_main_phone_number_text")),
                person: s(g(r, "owner_individual_full_name")), personTitle: s(g(r, "owner_individual_title_text")),
@@ -1169,9 +1169,11 @@ function build(input, log) {
     if (names.some(function (n) { return AGENT.test(n); })) return;
     if (kind === "mb") {
       if (names.length > 60) { sharedOffices[val] = names.length; return; }
-      var nSuite = 0;
-      Object.keys(keyNames).forEach(function (k2) { if (k2.indexOf("ms:" + val + "#") === 0) nSuite++; });
-      if (nSuite >= 3) return;                 /* a multi-tenant building: the ms: suite keys decide */
+      var nSuite = 0;                          /* suites here that hold 2+ names (a lone co-op in Ste 106 doesn't count) */
+      Object.keys(keyNames).forEach(function (k2) { if (k2.indexOf("ms:" + val + "#") === 0 && Object.keys(keyNames[k2]).length >= 2) nSuite++; });
+      /* two or more suites in play = a multi-tenant office (5301 Wisconsin Ave NW holds
+         Horning in 700 and Bernstein in 600): only the per-suite ms: keys link there */
+      if (nSuite >= 2) return;
     }
     if (kind === "dom" && names.length > 60) return;
     var label = kind === "co" ? "Reonomy groups them as one company" : kind === "hud" ? "Same HUD owner participant ID " + val
@@ -1268,6 +1270,7 @@ function build(input, log) {
     function credit(n, w, basis) {
       var k = nameKey(n);
       if (!k || w <= 0) return;
+      if (k.replace(/[^A-Z0-9]/g, "").length < 4) w *= 0.05;   /* "N R" is an initialism fragment, not a name */
       var c = cand[k] || (cand[k] = {n: title(n), w: 0, basis: basis, bw: 0});
       c.w += w;
       if (w > c.bw) { c.bw = w; c.basis = basis; }
