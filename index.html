@@ -564,7 +564,7 @@ tr.hidden-row td{opacity:.45}
     <div class="mark">O</div>
     <span class="brand-name">Greysteel</span><span class="brand-sep">|</span>
     <span class="brand-page">Owner 360</span>
-    <span id="verBadge" title="Page version">v2</span>
+    <span id="verBadge" title="Page version">v3</span>
   </div>
   <nav class="tabs">
     <button class="tab active" data-view="owners"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span class="tl">Owners</span></button>
@@ -873,6 +873,16 @@ function phone(p) {
   return d.length === 10 ? "(" + d.slice(0, 3) + ") " + d.slice(3, 6) + "-" + d.slice(6) : "";
 }
 
+/* A Fannie / Freddie credit facility (or any multi-property loan) is one
+   borrower's pool: Trepp gives every property a row per tranche, carrying
+   that property's allocated share. Its tranche ids tie the pool together. */
+function isFacility(l) { return (l.np || 0) > 1 && (l.mp || /credit facility/i.test(l.cat || "")); }
+function facIds(p) {
+  var ids = {};
+  (p.T || []).forEach(function (t) { (t.loans || []).forEach(function (l) { if (isFacility(l) && l.sec) ids[l.sec] = 1; }); });
+  return Object.keys(ids);
+}
+
 /* ---------------------------------------------------------- union-find */
 function DSU() { this.p = {}; }
 DSU.prototype.find = function (x) {
@@ -955,6 +965,7 @@ function build(input, log) {
       var loans = rows.map(function (r) {
         var bal = num(r.current_balance), mat = day(r.maturity_date);
         return {name: s(r.loan_name), src: s(r.source), deal: s(r.deal_type), cat: s(r.category), orig: title(r.originator), bal: bal, obal: num(r.original_balance),
+          sec: s(r.securitization_name_id), np: int(r.number_of_properties), alloc: num(r.allocated_balance_pct), mp: /^y/i.test(s(r.multiproperty_loan)),
           rate: num(r.loan_rate), rt: s(r.rate_type), amort: s(r.amortization_type), od: day(r.origination_date), mat: mat,
           open: day(r.model_first_open_date), pre: s(r.current_prepayment_restriction), dscr: num(r.dscr_ncf) || num(r.dscr_noi), ltv: num(r.ltv),
           wl: /^y/i.test(s(r.watchlist_status)), ss: /^y/i.test(s(r.spec_serv_status)) || !!s(r.special_servicer_transfer_reason),
@@ -1145,6 +1156,7 @@ function build(input, log) {
         if (mk && (!isPub || ownOffice(nk, mk.bldg))) { keyAdd("mb:" + mk.bldg, nk); if (mk.suite) keyAdd("ms:" + mk.bldg + "#" + mk.suite, nk); }
         var dom = emailDomain(c.email);
         if (dom && !isPub) keyAdd("dom:" + dom, nk);
+        if (c === p.cur && !isPub) facIds(p).forEach(function (id) { keyAdd("fac:" + id, nk); });
       }
     });
   });
@@ -1177,7 +1189,8 @@ function build(input, log) {
     }
     if (kind === "dom" && names.length > 60) return;
     var label = kind === "co" ? "Reonomy groups them as one company" : kind === "hud" ? "Same HUD owner participant ID " + val
-              : kind === "dom" ? "Same email domain @" + val : "Same mailing office " + prettyMail(val);
+              : kind === "dom" ? "Same email domain @" + val : kind === "fac" ? "In the same multi-property credit facility (Trepp " + val + ")"
+              : "Same mailing office " + prettyMail(val);
     /* Reonomy's company grouping is built from the same kind of evidence
        (shared officers and offices), so it gets the hub rules too */
     (kind === "hud" ? strongKeys : weakKeys).push({kind: kind === "ms" ? "mb" : kind, label: label, names: names});
@@ -1234,7 +1247,20 @@ function build(input, log) {
       if (O.find("n:" + c.k) === o.root) { o.claims.push(c); }
     });
   });
-  /* names seen only on other properties' secondary claims still belong to their group */
+  /* a property Trepp names no owner for, inside a credit facility, belongs to
+     whichever group holds most of the facility's other properties */
+  var facOwner = {};
+  props.forEach(function (p) { if (p._o) facIds(p).forEach(function (id) { var m = facOwner[id] || (facOwner[id] = new Map()); m.set(p._o, (m.get(p._o) || 0) + 1); }); });
+  props.forEach(function (p, pi) {
+    if (p._o) return;
+    var votes = new Map();
+    facIds(p).forEach(function (id) { (facOwner[id] || new Map()).forEach(function (n, o) { votes.set(o, (votes.get(o) || 0) + n); }); });
+    var best = null, bn = 0;
+    votes.forEach(function (n, o) { if (n > bn) { bn = n; best = o; } });
+    if (!best) return;
+    best.props.push(pi); p._o = best; p.viaFac = true;
+    best.facProps = (best.facProps || 0) + 1;
+  });
   owners = owners.filter(function (o) { return o.props.length; });
 
   owners.forEach(function (o, oi) {
@@ -1317,6 +1343,7 @@ function build(input, log) {
     });
     o.why = Object.keys(ev).map(function (k) { var e = ev[k]; return {t: e.t, v: e.t === "costar" ? "CoStar names the true buyer " + title(e.v) : e.v, names: Object.keys(e.names).length}; })
       .sort(function (a, b) { return b.names - a.names; }).slice(0, 12);
+    if (o.facProps) o.why.unshift({t: "fac", v: o.facProps + " propert" + (o.facProps > 1 ? "ies" : "y") + " with no owner name joined through a shared credit facility", names: 0});
     o.id = hash(aliasList.map(function (a) { return a.k; }).sort()[0] || o.name);
   });
   /* shared mail drops are listed for the page, not used */
@@ -1325,7 +1352,8 @@ function build(input, log) {
   /* ============================== 3. output ============================ */
   var outProps = props.map(function (p) {
     return {id: p.id, n: p.n, a: p.a, c: p.c, z: p.z, r: p.r, u: p.u, ue: p.ue || undefined, yb: p.yb, ll: p.ll, src: p.src, o: p._o ? p._o.idx : -1,
-      own: p.cur ? {n: title(p.cur.name), s: p.cur.src, d: p.cur.start || p.cur.seen || ""} : null,
+      own: p.cur ? {n: title(p.cur.name), s: p.cur.src, d: p.cur.start || p.cur.seen || ""}
+         : p.viaFac ? {n: "Not named - placed by its credit facility", s: "Trepp", d: ""} : null,
       other: p.other, R: p.R, T: p.T, C: p.C, P: p.P, X: p.X};
   });
   var outOwners = owners.map(function (o) {
@@ -1552,7 +1580,12 @@ function propSignals(p, horizon) {
       if (l.mat) {
         var m = monthsFrom(l.mat);
         if (m < 0 && m > -36 && (l.bal > 0 || (l.past || 0) > 0)) add({k: "pastmat", cat: "distress", l: "Loan past maturity", d: l.mat, pts: 25, x: desc});
-        else if (m >= 0 && m <= H) { treppMats.push(l.mat); add({k: "mat", cat: "debt", l: "Loan matures", d: l.mat, pts: m <= 12 ? 30 : m <= 24 ? 20 : 10, x: desc}); }
+        else if (m >= 0 && m <= H) {
+          treppMats.push(l.mat);
+          if (isFac(l)) add({k: "mat", cat: "debt", l: "Credit facility tranche matures", d: l.mat, pts: m <= 12 ? 12 : m <= 24 ? 8 : 4, fac: l.sec || "?", bal: l.bal || 0, np: l.np, src: facLabel(l), orig: l.orig, rate: l.rate,
+            x: fmtM(l.bal) + " share of a " + l.np + "-property " + facLabel(l) + (l.orig ? " (" + l.orig + ")" : "") + (l.rate ? " · " + l.rate + "%" : "") + " · usually rolled inside the facility"});
+          else add({k: "mat", cat: "debt", l: "Loan matures", d: l.mat, pts: m <= 12 ? 30 : m <= 24 ? 20 : 10, x: desc});
+        }
       }
       if (l.open) { var mo = monthsFrom(l.open); if (mo >= 0 && mo <= Math.min(H, 18) && (!l.mat || l.open < l.mat)) add({k: "open", cat: "debt", l: "Prepayment window opens", d: l.open, pts: 10, x: (l.pre ? l.pre + " ends · " : "") + desc}); }
       if (l.ss) add({k: "ss", cat: "distress", l: "In special servicing", d: "", pts: 25, x: (l.ssr ? l.ssr + " · " : "") + desc});
@@ -1615,6 +1648,9 @@ function propSignals(p, horizon) {
   p._sig = out; p._sigH = horizon;
   return out;
 }
+/* a tranche of a multi-property credit facility, not a stand-alone loan */
+function isFac(l) { return (l.np || 0) > 1 && (l.mp || /credit facility/i.test(l.cat || "")); }
+function facLabel(l) { return (l.src || "Agency") + " credit facility"; }
 function sizeFactor(u) { return Math.max(0.6, Math.min(2, Math.sqrt(Math.max(u || 0, 5) / 40))); }
 function propScore(p, horizon) {
   var sig = propSignals(p, horizon);
@@ -1747,6 +1783,7 @@ function sigPill(s, short) {
 }
 function shortLabel(s) {
   var w = s.d && s.d >= TODAY_ISO ? " " + fmtMon(s.d).replace(/ (\d{2})(\d{2})$/, " '$2") : "";
+  if (s.k === "mat" && /tranche/.test(s.l)) return "Facility tranche" + (s.d && s.d >= TODAY_ISO ? " " + fmtMon(s.d).replace(/ (\d{2})(\d{2})$/, " '$2") : "");
   return ({mat: "Maturity", rmat: "Maturity", open: "Prepay opens", hap: "HAP exp.", mtm: "Below-mkt HAP", ofs: "Offer of sale", pastmat: "Past maturity", ss: "Special servicing",
     wl: "Watchlist", dq: "Delinquent", dscr: "Low DSCR", pfc: "Pre-foreclosure", reac: "Low REAC", hold: s.l, nof: "Foreclosure notice", redev: "Redevelopment", ten: "Tenants", not: "Transfer"}[s.k] || s.l) + (s.k === "hold" ? "" : w);
 }
@@ -1819,14 +1856,26 @@ function renderProfile() {
 
   /* why now + contacts */
   var seen = {}, why = st.sig.filter(function (s) { if (s.pts <= 0 || s.k === "hold") return false; var k = s.k + "|" + s.p.id + "|" + (s.d || ""); if (seen[k]) return false; seen[k] = 1; return true; });
+  /* one facility tranche maturing is one event, however many of the owner's properties share it */
+  var facAgg = {};
+  why = why.filter(function (s) {
+    if (!s.fac) return true;
+    var k = s.fac + "|" + s.d, a = facAgg[k];
+    if (!a) { facAgg[k] = Object.assign({}, s, {props: [s.p], tot: s.bal}); return true; }
+    a.props.push(s.p); a.tot += s.bal; return false;
+  }).map(function (s) {
+    var a = s.fac && facAgg[s.fac + "|" + s.d];
+    if (!a || a.props.length < 2) return s;
+    return Object.assign({}, a, {pl: a.props.length + " properties in this pool", x: fmtM(a.tot) + " combined share of a " + a.np + "-property " + a.src + (a.orig ? " (" + a.orig + ")" : "") + (a.rate ? " · " + a.rate + "%" : "") + " · usually rolled inside the facility"});
+  });
   /* long holds are context, not events: one summary row instead of one per property */
   var holds = st.sig.filter(function (s) { return s.k === "hold"; }).sort(function (a, b) { return a.d.localeCompare(b.d); });
   h += '<div class="grid g-2 mt"><div class="card"><div class="card-h"><div><div class="card-t">Why call now</div><div class="card-s">' +
     (why.length ? why.length + " signal" + (why.length > 1 ? "s" : "") + " across " + uniqN(why.map(function (s) { return s.p.id; })) + " propert" + (uniqN(why.map(function (s) { return s.p.id; })) > 1 ? "ies" : "y") + " · within " + S.horizon + " months" : "No dated signals in the next " + S.horizon + " months") +
     '</div></div></div><div class="why">' + (why.slice(0, 14).map(function (s) {
       return '<div class="wy' + (s.d && s.d < TODAY_ISO && s.cat === "distress" ? " past" : "") + '" data-p="' + esc(s.p.id) + '"><div class="d">' + (s.d ? esc(fmtDate(s.d)) + '<div class="small">' + esc(rel(s.d)) + "</div>" : "Now") + "</div>" +
-        '<div><div class="l">' + sigPill(s) + " " + esc(s.p.n || s.p.a) + '</div><div class="x">' + esc(s.x || "") + (s.p.u ? (s.x ? " · " : "") + fmtN(s.p.u) + " units" : "") + "</div></div>" +
-        '<div class="p">' + esc(s.p.a !== s.p.n ? s.p.a : "") + "</div></div>";
+        '<div><div class="l">' + sigPill(s) + " " + esc(s.pl || s.p.n || s.p.a) + '</div><div class="x">' + esc(s.x || "") + (!s.pl && s.p.u ? (s.x ? " · " : "") + fmtN(s.p.u) + " units" : "") + "</div></div>" +
+        '<div class="p">' + esc(s.pl ? "" : s.p.a !== s.p.n ? s.p.a : "") + "</div></div>";
     }).join("") || (holds.length ? "" : '<div class="empty" style="padding:28px">Nothing pressing. Long-term relationship.</div>')) +
     (holds.length ? '<div class="wy" data-p="' + esc(holds[0].p.id) + '"><div class="d">Held</div><div><div class="l"><span class="sp hold">Long hold</span> ' + fmtN(holds.length) + " propert" + (holds.length > 1 ? "ies" : "y") + ' owned 10+ years</div><div class="x">Longest: ' + esc(holds[0].p.n || holds[0].p.a) + " since " + esc(fmtDate(holds[0].d)) + " · ripe for a disposition or recap conversation</div></div><div class=\"p\"></div></div>" : "") +
     (why.length > 14 ? '<div class="evr muted">+' + (why.length - 14) + " more in the Calendar tab</div>" : "") + "</div></div>";
@@ -1883,7 +1932,12 @@ function propRow(p) {
   var loans = [];
   (p.T || []).forEach(function (t) { (t.loans || []).forEach(function (l) { if (l.bal !== 0) loans.push(l); }); });
   loans.sort(function (a, b) { return (a.mat || "9").localeCompare(b.mat || "9"); });
-  var debt = loans.length ? loans.map(function (l) { return '<div class="sub">' + esc([fmtM(l.bal) || "Balance n/a", l.mat ? "matures " + fmtMon(l.mat) : "", l.orig].filter(Boolean).join(" · ")) + "</div>"; }).slice(0, 2).join("") : "";
+  var fl = loans.filter(isFac), sl = loans.filter(function (l) { return !isFac(l); });
+  var debt = sl.map(function (l) { return '<div class="sub">' + esc([fmtM(l.bal) || "Balance n/a", l.mat ? "matures " + fmtMon(l.mat) : "", l.orig].filter(Boolean).join(" · ")) + "</div>"; }).slice(0, 2).join("");
+  if (fl.length) {
+    var nx = fl.filter(function (l) { return l.mat && l.mat >= TODAY_ISO; }).sort(function (a, b) { return a.mat.localeCompare(b.mat); })[0];
+    debt = '<div class="sub">' + esc([fmtM(fl.reduce(function (t, l) { return t + (l.bal || 0); }, 0)) + " share of a " + fl[0].np + "-property facility", fl.length + " tranches", nx ? "next " + fmtMon(nx.mat) : ""].filter(Boolean).join(" · ")) + "</div>" + debt;
+  }
   if (!debt) { var ms = []; (p.R || []).forEach(function (r) { (r.mort || []).forEach(function (m) { ms.push(m); }); }); debt = ms.slice(0, 2).map(function (m) { return '<div class="sub">' + esc([fmtM(m.amt), m.mat ? "matures " + fmtMon(m.mat) : (m.rec ? "rec. " + fmtMon(m.rec) : ""), m.lender].filter(Boolean).join(" · ")) + "</div>"; }).join(""); }
   var hap = "";
   (p.P || []).forEach(function (h) { (h.contracts || []).slice(0, 2).forEach(function (c) { hap += '<div class="sub">' + esc([c.units ? c.units + "u" : "", c.prog, c.exp ? "exp. " + fmtMon(c.exp) : "", c.safmr ? c.safmr.toFixed(2) + "x SAFMR" : ""].filter(Boolean).join(" · ")) + "</div>"; }); });
@@ -2041,8 +2095,20 @@ function openProp(id) {
     (p.other && p.other.length ? row("Also on record", p.other.map(function (x) { return esc(x.n) + ' <span class="muted small">(' + esc(x.s) + ")</span>"; }).join("<br>")) : "") + "</div>";
   var loans = [];
   (p.T || []).forEach(function (t) { (t.loans || []).forEach(function (l) { loans.push(l); }); });
+  var facs = loans.filter(isFac), solo = loans.filter(function (l) { return !isFac(l); });
+  if (facs.length) {
+    facs.sort(function (a, b) { return (a.mat || "9").localeCompare(b.mat || "9"); });
+    var f0 = facs[0], share = facs.reduce(function (t, l) { return t + (l.bal || 0); }, 0);
+    var od = facs.map(function (l) { return l.od; }).filter(Boolean).sort()[0];
+    h += '<div class="dr-sec">' + esc(facLabel(f0)) + ' (Trepp)</div><div class="citem"><div class="ct">One loan pool across ' + fmtN(f0.np) + " properties, in " + facs.length + " tranches</div>" +
+      '<div class="muted">' + esc([f0.orig ? "Originated by " + f0.orig : "", od ? fmtMon(od) : ""].filter(Boolean).join(", ")) + ". Each balance below is this property's allocated share" + (f0.alloc ? " (" + f0.alloc + "% of each tranche)" : "") +
+      "; the DSCR is the facility's. This property's share: <b>" + (fmtM(share) || "$0") + "</b>. Tranches are usually refinanced or extended inside the facility, so a tranche maturity is a weaker signal than a stand-alone loan maturing.</div></div>" +
+      '<table class="dtab"><thead><tr><th>Tranche</th><th class="num">Share</th><th>Rate</th><th>Matures</th><th>DSCR</th></tr></thead><tbody>' +
+      facs.map(function (l) { return "<tr><td>" + esc(l.sec || "-") + '<div class="muted small">' + esc([l.amort, l.rt, l.od ? "from " + fmtMon(l.od) : ""].filter(Boolean).join(" · ")) + '</div></td><td class="num">' + (l.bal === 0 ? '<span class="muted">$0</span>' : fmtM(l.bal) || '<span class="muted">n/a</span>') + "</td><td>" + (l.rate ? l.rate + "%" : "") + "</td><td>" + esc(fmtDate(l.mat)) + "</td><td>" + (l.dscr ? l.dscr.toFixed(2) + "x" : "") + "</td></tr>"; }).join("") + "</tbody></table>";
+  }
+  loans = solo;
   if (loans.length) h += '<div class="dr-sec">Loans (Trepp)</div><table class="dtab"><thead><tr><th>Lender / type</th><th class="num">Balance</th><th>Rate</th><th>Matures</th><th>DSCR</th></tr></thead><tbody>' +
-    loans.map(function (l) { return "<tr><td>" + esc(l.orig || "-") + '<div class="muted small">' + esc([l.src, l.deal, l.amort, l.pre ? "Prepay: " + l.pre : "", l.open ? "opens " + fmtDate(l.open) : ""].filter(Boolean).join(" · ")) + (l.ssr || l.mod ? '<div style="color:var(--red)">' + esc([l.ssr, l.mod, l.wo].filter(Boolean).join(" · ")) + "</div>" : "") + '</div></td><td class="num">' + (fmtM(l.bal) || '<span class="muted">n/a</span>') + "</td><td>" + (l.rate ? l.rate + "%" : "") + "</td><td>" + esc(fmtDate(l.mat)) + "</td><td>" + (l.dscr ? l.dscr.toFixed(2) + "x" : "") + "</td></tr>"; }).join("") + "</tbody></table>";
+    loans.map(function (l) { return "<tr><td>" + esc(l.orig || "-") + '<div class="muted small">' + esc([l.src, l.deal, l.amort, l.pre ? "Prepay: " + l.pre : "", l.open ? "opens " + fmtDate(l.open) : ""].filter(Boolean).join(" · ")) + (l.ssr || l.mod ? '<div style="color:var(--red)">' + esc([l.ssr, l.mod, l.wo].filter(Boolean).join(" · ")) + "</div>" : "") + '</div></td><td class="num">' + (l.bal === 0 ? '<span class="muted">$0</span>' : fmtM(l.bal) || '<span class="muted">n/a</span>') + "</td><td>" + (l.rate ? l.rate + "%" : "") + "</td><td>" + esc(fmtDate(l.mat)) + "</td><td>" + (l.dscr ? l.dscr.toFixed(2) + "x" : "") + "</td></tr>"; }).join("") + "</tbody></table>";
   var morts = [];
   (p.R || []).forEach(function (r) { (r.mort || []).forEach(function (m) { morts.push(m); }); });
   if (morts.length) h += '<div class="dr-sec">Recorded mortgages (Reonomy)</div><table class="dtab"><thead><tr><th>Lender</th><th class="num">Amount</th><th>Recorded</th><th>Matures</th></tr></thead><tbody>' +
