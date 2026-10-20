@@ -1,0 +1,2450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Greysteel Owner 360</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%231a73e8'/%3E%3Cstop offset='.58' stop-color='%235b5bd6'/%3E%3Cstop offset='1' stop-color='%237b4fd0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='16' fill='url(%23g)'/%3E%3Ctext x='32' y='45.5' text-anchor='middle' font-family='Arial,Helvetica,sans-serif' font-size='38' font-weight='700' fill='%23fff'%3EO%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600&family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+/*BASE-CSS-START*/
+/* copied from the TOPA Tracker by tools/inject.js - edit Owner 360 styles below, not here */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blue:#1a73e8;--blue-dark:#1557b0;--blue-light:#e8f0fe;--green:#188038;--green-light:#e6f4ea;
+  --yellow:#f9ab00;--yellow-light:#fef7e0;--orange:#fa7b17;--orange-light:#feefe3;
+  --red:#d93025;--red-light:#fce8e6;--purple:#9334e6;--purple-light:#f3e8fd;
+  --text:#202124;--text2:#5f6368;--text3:#80868b;
+  --border:#dadce0;--border2:#e8eaed;--bg:#f8f9fa;--white:#fff;
+  --shadow:0 1px 2px rgba(60,64,67,.3),0 1px 3px 1px rgba(60,64,67,.15);
+  --shadow-lg:0 4px 12px rgba(60,64,67,.15),0 2px 6px rgba(60,64,67,.1);
+  --header:60px;
+}
+html,body{height:100%;font-family:'Roboto',sans-serif;font-size:14px;color:var(--text);background:var(--bg)}
+body{overflow:hidden}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
+a{color:var(--blue);text-decoration:none}
+a:hover{text-decoration:underline}
+.mono{font-family:'Roboto Mono',monospace}
+[hidden]{display:none!important}
+
+/* ---------- sign-in gate (same Worker + session as GreyHub / PBS8 / LoanID) ---------- */
+#authGate{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;background:radial-gradient(1200px 600px at 50% 30%,#eef3fe 0%,#f8f9fa 55%,#f1f3f4 100%);transition:opacity .35s ease}
+#authGate.hidden{opacity:0;pointer-events:none}
+#authGate.gone{display:none}
+.ag-card{width:380px;max-width:calc(100vw - 32px);background:var(--white);border:1px solid var(--border);border-radius:16px;box-shadow:0 18px 50px rgba(32,33,36,.12);padding:34px 32px 28px;text-align:center}
+.ag-brand{display:inline-flex;align-items:center;gap:10px;margin-bottom:8px}
+.ag-title{font-family:'Google Sans',sans-serif;font-size:22px;color:var(--text)}
+.ag-by{font-size:12px;color:var(--text3);margin-bottom:18px}
+.ag-sub{font-size:13.5px;color:var(--text2);margin:0 0 22px;line-height:1.5}
+.ag-btn{width:100%;height:44px;display:inline-flex;align-items:center;justify-content:center;gap:10px;border:1px solid #c4c7cc;border-radius:22px;background:var(--white);color:var(--text);font-size:14px;font-weight:500;transition:background .2s,box-shadow .2s}
+.ag-btn:hover{background:var(--bg);box-shadow:0 1px 4px rgba(32,33,36,.12)}
+.ag-btn:disabled{opacity:.6;cursor:default}
+.ag-msg{min-height:18px;margin-top:14px;font-size:12.5px;color:var(--red)}
+.ag-msg.ok{color:var(--text2)}
+.mark{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Google Sans',sans-serif;font-weight:700;font-size:19px;background:linear-gradient(160deg,rgba(255,255,255,.28),rgba(255,255,255,0) 46%),linear-gradient(135deg,#1a73e8 0%,#5b5bd6 58%,#7b4fd0 100%);box-shadow:0 2px 8px rgba(26,115,232,.35);flex-shrink:0}
+
+/* ---------- header ---------- */
+header{position:fixed;top:0;left:0;right:0;height:var(--header);background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:14px;z-index:200}
+.brand{display:flex;align-items:center;gap:10px;white-space:nowrap}
+.brand-name{font-family:'Google Sans',sans-serif;font-size:15px;color:var(--text2)}
+.brand-sep{color:var(--border);font-size:20px;font-weight:300}
+.brand-page{font-family:'Google Sans',sans-serif;font-size:18px;color:var(--text)}
+#verBadge{font-size:10.5px;font-weight:500;color:var(--text2);background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:1px 7px}
+nav.tabs{display:flex;gap:2px;margin-left:8px}
+.tab{height:36px;padding:0 14px;border-radius:18px;font-family:'Google Sans',sans-serif;font-size:14px;color:var(--text2);display:flex;align-items:center;gap:6px}
+.tab:hover{background:var(--bg)}
+.tab.active{background:var(--blue-light);color:var(--blue);font-weight:500}
+.gsearch{flex:1;max-width:520px;position:relative;margin-left:auto}
+.gsearch input{width:100%;height:40px;border:1px solid transparent;border-radius:20px;padding:0 16px 0 42px;background:#f1f3f4;outline:none;transition:all .2s}
+.gsearch input:focus{background:var(--white);border-color:var(--border);box-shadow:var(--shadow)}
+.gsearch svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text2);pointer-events:none}
+.hdr-right{display:flex;align-items:center;gap:8px}
+#syncDot{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--text3);white-space:nowrap}
+#syncDot i{width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block}
+#syncDot.busy i{background:var(--yellow)}
+#syncDot.err i{background:var(--red)}
+.btn{height:36px;padding:0 16px;border-radius:18px;font-size:13.5px;font-weight:500;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border);background:var(--white);color:var(--text);white-space:nowrap;transition:background .15s,box-shadow .15s}
+.btn:hover{background:var(--bg)}
+.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn.primary:hover{background:var(--blue-dark);box-shadow:var(--shadow)}
+.btn.sm{height:30px;padding:0 12px;font-size:12.5px;border-radius:15px}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--blue)}
+.btn.ghost:hover{background:var(--blue-light)}
+.btn.danger{color:var(--red)}
+.btn:disabled{opacity:.5;cursor:default}
+.clearall{height:30px;padding:0 12px;border-radius:15px;font-size:12.5px;font-weight:500;border:1px solid var(--border);background:var(--white);color:var(--text3);white-space:nowrap;transition:background .15s,color .15s,border-color .15s}
+.clearall.on{background:var(--red);border-color:var(--red);color:#fff}
+.clearall.on:hover{background:#b3261e;border-color:#b3261e}
+.clearall:not(.on){cursor:default}
+#userWrap{position:relative}
+#userChip{display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 10px 0 4px;border:1px solid var(--border);border-radius:17px;background:var(--white);font-size:12.5px}
+#userChip:hover{background:var(--bg)}
+.uc-av{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11.5px;font-weight:700;background:linear-gradient(135deg,#1a73e8,#7b4fd0)}
+#userMenu{position:absolute;top:calc(100% + 8px);right:0;z-index:6000;min-width:230px;background:var(--white);border:1px solid var(--border);border-radius:10px;box-shadow:0 12px 32px rgba(32,33,36,.18);padding:12px 14px;display:none}
+#userMenu.open{display:block}
+#userMenu .um-n{font-size:13px;font-weight:600}
+#userMenu .um-e{font-size:12px;color:var(--text2);margin:2px 0 12px;word-break:break-all}
+#userMenu button{width:100%;height:32px;border-radius:16px;border:1px solid var(--border);font-size:12.5px}
+
+/* ---------- layout ---------- */
+main{position:fixed;top:var(--header);left:0;right:0;bottom:0;overflow:hidden}
+.view{position:absolute;inset:0;overflow:auto;display:none}
+.view.active{display:block}
+.wrap{max-width:1480px;margin:0 auto;padding:20px 24px 48px}
+.card{background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.card-h{display:flex;align-items:center;gap:10px;padding:14px 18px 10px;flex-wrap:wrap}
+.card-t{font-family:'Google Sans',sans-serif;font-size:16px;color:var(--text)}
+.card-s{font-size:12.5px;color:var(--text2)}
+.card-b{padding:0 18px 16px}
+.grid{display:grid;gap:16px}
+.g-kpi{grid-template-columns:repeat(4,minmax(0,1fr))}
+.g-2{grid-template-columns:minmax(0,3fr) minmax(0,2fr)}
+.g-2e{grid-template-columns:repeat(2,minmax(0,1fr))}
+.mt{margin-top:16px}
+.kpi{padding:16px 18px}
+.kpi .k-l{font-size:12.5px;color:var(--text2)}
+.kpi .k-v{font-family:'Google Sans',sans-serif;font-size:30px;color:var(--text);margin:6px 0 4px;letter-spacing:-.01em}
+.kpi .k-d{font-size:12.5px;color:var(--text2)}
+.delta{font-weight:500}
+.delta.up{color:var(--green)}
+.delta.down{color:var(--red)}
+.seg{display:inline-flex;border:1px solid var(--border);border-radius:16px;overflow:hidden}
+.seg button{height:28px;padding:0 12px;font-size:12px;color:var(--text2);border-right:1px solid var(--border)}
+.seg button:last-child{border-right:none}
+.seg button.on{background:var(--blue-light);color:var(--blue);font-weight:500}
+.ml-auto{margin-left:auto}
+.muted{color:var(--text2)}
+.small{font-size:12px}
+.pill{display:inline-flex;align-items:center;height:22px;padding:0 9px;border-radius:11px;font-size:11.5px;font-weight:500;white-space:nowrap}
+.pill.blue{background:var(--blue-light);color:var(--blue)}
+.pill.green{background:var(--green-light);color:var(--green)}
+.pill.gray{background:#f1f3f4;color:var(--text2)}
+.pill.orange{background:var(--orange-light);color:#b5520c}
+.pill.red{background:var(--red-light);color:var(--red)}
+.pill.purple{background:var(--purple-light);color:var(--purple)}
+
+/* comparison table */
+.cmp{width:100%;border-collapse:collapse;font-size:12.5px}
+.cmp th,.cmp td{padding:6px 10px;border-bottom:1px solid var(--border2);text-align:right;white-space:nowrap}
+.cmp th:first-child,.cmp td:first-child{text-align:left;position:sticky;left:0;background:var(--white);z-index:1}
+.cmp thead th{font-weight:500;color:var(--text2);font-size:12px;background:var(--white)}
+.cmp tr.sec td{font-family:'Google Sans',sans-serif;font-weight:500;color:var(--text);background:var(--bg);font-size:12.5px}
+.cmp td.cur{background:#f6f9fe;font-weight:500}
+.cmp tbody tr:hover td{background:#f1f3f4}
+.scroll-x{overflow-x:auto}
+.ucap{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.ucap input{width:84px;height:28px;border:1px solid var(--border);border-radius:6px;padding:0 8px;outline:none}
+
+/* charts */
+.chart{position:relative}
+.chart svg{display:block;width:100%;overflow:visible}
+.chart .bar{fill:var(--blue);transition:opacity .12s}
+.chart .bar.cur{fill:#5b5bd6}
+.chart .bar.dim{opacity:.35}
+.chart .ax{font-size:11px;fill:var(--text3)}
+.chart .gl{stroke:var(--border2);stroke-width:1}
+.chart .lbl{font-size:11px;fill:var(--text2)}
+.tip{position:fixed;z-index:8000;pointer-events:none;background:#202124;color:#fff;font-size:12px;padding:7px 10px;border-radius:6px;box-shadow:var(--shadow-lg);white-space:nowrap;display:none;line-height:1.45}
+.tip b{font-weight:500}
+
+/* pipeline list */
+.pipe{max-height:440px;overflow:auto;border-top:1px solid var(--border2)}
+.pi{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;padding:10px 18px;border-bottom:1px solid var(--border2);cursor:pointer}
+.pi:hover{background:#f6f9fe}
+.pi .a{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pi .m{font-size:12px;color:var(--text2)}
+.pbar{grid-column:1/-1;height:4px;border-radius:2px;background:var(--border2);overflow:hidden}
+.pbar i{display:block;height:100%;background:var(--blue);border-radius:2px}
+/* map tab */
+#vMap{overflow:hidden}
+.mv{position:absolute;inset:0;display:flex}
+.mside{width:380px;flex-shrink:0;display:flex;flex-direction:column;background:var(--white);border-right:1px solid var(--border);min-height:0}
+.ms-stats{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--border2)}
+.ms-stat{padding:12px 12px 10px;border-right:1px solid var(--border2)}
+.ms-stat:last-child{border-right:none}
+.ms-stat .v{font-family:'Google Sans',sans-serif;font-size:18px;color:var(--text)}
+.ms-stat .l{font-size:11px;color:var(--text2);margin-top:1px}
+.ms-ctl{padding:10px 12px;border-bottom:1px solid var(--border2);display:flex;flex-direction:column;gap:8px}
+.ms-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.ms-row .fld{flex:1;min-width:0}
+.ms-row .fld.search{min-width:0}
+.ms-more{font-size:12.5px;color:var(--blue);cursor:pointer;user-select:none}
+.ms-filters{display:grid;grid-template-columns:1fr 1fr;gap:8px 10px}
+.ms-filters[hidden]{display:none}
+.ms-f label{display:block;font-size:11px;color:var(--text2);margin-bottom:3px}
+.ms-f .rr{display:flex;align-items:center;gap:4px}
+.ms-f input,.ms-f select{width:100%;height:30px;border:1px solid var(--border);border-radius:6px;padding:0 7px;font-size:12.5px;outline:none;background:#fff;min-width:0}
+.ms-f input:focus,.ms-f select:focus{border-color:var(--blue)}
+.ms-f.wide{grid-column:1/-1}
+.ms-count{padding:8px 14px;font-size:12px;color:var(--text2);border-bottom:1px solid var(--border2);display:flex;gap:8px;align-items:center}
+.ms-list{flex:1;overflow:auto}
+.mc{padding:11px 14px 10px;border-bottom:1px solid var(--border2);cursor:pointer;position:relative}
+.mc:hover{background:#f8f9fa}
+.mc.sel{background:#f6f9fe;box-shadow:inset 3px 0 0 var(--blue)}
+.mc .r1{display:flex;align-items:flex-start;gap:8px}
+.mc .ad{font-weight:500;flex:1;min-width:0;line-height:1.3}
+.mc .pr{font-weight:500;white-space:nowrap}
+.mc .nm{font-size:12px;color:var(--text2);margin-top:1px}
+.mc .r2{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:5px;font-size:12px;color:var(--text2)}
+.mc .r3{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:11.5px;color:var(--text2)}
+.segbar{display:inline-flex;gap:2px;width:96px;height:5px}
+.segbar i{flex:1;border-radius:1px;background:var(--border2)}
+.mc .det{margin-left:auto;font-size:12px;color:var(--blue)}
+.mmap{flex:1;position:relative;min-width:0}
+#map{position:absolute;inset:0}
+.mlegend{position:absolute;left:12px;bottom:24px;z-index:500;background:rgba(255,255,255,.97);border:1px solid var(--border);border-radius:10px;padding:10px 12px;box-shadow:var(--shadow);font-size:12px}
+.mlegend .lt{font-size:10.5px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);margin-bottom:6px}
+.mlegend .lr{display:flex;align-items:center;gap:8px;margin:3px 0;color:var(--text)}
+.mdot{width:12px;height:12px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.18);flex-shrink:0;display:inline-block}
+.mtools{position:absolute;top:12px;right:12px;z-index:500;display:flex;gap:6px}
+.mdraw{position:absolute;top:10px;left:54px;z-index:500;display:flex;align-items:center;background:var(--white);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow);overflow:hidden}
+.mdraw button{height:34px;padding:0 12px;display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--text);border-right:1px solid var(--border2)}
+.mdraw button:last-child{border-right:none}
+.mdraw button:hover{background:#f1f3f4}
+.mdraw button.on{background:var(--blue-light);color:var(--blue);font-weight:500}
+.mdraw button svg{width:15px;height:15px}
+.marea{display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--blue-light);border-bottom:1px solid #c6dafc;font-size:12.5px;color:var(--blue)}
+.marea input{width:64px;height:26px;border:1px solid #c6dafc;border-radius:6px;padding:0 6px;font-size:12.5px;outline:none}
+.marea a{margin-left:auto;cursor:pointer}
+.mtools .chk{box-shadow:var(--shadow)}
+.leaflet-popup-content-wrapper{border-radius:12px;box-shadow:var(--shadow-lg)}
+.leaflet-popup-content{margin:14px 16px;font-family:'Roboto',sans-serif;font-size:12.5px;color:var(--text);line-height:1.4}
+.pu-a{font-family:'Google Sans',sans-serif;font-size:15px;line-height:1.3}
+.pu-n{font-size:12px;color:var(--text2);margin-top:2px}
+.pu-g{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;margin:10px 0}
+.pu-g label{display:block;font-size:10.5px;color:var(--text3)}
+.pu-g .w{grid-column:1/-1}
+.pu-ms{border-top:1px solid var(--border2);padding-top:8px;margin-top:4px}
+.pu-ms .row{display:flex;align-items:center;gap:7px;font-size:11.5px;margin:2px 0;color:var(--text3)}
+.pu-ms .row.past{color:var(--text2)}
+.pu-ms .row.cur{color:var(--text);font-weight:500}
+.pu-ms .row i{width:8px;height:8px;border-radius:50%;background:var(--border);flex-shrink:0}
+.pu-ms .row.past i{background:var(--text3)}
+.pu-ms .row.cur i{background:var(--blue);box-shadow:0 0 0 3px var(--blue-light)}
+.pu-ms .row span:last-child{margin-left:auto}
+.pu-f{display:flex;gap:10px;margin-top:10px}
+.pill.gsp{background:linear-gradient(135deg,#1a73e8 0%,#5b5bd6 58%,#7b4fd0 100%);color:#fff;font-weight:700}
+.mdot.g{display:inline-flex;align-items:center;justify-content:center;color:#fff;font:700 7px/1 Arial,sans-serif;border-color:#5b5bd6}
+
+/* ---------- table view ---------- */
+#vTable{overflow:hidden}
+.tv{position:absolute;inset:0;display:flex}
+.tv{--sidew:248px}
+.side{width:var(--sidew);flex-shrink:0;border-right:1px solid var(--border);background:var(--white);overflow:auto;overflow-x:hidden;padding:10px 8px 24px;margin-left:0;opacity:1;
+  transition:margin-left .32s cubic-bezier(.2,.7,.3,1),opacity .24s ease,border-color .32s ease}
+.tv.side-off .side{margin-left:calc(-1 * var(--sidew));opacity:0;pointer-events:none;border-right-color:transparent}
+.tv.no-anim .side{transition:none}
+.sidetog{width:34px;height:34px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:var(--text2);flex-shrink:0;margin-left:-6px}
+.sidetog:hover{background:#f1f3f4;color:var(--text)}
+.sidetog svg{width:20px;height:20px;transition:transform .32s cubic-bezier(.2,.7,.3,1)}
+.tv.side-off .sidetog svg{transform:scaleX(-1)}
+.side{padding:8px 8px 24px}
+.nav-sec{margin-bottom:2px}
+.nav-h{width:100%;display:flex;align-items:center;gap:8px;height:36px;padding:0 10px 0 8px;border-radius:18px;font-family:'Google Sans',sans-serif;font-size:13.5px;font-weight:500;color:var(--text);text-align:left}
+button.nav-h:hover{background:#f1f3f4}
+.nav-h .chev{width:18px;height:18px;color:var(--text2);transition:transform .15s;flex-shrink:0}
+.nav-sec.closed .chev{transform:rotate(-90deg)}
+.nav-h .gc{margin-left:auto;font-family:'Roboto',sans-serif;font-size:11.5px;font-weight:400;color:var(--text3)}
+.nav-h .star-ic{width:18px;height:18px;color:var(--yellow);flex-shrink:0}
+.nav-items{padding:2px 0 6px}
+.nav-sec.closed .nav-items{display:none}
+.nav-empty{font-size:12px;color:var(--text3);padding:4px 12px 8px 34px;line-height:1.5}
+.sh{width:100%;display:flex;align-items:center;gap:6px;min-height:34px;padding:4px 6px 4px 34px;border-radius:17px;font-size:13px;color:var(--text);cursor:pointer;user-select:none}
+.sh:hover{background:#f1f3f4}
+.sh.on{background:var(--blue-light);color:var(--blue);font-weight:500}
+.sh .t{flex:1;min-width:0;line-height:1.25}
+.sh .n{font-size:11.5px;color:var(--text3);font-weight:400}
+.sh.on .n{color:var(--blue)}
+.nb{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:18px;padding:0 6px;border-radius:9px;background:#e6f4ea;color:#137333;font-size:11px;font-weight:700;flex-shrink:0}
+.star{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--text3);opacity:0;flex-shrink:0}
+.star svg{width:15px;height:15px}
+.sh:hover .star{opacity:1}
+.star:hover{background:rgba(60,64,67,.1);color:var(--text)}
+.star.on{color:var(--yellow);opacity:1}
+.fav .star.on{opacity:0}
+.fav .sh:hover .star.on{opacity:1}
+.nav-div{height:1px;background:var(--border2);margin:6px 8px 8px}
+.pill.new{background:#e6f4ea;color:#137333;margin-left:6px;height:18px;font-size:10.5px;font-weight:700}
+.tmain{flex:1;min-width:0;display:flex;flex-direction:column}
+.tbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:12px 16px;border-bottom:1px solid var(--border);background:var(--white)}
+.tbar .ttl{font-family:'Google Sans',sans-serif;font-size:18px;margin-right:6px}
+.fld{display:inline-flex;align-items:center;gap:6px;height:32px;border:1px solid var(--border);border-radius:16px;padding:0 10px;background:var(--white);font-size:12.5px;color:var(--text2)}
+.fld input,.fld select{border:none;outline:none;background:transparent;font-size:12.5px;color:var(--text)}
+.fld input[type=date]{width:118px}
+.fld input.num{width:64px}
+.fld.search{min-width:220px}
+.fld.search input{width:100%}
+.chk{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--text2);cursor:pointer;user-select:none;height:32px;padding:0 10px;border-radius:16px;border:1px solid var(--border);background:var(--white)}
+.chk.on{background:var(--blue-light);border-color:#c6dafc;color:var(--blue)}
+.chk input{display:none}
+.tscroll{flex:1;overflow:auto;background:var(--white)}
+table.dt{border-collapse:separate;border-spacing:0;font-size:13px;min-width:100%}
+.dt th{position:sticky;top:0;z-index:2;background:var(--white);text-align:left;font-weight:500;font-size:12px;color:var(--text2);padding:0 10px;height:38px;border-bottom:1px solid var(--border);white-space:nowrap;cursor:pointer;user-select:none}
+.dt th:hover{color:var(--text)}
+.dt th.sorted{color:var(--blue)}
+.dt th .ar{font-size:10px;margin-left:3px}
+.dt td{padding:0 10px;height:36px;border-bottom:1px solid var(--border2);white-space:nowrap;max-width:320px;overflow:hidden;text-overflow:ellipsis;position:relative}
+.dt td.num{text-align:right;font-variant-numeric:tabular-nums}
+.dt td.adr{max-width:none;overflow:visible}
+.dt td.adr .adt{display:inline-block;max-width:300px;overflow:hidden;text-overflow:ellipsis;vertical-align:middle}
+.dt th.num{text-align:right}
+.dt td.ed{cursor:text}
+.dt td.ed:hover{box-shadow:inset 0 0 0 1px #c6dafc;background:#fafcff}
+.dt td.edited::after{content:"";position:absolute;top:4px;right:4px;width:6px;height:6px;border-radius:50%;background:var(--blue)}
+.dt td.editing{padding:0;box-shadow:inset 0 0 0 2px var(--blue);overflow:visible}
+.dt td.editing input{width:100%;height:34px;border:none;outline:none;padding:0 9px;font-size:13px;background:#fff;min-width:140px}
+.dt tbody tr:hover td{background:#f8f9fa}
+.dt td.hlc{width:34px;padding:0 0 0 10px;cursor:pointer}
+.dt td.opn{width:34px;padding:0 8px;cursor:pointer;color:var(--text3)}
+.dt td.opn:hover{color:var(--blue)}
+.hdot{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--border);display:inline-block;vertical-align:middle}
+tr:hover .hdot{border-color:var(--text3)}
+tr.hl-yellow td{background:var(--yellow-light)!important}
+tr.hl-green td{background:var(--green-light)!important}
+tr.hl-blue td{background:var(--blue-light)!important}
+tr.hl-red td{background:var(--red-light)!important}
+tr.hl-purple td{background:var(--purple-light)!important}
+tr.hl-orange td{background:var(--orange-light)!important}
+tr.hl-gray td{background:#eceff1!important}
+tr.hl-gray td:first-child{box-shadow:inset 4px 0 0 #9aa0a6}
+tr.hl-yellow td:first-child{box-shadow:inset 4px 0 0 var(--yellow)}
+tr.hl-green td:first-child{box-shadow:inset 4px 0 0 var(--green)}
+tr.hl-blue td:first-child{box-shadow:inset 4px 0 0 var(--blue)}
+tr.hl-red td:first-child{box-shadow:inset 4px 0 0 var(--red)}
+tr.hl-purple td:first-child{box-shadow:inset 4px 0 0 var(--purple)}
+tr.hl-orange td:first-child{box-shadow:inset 4px 0 0 var(--orange)}
+tr.hidden-row td{opacity:.45}
+.sw{display:inline-block;width:14px;height:14px;border-radius:50%}
+.sw.yellow{background:var(--yellow)}.sw.green{background:var(--green)}.sw.blue{background:var(--blue)}.sw.red{background:var(--red)}.sw.purple{background:var(--purple)}.sw.orange{background:var(--orange)}.sw.gray{background:#9aa0a6}
+#hlPop{position:fixed;z-index:7000;background:var(--white);border:1px solid var(--border);border-radius:22px;box-shadow:var(--shadow-lg);padding:6px 8px;display:none;gap:6px;align-items:center}
+#hlPop.open{display:flex}
+#hlPop button{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+#hlPop button:hover{background:#f1f3f4}
+#hlPop .x{font-size:13px;color:var(--text2)}
+.tfoot{display:flex;align-items:center;gap:10px;padding:8px 16px;border-top:1px solid var(--border);background:var(--white);font-size:12.5px;color:var(--text2)}
+.tfoot select{height:28px;border:1px solid var(--border);border-radius:6px;padding:0 6px;background:#fff}
+.empty{padding:48px;text-align:center;color:var(--text2)}
+
+/* drawer */
+#drawer{position:fixed;top:var(--header);right:0;bottom:0;width:460px;max-width:100vw;background:var(--white);border-left:1px solid var(--border);box-shadow:-8px 0 24px rgba(32,33,36,.12);z-index:300;transform:translateX(105%);transition:transform .22s ease;display:flex;flex-direction:column}
+#drawer.open{transform:none}
+.dr-h{padding:16px 18px 12px;border-bottom:1px solid var(--border2)}
+.dr-h .t{font-family:'Google Sans',sans-serif;font-size:19px;line-height:1.3;padding-right:36px}
+.dr-h .s{font-size:12.5px;color:var(--text2);margin-top:4px}
+.dr-x{position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:50%;font-size:18px;color:var(--text2)}
+.dr-x:hover{background:#f1f3f4}
+.dr-b{flex:1;overflow:auto;padding:12px 18px 24px}
+.dr-sec{font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);margin:18px 0 8px}
+.f{margin-bottom:10px}
+.f label{display:flex;font-size:11.5px;color:var(--text2);margin-bottom:3px;gap:6px}
+.f label .who{margin-left:auto;color:var(--blue);font-size:11px}
+.gs-foia{font-weight:700;font-style:italic;color:#80868b}
+.dt td .cpy{display:inline-flex;align-items:center;gap:4px;height:22px;margin-left:6px;padding:0 8px;border-radius:11px;background:var(--red-light);color:var(--red);font-size:11px;font-weight:500;vertical-align:middle}
+.dt td .cpy:hover{background:var(--red);color:#fff}
+.dt td .cpy svg{width:12px;height:12px}
+.foia-acts{display:flex;gap:8px;align-items:center;margin-top:6px}
+.rvc{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:#e8eaed;color:var(--text2);font-size:11px;font-weight:700}
+.rv-bulk{display:flex;gap:8px;align-items:center;padding:0 18px 10px}
+.dt td .lnk{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;margin-left:4px;border-radius:50%;color:var(--text3);opacity:0;vertical-align:middle}
+.dt td .lnk svg{width:14px;height:14px}
+.dt tr:hover td .lnk{opacity:1}
+.dt td .lnk:hover{background:rgba(60,64,67,.1);color:var(--blue)}
+.dt td .lnk.has{opacity:.9;color:var(--blue)}
+#lnkPop{position:fixed;z-index:7000;width:360px;background:var(--white);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow-lg);padding:12px;display:none}
+#lnkPop.open{display:block}
+#lnkPop .lt{font-size:12px;color:var(--text2);margin-bottom:6px}
+#lnkPop input{width:100%;height:32px;border:1px solid var(--border);border-radius:6px;padding:0 8px;outline:none;font-size:12.5px}
+#lnkPop input:focus{border-color:var(--blue);box-shadow:0 0 0 2px var(--blue-light)}
+#lnkPop .lb{display:flex;gap:8px;margin-top:10px;align-items:center}
+.f input,.f textarea,.f select{width:100%;border:1px solid var(--border);border-radius:6px;padding:7px 9px;outline:none;background:#fff}
+.f textarea{min-height:64px;resize:vertical}
+.f input:focus,.f textarea:focus,.f select:focus{border-color:var(--blue);box-shadow:0 0 0 2px var(--blue-light)}
+.f .ro{padding:7px 0;color:var(--text)}
+.f .orig{font-size:11px;color:var(--text3);margin-top:3px}
+.f .orig a{font-size:11px;cursor:pointer}
+.swrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.swrow button{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid transparent}
+.swrow button.on{border-color:var(--text)}
+.statbox{border:1px solid var(--border2);border-radius:10px;padding:12px 14px;background:var(--bg)}
+.statbox .row{display:flex;justify-content:space-between;font-size:12.5px;margin:3px 0}
+.citem{border:1px solid var(--border2);border-radius:10px;padding:10px 12px;margin-bottom:8px;font-size:12.5px}
+.citem .ct{font-weight:500;margin-bottom:2px}
+.dr-f{padding:12px 18px;border-top:1px solid var(--border2);display:flex;gap:8px;justify-content:flex-end}
+
+/* modal */
+#modal{position:fixed;inset:0;z-index:8500;background:rgba(32,33,36,.45);display:none;align-items:center;justify-content:center;padding:24px}
+#modal.open{display:flex}
+.mbox{background:var(--white);border-radius:14px;box-shadow:0 24px 64px rgba(0,0,0,.3);width:980px;max-width:100%;max-height:calc(100vh - 48px);display:flex;flex-direction:column}
+.mbox.narrow{width:560px}
+.mh{padding:18px 22px 10px;display:flex;align-items:flex-start;gap:12px}
+.mh .t{font-family:'Google Sans',sans-serif;font-size:20px}
+.mh .s{font-size:12.5px;color:var(--text2);margin-top:3px}
+.mb{flex:1;overflow:auto;padding:4px 22px 16px}
+.mf{padding:12px 22px;border-top:1px solid var(--border2);display:flex;gap:8px;align-items:center}
+.ptable{width:100%;border-collapse:collapse;font-size:12.5px}
+.ptable th{position:sticky;top:0;background:var(--white);text-align:left;font-weight:500;color:var(--text2);font-size:11.5px;padding:6px 8px;border-bottom:1px solid var(--border)}
+.ptable td{padding:5px 8px;border-bottom:1px solid var(--border2);vertical-align:top}
+.ptable tr.dup td{color:var(--text3)}
+.ptable tr.grp td{background:var(--bg);font-weight:500;padding-top:9px}
+.drop{border:2px dashed var(--border);border-radius:12px;padding:28px;text-align:center;color:var(--text2);transition:all .15s}
+.drop.over{border-color:var(--blue);background:var(--blue-light);color:var(--blue)}
+.list-t{width:100%;border-collapse:collapse;font-size:12.5px}
+.list-t th{text-align:left;font-weight:500;color:var(--text2);font-size:12px;padding:8px 12px;border-bottom:1px solid var(--border)}
+.list-t td{padding:8px 12px;border-bottom:1px solid var(--border2)}
+.list-t tbody tr:hover td{background:#f8f9fa}
+.howto ol{padding-left:20px;line-height:1.6;font-size:13px}
+.howto li{margin-bottom:6px}
+.howto .note{font-size:12.5px;color:var(--text2);margin-top:10px;line-height:1.55}
+
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);z-index:9500;background:#202124;color:#fff;font-size:13px;padding:11px 18px;border-radius:8px;box-shadow:var(--shadow-lg);opacity:0;pointer-events:none;transition:all .2s;max-width:80vw}
+#toast.show{opacity:1;transform:translateX(-50%)}
+#toast.err{background:var(--red)}
+.spinner{width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;display:inline-block;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+#boot{position:fixed;inset:var(--header) 0 0 0;display:flex;align-items:center;justify-content:center;gap:10px;color:var(--text2);z-index:150;background:var(--bg)}
+@media (max-width:1100px){.g-kpi{grid-template-columns:repeat(2,minmax(0,1fr))}.g-2,.g-2e{grid-template-columns:1fr}.gsearch{display:none}.tv{--sidew:200px}}
+@media (max-width:760px){nav.tabs .tl{display:none}.brand-name,.brand-sep,#syncDot span{display:none}.side{display:none}.wrap{padding:16px}}
+/*BASE-CSS-END*/
+
+/* ================= Owner 360 (same tokens and idiom as the TOPA Tracker) ================= */
+/* owners view: list on the left like the TOPA map side, profile on the right */
+#vOwners{overflow:hidden}
+.ov{position:absolute;inset:0;display:flex}
+.oside{width:400px;flex-shrink:0;display:flex;flex-direction:column;background:var(--white);border-right:1px solid var(--border);min-height:0}
+.oside .ms-stats{grid-template-columns:repeat(4,1fr)}
+#oRegion{display:flex;width:100%}
+#oRegion button{flex:1 1 auto;padding:0 7px;font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:5px;height:28px;padding:0 11px;border-radius:14px;border:1px solid var(--border);background:var(--white);font-size:12px;color:var(--text2);cursor:pointer;user-select:none;white-space:nowrap}
+.chip:hover{background:#f1f3f4}
+.chip.on{background:var(--blue-light);border-color:#c6dafc;color:var(--blue);font-weight:500}
+.chip i{width:8px;height:8px;border-radius:50%;display:inline-block}
+.chip .c{font-size:11px;color:var(--text3);font-weight:400}
+.chip.on .c{color:var(--blue)}
+.mc .sc{margin-left:auto}
+.score{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:24px;padding:0 7px;border-radius:12px;font-family:'Google Sans',sans-serif;font-size:13px;font-weight:500;background:#f1f3f4;color:var(--text2);flex-shrink:0;font-variant-numeric:tabular-nums}
+.score.s1{background:var(--yellow-light);color:#b06000}
+.score.s2{background:var(--orange-light);color:#b5520c}
+.score.s3{background:var(--red-light);color:var(--red)}
+.score.lg{height:34px;min-width:46px;border-radius:17px;font-size:17px}
+.mc .sig{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.sp{display:inline-flex;align-items:center;gap:4px;height:20px;padding:0 8px;border-radius:10px;font-size:11px;font-weight:500;white-space:nowrap}
+.sp.debt{background:var(--blue-light);color:var(--blue)}
+.sp.hap{background:var(--purple-light);color:var(--purple)}
+.sp.topa{background:var(--green-light);color:var(--green)}
+.sp.distress{background:var(--red-light);color:var(--red)}
+.sp.hold{background:#f1f3f4;color:var(--text2)}
+.sp.redev{background:var(--orange-light);color:#b5520c}
+.sp.tenant{background:#e4f7fb;color:#007b83}
+.sp.gs{background:linear-gradient(135deg,#1a73e8 0%,#5b5bd6 58%,#7b4fd0 100%);color:#fff;font-weight:700}
+.st-dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0}
+.omain{flex:1;min-width:0;overflow:auto;background:var(--bg)}
+.omain .wrap{max-width:1240px}
+.ph{display:flex;align-items:flex-start;gap:14px;margin-bottom:14px}
+.ph .t{font-family:'Google Sans',sans-serif;font-size:26px;line-height:1.25;color:var(--text)}
+.ph .s{font-size:13px;color:var(--text2);margin-top:4px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.ph .acts{margin-left:auto;display:flex;gap:8px;align-items:center;flex-shrink:0}
+.ibtn{width:36px;height:36px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:var(--text2);border:1px solid var(--border);background:var(--white)}
+.ibtn:hover{background:var(--bg);color:var(--text)}
+.ibtn.on{color:var(--yellow);border-color:#fde293;background:var(--yellow-light)}
+.ibtn svg{width:18px;height:18px}
+.g-kpi6{grid-template-columns:repeat(6,minmax(0,1fr))}
+.kpi .k-v.sm{font-size:22px;margin:8px 0 4px}
+.kpi .k-d{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.why{border-top:1px solid var(--border2)}
+.wy{display:grid;grid-template-columns:92px minmax(0,1fr) auto;gap:2px 12px;padding:9px 18px;border-bottom:1px solid var(--border2);align-items:center;cursor:pointer}
+.wy:hover{background:#f6f9fe}
+.wy .d{font-size:12px;color:var(--text2);font-variant-numeric:tabular-nums}
+.wy .l{font-weight:500;line-height:1.3}
+.wy .x{font-size:12px;color:var(--text2);grid-column:2/3;line-height:1.35}
+.wy .p{font-size:11.5px;color:var(--text3);text-align:right;white-space:nowrap}
+.wy.past .d{color:var(--red)}
+.ct{display:grid;grid-template-columns:minmax(0,1fr);gap:0;border-top:1px solid var(--border2)}
+.cp{padding:9px 18px;border-bottom:1px solid var(--border2)}
+.cp .n{font-weight:500}
+.cp .r{font-size:12px;color:var(--text2);margin-top:2px;line-height:1.5}
+.cp .r a{margin-right:10px}
+.cp .src{font-size:10.5px;color:var(--text3);margin-left:6px;font-weight:400}
+.kv{display:grid;grid-template-columns:110px minmax(0,1fr);gap:4px 12px;font-size:12.5px;padding:10px 18px 14px;border-top:1px solid var(--border2)}
+.kv .k{color:var(--text2)}
+.kv .v{color:var(--text);word-break:break-word}
+.kv .v .m{color:var(--text3);font-size:11.5px}
+.tline{position:relative}
+.tline svg{display:block;width:100%;overflow:visible}
+.tline .ax{font-size:11px;fill:var(--text3)}
+.tline .gl{stroke:var(--border2);stroke-width:1}
+.tline .now{stroke:var(--blue);stroke-width:1.5;stroke-dasharray:3 3}
+.tline .lane{font-size:11.5px;fill:var(--text2)}
+.tline circle{cursor:pointer;stroke:#fff;stroke-width:2}
+.pcard .dt td{height:auto;padding-top:8px;padding-bottom:8px;vertical-align:top;white-space:normal}
+.pcard .dt td.nw{white-space:nowrap}
+.pcard .dt tbody tr{cursor:pointer}
+.pcard .dt .pn{font-weight:500;line-height:1.3}
+.pcard .dt .pa{font-size:12px;color:var(--text2)}
+.pcard .dt .sub{font-size:11.5px;color:var(--text2);line-height:1.35}
+.srcs{display:inline-flex;gap:3px}
+.srcs b{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:5px;font-size:10px;font-weight:700;color:#fff}
+.srcs .R{background:#5f6368}.srcs .T{background:#1a73e8}.srcs .C{background:#9334e6}.srcs .P{background:#188038}.srcs .X{background:#e8710a}
+#omap{height:330px;border-top:1px solid var(--border2)}
+.notes .f{padding:0 18px}
+.nrow{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 18px}
+.nthread{padding:6px 18px 4px}
+.nt{border:1px solid var(--border2);border-radius:10px;padding:9px 12px;margin-bottom:8px;font-size:12.5px;background:var(--white)}
+.nt .h{display:flex;gap:8px;font-size:11.5px;color:var(--text2);margin-bottom:3px}
+.nt .h a{margin-left:auto;cursor:pointer;color:var(--text3)}
+.nt .b{white-space:pre-wrap;line-height:1.45}
+.nadd{display:flex;gap:8px;padding:4px 18px 16px;align-items:flex-end}
+.nadd textarea{flex:1;min-height:54px;border:1px solid var(--border);border-radius:8px;padding:8px 10px;outline:none;resize:vertical;font-size:13px}
+.nadd textarea:focus{border-color:var(--blue);box-shadow:0 0 0 2px var(--blue-light)}
+.ev{border-top:1px solid var(--border2)}
+.evr{padding:9px 18px;border-bottom:1px solid var(--border2);font-size:12.5px}
+.evr .h{font-weight:500}
+.evr .b{color:var(--text2);margin-top:2px;line-height:1.45}
+.al{width:100%;border-collapse:collapse;font-size:12.5px}
+.al td,.al th{padding:6px 18px;border-bottom:1px solid var(--border2);text-align:left}
+.al th{font-weight:500;color:var(--text2);font-size:12px}
+.al td.n{width:1%;white-space:nowrap;text-align:right}
+.al tr.det td{color:var(--text3);text-decoration:line-through}
+.al .nx{font-size:11.5px;color:var(--text3);opacity:0}
+.al tr:hover .nx{opacity:1}
+.oempty{height:100%;display:flex;align-items:center;justify-content:center;color:var(--text2);text-align:center;padding:40px;line-height:1.6}
+.oempty .big{font-family:'Google Sans',sans-serif;font-size:22px;color:var(--text);margin-bottom:6px}
+.more{display:block;width:100%;padding:12px;text-align:center;color:var(--blue);font-size:12.5px;border-top:1px solid var(--border2)}
+.more:hover{background:#f6f9fe}
+/* calendar + properties tables share the TOPA .tv/.tbar/.dt layout */
+.dt tr.mon td{background:var(--bg);font-family:'Google Sans',sans-serif;font-weight:500;color:var(--text);height:32px}
+.dt tbody tr.clk{cursor:pointer}
+.dt td .own{color:var(--blue)}
+/* property drawer */
+#drawer{width:560px}
+.dr-h .chips{margin-top:8px}
+.dtab{width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:6px}
+.dtab th{text-align:left;font-weight:500;color:var(--text2);font-size:11.5px;padding:5px 8px 5px 0;border-bottom:1px solid var(--border)}
+.dtab td{padding:6px 8px 6px 0;border-bottom:1px solid var(--border2);vertical-align:top}
+.dtab td.num{text-align:right;font-variant-numeric:tabular-nums}
+.lnks{display:flex;flex-wrap:wrap;gap:8px}
+/* map tab */
+#vMap{overflow:hidden}
+#bigmap{position:absolute;inset:0}
+.mpanel{position:absolute;top:12px;left:54px;z-index:500;background:rgba(255,255,255,.98);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);padding:10px 12px;font-size:12.5px;max-width:520px}
+.mpanel .ttl{font-family:'Google Sans',sans-serif;font-size:15px}
+/* rebuild modal */
+.prog{height:6px;border-radius:3px;background:var(--border2);overflow:hidden;margin:10px 0 6px}
+.prog i{display:block;height:100%;width:0;background:var(--blue);transition:width .2s}
+.srcgrid{display:grid;grid-template-columns:auto 1fr;gap:4px 16px;font-size:12.5px;margin-top:8px}
+.srcgrid .k{color:var(--text2)}
+@media (max-width:1300px){.g-kpi6{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:1100px){.oside{width:320px}}
+.mback{display:none;margin-bottom:12px}
+@media (max-width:760px){.mback{display:inline-flex}.wy{grid-template-columns:74px minmax(0,1fr)}.wy .p{display:none}.ph{flex-wrap:wrap}.ph .acts{margin-left:0}.g-kpi6{grid-template-columns:repeat(2,minmax(0,1fr))}.oside{width:100%}.omain{display:none}.ov.pick .oside{display:none}.ov.pick .omain{display:block}}
+</style>
+</head>
+<body>
+
+<div id="authGate">
+  <div class="ag-card">
+    <div class="ag-brand"><div class="mark">O</div><div class="ag-title">Owner 360</div></div>
+    <div class="ag-by">Greysteel · Created by Mason Rareshide</div>
+    <div class="ag-sub">Sign in with your Greysteel Microsoft account to continue.</div>
+    <button id="agBtn" class="ag-btn">
+      <svg width="16" height="16" viewBox="0 0 23 23" aria-hidden="true"><rect x="1" y="1" width="10" height="10" fill="#f25022"/><rect x="12" y="1" width="10" height="10" fill="#7fba00"/><rect x="1" y="12" width="10" height="10" fill="#00a4ef"/><rect x="12" y="12" width="10" height="10" fill="#ffb900"/></svg>
+      Sign in with Microsoft
+    </button>
+    <div class="ag-msg" id="agMsg"></div>
+  </div>
+</div>
+
+<header>
+  <div class="brand">
+    <div class="mark">O</div>
+    <span class="brand-name">Greysteel</span><span class="brand-sep">|</span>
+    <span class="brand-page">Owner 360</span>
+    <span id="verBadge" title="Page version">v1</span>
+  </div>
+  <nav class="tabs">
+    <button class="tab active" data-view="owners"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span class="tl">Owners</span></button>
+    <button class="tab" data-view="cal"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span class="tl">Calendar</span></button>
+    <button class="tab" data-view="map"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg><span class="tl">Map</span></button>
+    <button class="tab" data-view="props"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V8l7-5 7 5v13M9 21v-6h6v6"/></svg><span class="tl">Properties</span></button>
+  </nav>
+  <div class="gsearch">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input id="gq" type="search" placeholder="Search owners, LLCs, people, emails, addresses..." autocomplete="off">
+  </div>
+  <div class="hdr-right">
+    <span id="syncDot" title="Live: notes from teammates appear within ~30 seconds"><i></i><span>Live</span></span>
+    <button class="btn sm" id="dataBtn" title="Where the data comes from, and rebuild it"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg><span id="dataLbl">Data</span></button>
+    <div id="userWrap" hidden>
+      <button id="userChip" aria-haspopup="true" aria-expanded="false"><span class="uc-av" id="ucAv"></span><span id="ucName"></span></button>
+      <div id="userMenu"><div class="um-n" id="umName"></div><div class="um-e" id="umEmail"></div><button id="signOutBtn">Sign out</button></div>
+    </div>
+  </div>
+</header>
+
+<div id="boot"><span class="spinner"></span> Loading Owner 360...</div>
+
+<main>
+  <!-- ======================= OWNERS ======================= -->
+  <section class="view active" id="vOwners"><div class="ov" id="ov">
+    <aside class="oside">
+      <div class="ms-stats" id="oStats"></div>
+      <div class="ms-ctl">
+        <div class="ms-row"><div class="seg" id="oRegion"></div></div>
+        <div class="ms-row">
+          <span class="fld search" style="flex:1"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input id="oq" type="search" placeholder="Owner, LLC, person, address"></span>
+          <select id="oSort" class="fld" style="flex:0 0 auto;padding:0 8px">
+            <option value="score">Why-call-now score</option><option value="units">Units</option><option value="props">Properties</option>
+            <option value="next">Next event</option><option value="debt">Debt on record</option><option value="name">Name</option>
+          </select>
+        </div>
+        <div class="chips" id="oSig"></div>
+        <div class="ms-row"><span class="ms-more" id="oMore">More filters</span><span class="ml-auto"></span><button class="clearall" id="oReset" title="Nothing to clear">Clear All</button></div>
+        <div class="ms-filters" id="oFilters" hidden>
+          <div class="ms-f wide"><label>Owner type</label><div class="chips" id="oKind"></div></div>
+          <div class="ms-f"><label>Min properties</label><input type="number" id="oPmin" min="1" placeholder="1"></div>
+          <div class="ms-f"><label>Min units</label><input type="number" id="oUmin" min="0" placeholder="0"></div>
+          <div class="ms-f"><label>Status</label><select id="oStatus"><option value="">Any</option><option value="-">No status yet</option></select></div>
+          <div class="ms-f"><label>Assigned</label><select id="oAssn"><option value="">Anyone</option><option value="me">Me</option><option value="-">Unassigned</option></select></div>
+          <div class="ms-f"><label>Signals within</label><select id="oHorizon"><option value="12">12 months</option><option value="24" selected>24 months</option><option value="36">36 months</option></select></div>
+          <div class="ms-f"><label>Other</label><select id="oOther"><option value="">-</option><option value="star">Starred by me</option><option value="contact">Has phone or email</option><option value="gs">Greysteel history</option><option value="notes">Has notes</option></select></div>
+        </div>
+      </div>
+      <div class="ms-count" id="oCount"></div>
+      <div class="ms-list" id="oList"></div>
+    </aside>
+    <div class="omain" id="omain"><div class="oempty"><div><div class="big">Pick an owner</div>Every owner in the LoanID markets, with PBS8, LoanID and TOPA joined.<br>The list is ranked by why-call-now: maturing debt, expiring HAP contracts, TOPA filings, distress and hold period.</div></div></div>
+  </div></section>
+
+  <!-- ======================= CALENDAR ======================= -->
+  <section class="view" id="vCal"><div class="tv"><div class="tmain">
+    <div class="tbar">
+      <span class="ttl">Upcoming events</span>
+      <div class="seg" id="cWin"><button data-v="6">6 mo</button><button data-v="12" class="on">12 mo</button><button data-v="24">24 mo</button><button data-v="36">36 mo</button></div>
+      <div class="chips" id="cTypes"></div>
+      <span class="fld search"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input id="cq" type="search" placeholder="Owner or property"></span>
+      <label class="chk" id="cPast"><input type="checkbox">Include last 6 months</label>
+      <span class="ml-auto small muted" id="cCount"></span>
+      <button class="btn sm" id="cCsv">Export CSV</button>
+    </div>
+    <div class="tscroll"><table class="dt" id="cTable"></table></div>
+  </div></div></section>
+
+  <!-- ======================= MAP ======================= -->
+  <section class="view" id="vMap">
+    <div id="bigmap"></div>
+    <div class="mpanel"><div class="ttl" id="mpT">Properties</div><div class="small muted" id="mpS">Uses the Owners filters</div></div>
+    <div class="mlegend" id="mLegend"></div>
+  </section>
+
+  <!-- ======================= PROPERTIES ======================= -->
+  <section class="view" id="vProps"><div class="tv"><div class="tmain">
+    <div class="tbar">
+      <span class="ttl">Properties</span>
+      <div class="seg" id="pRegion"></div>
+      <span class="fld search"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input id="pq" type="search" placeholder="Address, property, owner"></span>
+      <div class="chips" id="pSrc"></div>
+      <label class="chk" id="pNoOwner"><input type="checkbox">No owner found</label>
+      <span class="ml-auto small muted" id="pCount"></span>
+      <button class="btn sm" id="pCsv">Export CSV</button>
+    </div>
+    <div class="tscroll"><table class="dt" id="pTable"></table></div>
+    <div class="tfoot"><span id="pPage"></span><span class="ml-auto"></span><button class="btn sm" id="pPrev">Previous</button><button class="btn sm" id="pNext">Next</button></div>
+  </div></div></section>
+</main>
+
+<aside id="drawer"><button class="dr-x" id="drX" aria-label="Close">&times;</button><div class="dr-h" id="drH"></div><div class="dr-b" id="drB"></div></aside>
+<div id="modal"><div class="mbox narrow" id="mbox"></div></div>
+<div id="toast"></div>
+<div class="tip" id="tip"></div>
+
+<script>
+/* ======================================================================
+   Greysteel Owner 360. One page over three private datasets, joined by
+   tools/owner360_build.js into owner360/owners.json in mrare-cmd/loanid-data
+   and served by the hap-update Worker after Microsoft sign-in:
+     /owner360/manifest   blob shas of owners.json + overlay.json
+     /owner360/data/...   the files (?v=<sha> is immutable)
+     /owner360/edit       shared notes, status, assignee, stars, corrections
+     /owner360/publish    a rebuilt owners.json (the Rebuild button)
+   Signals and the why-call-now score are computed here from dates, so they
+   never go stale between rebuilds.
+   ====================================================================== */
+var API = "https://hap-update.mrareshide.workers.dev";
+(function () {   /* local preview only: ?api=http://localhost:8788 points at tools/devserver.js */
+  var q = new URLSearchParams(location.search).get("api");
+  if (q && /^(localhost|127\.0\.0\.1)$/.test(location.hostname)) API = q;
+})();
+var TKEY = "hap_session";
+var DAY = 864e5;
+
+/*BUILD-START*/
+/* Greysteel Owner 360 builder.
+
+   Joins PBS8 (HUD project-based Section 8), LoanID (Reonomy parcels, Trepp
+   loans, CoStar sale comps) and the TOPA Tracker (DC DHCD filings) for the
+   LoanID markets only, and writes one owners.json:
+
+     props[]   one row per physical property, every source merged onto it
+     owners[]  one row per owner group, with the evidence for the grouping
+
+   The same file runs in Node (tools/build.js) and in the page (the Rebuild
+   button), between /*BUILD-START*\/ and /*BUILD-END*\/ in site/index.html;
+   tools/inject_build.js copies it there. Keep it free of Node-only APIs.
+
+   Grain (see LoanID's CLAUDE.md): Reonomy = one row per tax parcel, Trepp =
+   one row per loan, CoStar = one row per sale, PBS8 = one row per HAP
+   contract, TOPA = one row per DHCD filing. Properties are merged on street
+   + overlapping house-number range inside a region; owners are grouped on
+   strong keys only (normalised name, Reonomy company, CoStar true company,
+   HUD participant id, a shared mailing office, a corporate email domain). */
+(function (root) {
+"use strict";
+
+var BUILD_VERSION = 1;
+
+/* ------------------------------------------------------------ regions */
+var REGIONS = {      /* box = [south, west, north, east], generous: drops geocodes that landed in another state */
+  hampton:       {name: "Hampton Roads", state: "VA", box: [36.48, -77.25, 37.35, -75.85]},
+  dc:            {name: "Washington, DC", state: "DC", box: [38.78, -77.13, 39.0, -76.9]},
+  montgomery:    {name: "Montgomery County", state: "MD", box: [38.92, -77.54, 39.36, -76.88]},
+  princegeorges: {name: "Prince George's County", state: "MD", box: [38.53, -77.1, 39.13, -76.66]}
+};
+function inBox(reg, lat, lng) { var b = REGIONS[reg] && REGIONS[reg].box; return !!(b && lat >= b[0] && lat <= b[2] && lng >= b[1] && lng <= b[3]); }
+/* PBS8 rows are national; these county names put a contract in a region.
+   Hampton Roads = the seven cities LoanID covers. */
+function pbs8Region(state, county) {
+  var c = String(county || "").toUpperCase().replace(/[^A-Z ]/g, "").replace(/\s+/g, " ").trim();
+  if (state === "DC") return "dc";
+  if (state === "MD" && c === "MONTGOMERY") return "montgomery";
+  if (state === "MD" && (c === "PRINCE GEORGES" || c === "PRINCE GEORGE")) return "princegeorges";
+  if (state === "VA" && /^(NORFOLK|VIRGINIA BEACH|CHESAPEAKE|PORTSMOUTH|NEWPORT NEWS|HAMPTON|SUFFOLK)( CITY)?$/.test(c)) return "hampton";
+  return null;
+}
+
+/* ------------------------------------------------------------ helpers */
+function s(v) { return v === null || v === undefined ? "" : String(v).trim(); }
+function num(v) {
+  if (v === null || v === undefined || v === "") return null;
+  var n = typeof v === "number" ? v : parseFloat(String(v).replace(/[$,\s]/g, ""));
+  return isFinite(n) ? n : null;
+}
+function int(v) { var n = num(v); return n === null ? null : Math.round(n); }
+/* every date the sources use -> "YYYY-MM-DD" (or "") */
+function day(v) {
+  var t = s(v);
+  if (!t) return "";
+  var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(t);
+  if (m) return m[1] + "-" + m[2] + "-" + m[3];
+  m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})/.exec(t);
+  if (m) return m[3] + "-" + ("0" + m[1]).slice(-2) + "-" + ("0" + m[2]).slice(-2);
+  m = /^(\d{5})(\.0+)?$/.exec(t);            /* Excel serial that leaked through Reonomy */
+  if (m) { var n = +m[1]; if (n > 20000 && n < 80000) return new Date(Date.UTC(1899, 11, 30) + n * 864e5).toISOString().slice(0, 10); }
+  return "";
+}
+function zip5(v) { var m = /(\d{5})(?:\.0+)?(?:-?\d{4})?\s*$/.exec(s(v)); return m ? m[1] : ""; }
+function title(t) {
+  t = s(t).replace(/[\s,;]+$/, "");
+  if (!t) return "";
+  if (!(/[a-z]/.test(t) && /[A-Z]/.test(t)))                 /* ALL CAPS or all lower: title-case it */
+    t = t.toLowerCase().replace(/\b([a-z])/g, function (c) { return c.toUpperCase(); });
+  return t
+    .replace(/\b(Llc|Lp|Llp|Lllp|Ii|Iii|Iv|Vi|Vii|Viii|Ix|Xi|Nw|Ne|Sw|Se|Dc|Va|Md|Hud|Usa|Lc|Pllc|Reit|Hoc|Mhp|Cih|Jbg|Ubs|Uip|Bdc|Nhp|Nht|Ahc)\b/g, function (w) { return w.toUpperCase(); })
+    .replace(/\b(\d+)(St|Nd|Rd|Th)\b/g, function (a, n, x) { return n + x.toLowerCase(); });
+}
+function uniq(a) { var seen = {}, out = []; for (var i = 0; i < a.length; i++) { var k = a[i]; if (k && !seen[k]) { seen[k] = 1; out.push(k); } } return out; }
+/* the overlay key for a name: what the Worker accepts (A-Z 0-9 space & ' + / -) */
+function ownerKey(k) { return s(k).toUpperCase().replace(/[^A-Z0-9 &'+\/-]/g, "").replace(/\s+/g, " ").trim().slice(0, 160); }
+/* small deterministic hash -> id strings that survive rebuilds */
+function hash(str) {
+  var h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+  for (var i = 0; i < str.length; i++) { var c = str.charCodeAt(i); h1 = Math.imul(h1 ^ c, 2654435761); h2 = Math.imul(h2 ^ c, 1597334677); }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36);
+}
+
+/* ------------------------------------------------------- name keys ---
+   "Jubilee Housing Limited Partnership", "JUBILEE HOUSING LP" and
+   "Jubilee Housing, L.P." are one entity. Suffixes go, words stay. */
+var JUNK_NAME = /^(INDIVIDUAL|INDIVIDUALS|PRIVATE INVESTOR|PRIVATE BUYER|UNKNOWN|NOT AVAILABLE|N ?A|NONE|OWNER|CURRENT OWNER|OWNER OF RECORD|TBD|VARIOUS|MULTIPLE|PRIVATE|UNDISCLOSED|CONFIDENTIAL|NOT DISCLOSED|SEE NOTES?)$/;
+var SUFFIX = /\s+(L ?L ?C|L ?L ?P|P ?L ?L ?C|L ?P|L ?C|INC|INCORPORATED|CORP|CORPORATION|CO|COMPANY|LTD|LIMITED|LIMITED PARTNERSHIP|LTD PARTNERSHIP|LTD PTNSHP|LIMITED PTNSHP|LIMITED LIABILITY COMPANY|LIMITED LIABILITY CO|PARTNERSHIP|PTNSHP|LLLP|L ?L ?L ?P|PC|P ?C|TRUSTEES?|ET AL|ETAL|THE)$/;
+function nameKey(n) {
+  var t = s(n).toUpperCase();
+  if (!t) return "";
+  t = t.replace(/&/g, " AND ").replace(/\bLIMIITED\b/g, "LIMITED").replace(/[.,'"`()]/g, "").replace(/[\/\\_-]+/g, " ")
+       .replace(/\s+/g, " ").trim();
+  t = t.replace(/^(THE|LLC)\s+/, "");        /* Reonomy flips "LLC Corcoran House" */
+  var prev;
+  do { prev = t; t = t.replace(SUFFIX, "").trim(); } while (t !== prev && t);
+  t = t.replace(/\bASSOC(IATES)?\b/g, "ASSOCIATES").replace(/\bAPTS?\b/g, "APARTMENTS").replace(/\bMGMT\b/g, "MANAGEMENT")
+       .replace(/\bPROPS?\b/g, "PROPERTIES").replace(/\bDEV\b/g, "DEVELOPMENT").replace(/\bHSG\b/g, "HOUSING");
+  if (!t || t.length < 2 || JUNK_NAME.test(t)) return "";
+  return t;
+}
+/* single-purpose entity ("1446 Fairmont LLC", "300 12th St Owner LLC"):
+   a poor display name for a whole group */
+function isSpe(n) {
+  var t = s(n).toUpperCase();
+  return /^\d/.test(t) || /\b(OWNER|PROPCO|BORROWER|HOLDINGS? \d|PHASE|ST|STREET|AVE|AVENUE|RD|ROAD|PL|PLACE|TER|TERRACE|CT|COURT)\b.*\b(LLC|LP|INC)\b/.test(t) && /\d/.test(t);
+}
+var COMPANY_WORDS = /\b(MANAGEMENT|MGMT|COMPANY|CO INC|& CO|AND CO|GROUP|PARTNERS|PROPERTIES|REALTY|DEVELOPMENT|DEVELOPERS|HOLDINGS|CAPITAL|COMMUNITIES|HOUSING|FOUNDATION|ENTERPRISES|INVESTMENTS?|EQUITIES|INVESTORS|ADVISORS|RESIDENTIAL|REAL ESTATE|TRUST|FUND|CORPORATION|COMPANIES|AUTHORITY|COMMISSION|SERVICES|MINISTRIES|CHURCH|ASSOCIATES INC)\b/;
+var PROPERTY_WORDS = /\b(APTS?|APARTMENTS?|MANOR|TERRACE|GARDENS?|TOWERS?|HOUSE|COURTS?|VILLAGE|PLAZA|PLACE|OWNER|SQUARE|COMMONS|POINTE?|LANDING|HEIGHTS|PARK|VIEW|ESTATES|CROSSING|RIDGE|HILLS?|WOODS|LOFTS|FLATS|RESIDENCES|ARMS|HALL|MEWS|STATION|SECTION|PHASE|KING FARM|LAKE|RUN|COVE|BAY|HARBOR|SPRINGS)\b/;
+function companyLike(n) { return COMPANY_WORDS.test(s(n).toUpperCase()); }
+function propertyLike(n) { var t = s(n).toUpperCase(); return PROPERTY_WORDS.test(t) || /^\d/.test(t) || /\b(LP|L P|LIMITED PARTNERSHIP|LTD PARTNERSHIP|ASSOC(IATES)?)$/.test(t.replace(/[.,]/g, "")); }
+function isPerson(n) {
+  var t = s(n).toUpperCase();
+  if (/\b(LLC|LP|INC|CORP|TRUST|ASSOC|PARTNERS|HOUSING|APARTMENTS?|PROPERT|COMPANY|CO|GROUP|FUND|VENTURES?|HOLDINGS?|REALTY|DEVELOPMENT|MANAGEMENT|CHURCH|AUTHORITY|COMMISSION|FOUNDATION|COOPERATIVE|LTD|BANK|CAPITAL|INVEST|ESTATE|HOMES?|MANOR|TOWERS?|GARDENS?|PLAZA|VILLAGE|HOUSE|CENTER|COMMUNITY|SERVICES|ENTERPRISES|ASSOCIATION)\b/.test(t)) return false;
+  var w = t.split(/\s+/);
+  return w.length >= 2 && w.length <= 4 && /^[A-Z' -]+$/.test(t);
+}
+
+/* public owners: grouped on exact identity only, never through a shared
+   office (housing authorities sit in every JV and would chain sponsors) */
+var PUBLIC_RE = /\b(HOUSING AUTHORITY|REDEVELOPMENT AND HOUSING|HOUSING OPPORTUNIT(Y|IES) COMMISSION|HOUSING COMMISSION|HOUSING FINANCE AGENCY|UNITED STATES|USA|COMMONWEALTH OF|STATE OF|CITY OF|COUNTY OF|COUNTY COUNCIL|COUNTY GOVERNMENT|BOARD OF EDUCATION|DEPARTMENT OF|SECRETARY OF HOUSING|FEDERAL NATIONAL|FANNIE MAE|FREDDIE MAC|WASHINGTON METROPOLITAN AREA TRANSIT|WMATA|REVENUE AUTHORITY|ECONOMIC DEVELOPMENT AUTHORITY)\b|^(DISTRICT OF COLUMBIA|MONTGOMERY COUNTY|PRINCE GEORGES COUNTY|PRHA|NRHA|HRHA|DCHA|HOC|CITY OF [A-Z ]+|[A-Z ]+ CITY)$/;
+function ownerKind(names, hudTypes) {
+  var all = names.join(" | ");
+  if (names.some(function (n) { return PUBLIC_RE.test(n); })) return "Public";
+  if (/\bCOOPERATIVE|\bCO OP\b|\bCOOP\b/.test(all) && names.filter(function (n) { return /COOPERATIVE|COOP/.test(n); }).length * 2 >= names.length) return "Co-op";
+  if (hudTypes.indexOf("Non-Profit") >= 0 || /\b(FOUNDATION|CHURCH|MINISTR|COMMUNITY DEVELOPMENT CORP|CDC|HABITAT FOR HUMANITY|ARCHDIOCESE|DIOCESE|VOLUNTEERS OF AMERICA|SALVATION ARMY|NONPROFIT|NON PROFIT|SOME)\b/.test(all)) return "Non-profit";
+  if (names.length && names.every(function (n) { return isPerson(n); })) return "Individual";
+  return "Private";
+}
+
+/* ---------------------------------------------------- address keys --- */
+var SUF = {STREET: "ST", STR: "ST", AVENUE: "AVE", AV: "AVE", AVN: "AVE", ROAD: "RD", BOULEVARD: "BLVD", BLV: "BLVD", DRIVE: "DR",
+  LANE: "LN", PLACE: "PL", COURT: "CT", TERRACE: "TER", TERR: "TER", CIRCLE: "CIR", PARKWAY: "PKWY", PKY: "PKWY", HIGHWAY: "HWY",
+  SQUARE: "SQ", TRAIL: "TRL", WAY: "WAY", PIKE: "PIKE", ALLEY: "ALY", CRESCENT: "CRES", EXPRESSWAY: "EXPY", POINT: "PT",
+  NORTHWEST: "NW", NORTHEAST: "NE", SOUTHWEST: "SW", SOUTHEAST: "SE", NORTH: "N", SOUTH: "S", EAST: "E", WEST: "W",
+  FIRST: "1ST", SECOND: "2ND", THIRD: "3RD", FOURTH: "4TH", FIFTH: "5TH", SIXTH: "6TH", SEVENTH: "7TH", EIGHTH: "8TH", NINTH: "9TH", TENTH: "10TH",
+  MOUNT: "MT", SAINT: "ST", FORT: "FT"};
+var UNIT_RE = /\s+(STE|SUITE|UNIT|APT|APARTMENT|#|FL|FLR|FLOOR|RM|ROOM|BLDG|BUILDING|PMB|DEPT|OFC|OFFICE)\b.*$|\s+#\S*.*$/;
+function addrTokens(line) {
+  var t = s(line).toUpperCase().replace(/[.,]/g, " ").replace(/\s+/g, " ").trim();
+  return t.split(" ").map(function (w) { return SUF[w] || w; }).join(" ");
+}
+/* "1300-1310 Fairmont St NW" -> {lo:1300, hi:1310, street:"FAIRMONT ST NW"} */
+function parseSite(line) {
+  var t = addrTokens(line).replace(UNIT_RE, "").trim();
+  t = t.replace(/^(\d+)\s*(?:[A-Z](?=\s))?\s*(?:-|&|AND|THRU|TO)\s*(\d+)\b/, "$1-$2");
+  var m = /^(\d+)(?:[A-Z])?(?:-(\d+)[A-Z]?)?\s+(.+)$/.exec(t);
+  if (!m) return null;
+  var lo = +m[1], hi = m[2] ? +m[2] : lo;
+  if (m[2] && m[2].length < m[1].length) hi = +(m[1].slice(0, m[1].length - m[2].length) + m[2]);   /* "1300-10" */
+  if (hi < lo || hi - lo > 400) hi = lo;
+  var street = m[3].replace(/^(UNIT|APT|STE)\s+\S+\s+/, "").trim();
+  if (!street || /^PO BOX|^P O BOX|^BOX\b/.test(street)) return null;
+  return {lo: lo, hi: hi, street: street};
+}
+/* mailing office key: building + zip, and the suite when there is one */
+function mailKey(line, zip) {
+  var t = addrTokens(line);
+  if (!t) return null;
+  var z = zip5(zip);
+  if (!z) return null;
+  var po = /\b(?:P ?O ?BOX|BOX|POST OFFICE BOX)\s*(\d+)/.exec(t) || /^(\d+)\s+PO BOX$/.exec(t);
+  if (po) return {bldg: "POBOX " + po[1] + "|" + z, suite: ""};
+  var su = /\b(?:STE|SUITE|UNIT|#|FL|FLOOR|RM|ROOM|PMB)\s*#?\s*([A-Z0-9-]+)/.exec(t);
+  var base = t.replace(UNIT_RE, "").replace(/\s+\d+(ST|ND|RD|TH)\s+FL(OOR)?$/, "").trim();
+  if (!/^\d/.test(base)) return null;
+  if (/^C\s*\/?\s*O\b/.test(t)) return null;
+  return {bldg: base + "|" + z, suite: su ? su[1] : ""};
+}
+/* trepp: "1000 SANSOME ST, # FIRSTFLO, SAN FRANCISCO, CA, 94111" */
+function splitMail(full) {
+  var parts = s(full).split(/\s*,\s*/).filter(Boolean);
+  return {line1: parts[0] || "", zip: zip5(full), full: s(full)};
+}
+var FREE_MAIL = /^(gmail|yahoo|hotmail|aol|outlook|msn|live|icloud|me|mac|comcast|verizon|att|sbcglobal|earthlink|cox|bellsouth|ymail|protonmail|rocketmail|juno|netzero|charter|optonline|bigstring|excite|mail|email|usa|inbox|gmx|zoho|yandex|hud|aim|rcn|frontier|windstream|centurylink|q)\.(com|net|org|gov|us)$/;
+function emailDomain(e) {
+  var m = /@([a-z0-9.-]+\.[a-z]{2,})$/.exec(s(e).toLowerCase());
+  if (!m) return "";
+  var d = m[1].replace(/^(mail|email|www)\./, "");
+  if (FREE_MAIL.test(d) || /\.(gov|mil|edu)$/.test(d)) return "";
+  return d;
+}
+function phone(p) {
+  var d = s(p).replace(/\.0$/, "").replace(/\D/g, "");
+  if (d.length === 11 && d[0] === "1") d = d.slice(1);
+  return d.length === 10 ? "(" + d.slice(0, 3) + ") " + d.slice(3, 6) + "-" + d.slice(6) : "";
+}
+
+/* ---------------------------------------------------------- union-find */
+function DSU() { this.p = {}; }
+DSU.prototype.find = function (x) {
+  if (this.p[x] === undefined) this.p[x] = x;
+  while (this.p[x] !== x) { this.p[x] = this.p[this.p[x]]; x = this.p[x]; }
+  return x;
+};
+DSU.prototype.union = function (a, b) { a = this.find(a); b = this.find(b); if (a !== b) this.p[b] = a; return a; };
+
+/* ============================================================ build === */
+/* input = {
+     pbs8:   hap_state.json {cols, rows, asof}, pbs8Coords: property_coords.json,
+     loanid: {<region>: {reonomy:[...], trepp:[...], costar:[...]}},
+     topa:   {sheets: {<slug>: sheet}, overlay: overlay.json, comps: comps.json, index: index.json},
+     overlay: owner360 overlay.json (for "not the same owner" corrections),
+     today:  "YYYY-MM-DD", by: "<email>" }                              */
+function build(input, log) {
+  log = log || function () {};
+  var today = input.today || new Date().toISOString().slice(0, 10);
+  var ov = input.overlay || {};
+  var detach = {};                           /* nameKey -> true: link on strong keys only */
+  for (var dk in (ov.detach || {})) if (ov.detach[dk] && ov.detach[dk].v) detach[dk] = true;
+
+  var recs = [];                             /* every source row that names a property */
+  function addRec(r) { r.i = recs.length; recs.push(r); return r; }
+
+  /* ---- LoanID: Reonomy parcels ---- */
+  var L = input.loanid || {};
+  Object.keys(L).forEach(function (reg) {
+    if (!REGIONS[reg]) return;
+    (L[reg].reonomy || []).forEach(function (r) {
+      var co = /\/company\/([0-9a-f-]{20,})/i.exec(s(r.owner_profile_link));
+      var contacts = [];
+      ["", "_2", "_3"].forEach(function (k) {
+        var nm = s(r["contact" + k + "_name"]);
+        if (!nm) return;
+        var ph = [], em = [];
+        for (var j = 1; j <= 3; j++) {
+          var p = phone(r["contact" + k + "_phone_" + j]);
+          if (p) ph.push(p + (r["contact" + k + "_phone_" + j + "_type"] && r["contact" + k + "_phone_" + j + "_type"] !== "unknown" ? " (" + r["contact" + k + "_phone_" + j + "_type"] + ")" : ""));
+          var e = s(r["contact" + k + "_email_" + j]).toLowerCase();
+          if (e) em.push(e);
+        }
+        contacts.push({n: title(nm), t: title(r["contact" + k + "_title"]), co: title(r["contact" + k + "_company_name"]), ph: ph, em: em, src: "Reonomy"});
+      });
+      var mortgages = [];
+      ["", "2"].forEach(function (k) {
+        var amt = num(r["mortgage" + k + "_amount"]);
+        if (!amt && !r["mortgage" + k + "_standardized_name"]) return;
+        mortgages.push({lender: title(r["mortgage" + k + "_standardized_name"] || r["mortgage" + k + "_recorded_name"]), amt: amt,
+                        rec: day(r["mortgage" + k + "_recorded_date"]), mat: day(r["mortgage" + k + "_maturity_date"])});
+      });
+      /* Reonomy's unit count is sometimes nonsense (8,535 units in 605K SF): under
+         300 SF a unit, estimate from building area instead and say so */
+      var ru = int(r.total_residential_units) || int(r.total_units), gba = num(r.gross_building_area), est = false;
+      if (ru && gba && gba / ru < 300) { ru = Math.max(1, Math.round(gba / 900)); est = true; }
+      addRec({src: "R", reg: reg, line: s(r.address_line_1), city: s(r.address_city), zip: zip5(r.address_postal_code),
+        lat: num(r.latitude), lng: num(r.longitude), units: ru, unitsEst: est,
+        yb: int(r.year_built), name: "",
+        owner: {name: s(r.reported_owner_name), mail: {line1: s(r.reported_mailing_address_line_1), zip: zip5(r.reported_mailing_address_postal_code),
+                full: s(r.reported_mailing_address_full)}, co: co ? co[1].toLowerCase() : "", start: day(r.sale_recorded_date), src: "Reonomy"},
+        contacts: contacts, contactCo: s(r.contact_company_name),
+        d: {link: s(r.link), owner: s(r.owner_profile_link), apn: s(r.apn), sale: day(r.sale_recorded_date), price: num(r.sale_amount),
+            sale2: day(r.sale2_recorded_date), price2: num(r.sale2_amount), asr: num(r.asr_total_value), gba: num(r.gross_building_area),
+            sub: s(r.property_subtype), ren: int(r.year_renovated), mort: mortgages,
+            pfc: r.preforeclosure_recording_date ? {d: day(r.preforeclosure_recording_date), doc: s(r.preforeclosure_doc_type || r.preforeclosure_deed_category),
+                  auction: day(r.preforeclosure_auction_date), plaintiff: title(r.preforeclosure_plaintiff_1), amt: num(r.preforeclosure_final_judgement_amount),
+                  active: s(r.preforeclosure_active_flag) === "1" || s(r.preforeclosure_active_flag) === "1.0"} : null}});
+    });
+
+    /* ---- LoanID: Trepp loans, collapsed on trepp_real_id ---- */
+    var byReal = {};
+    (L[reg].trepp || []).forEach(function (r) {
+      var k = s(r.trepp_real_id) || ("x" + s(r.loan_number) + s(r.address));
+      (byReal[k] = byReal[k] || []).push(r);
+    });
+    Object.keys(byReal).forEach(function (k) {
+      var rows = byReal[k], r0 = rows[0];
+      rows.forEach(function (r) { if ((num(r.number_of_units) || 0) > (num(r0.number_of_units) || 0)) r0 = r; });
+      var loans = rows.map(function (r) {
+        var bal = num(r.current_balance), mat = day(r.maturity_date);
+        return {name: s(r.loan_name), src: s(r.source), deal: s(r.deal_type), cat: s(r.category), orig: title(r.originator), bal: bal, obal: num(r.original_balance),
+          rate: num(r.loan_rate), rt: s(r.rate_type), amort: s(r.amortization_type), od: day(r.origination_date), mat: mat,
+          open: day(r.model_first_open_date), pre: s(r.current_prepayment_restriction), dscr: num(r.dscr_ncf) || num(r.dscr_noi), ltv: num(r.ltv),
+          wl: /^y/i.test(s(r.watchlist_status)), ss: /^y/i.test(s(r.spec_serv_status)) || !!s(r.special_servicer_transfer_reason),
+          dq: s(r.delinquency_status), occ: num(r.occupancy_pct), noi: num(r.noi), ssr: s(r.special_servicer_transfer_reason),
+          past: num(r.periods_past_maturity), mod: s(r.modified_loan_description), wo: s(r.workout_strategy),
+          dead: bal === 0 && mat && mat < today};
+      }).filter(function (l) { return !l.dead; });
+      if (!loans.length && rows.length) return;          /* LoanID v16: paid off and matured -> hidden */
+      var mail = splitMail(r0.owner_1_mail_address || r0.borrower_mailing_address);
+      var names = s(r0.owner_1_name).split(/\s*;\s*/).filter(Boolean);
+      addRec({src: "T", reg: reg, line: s(r0.address), city: s(r0.city), zip: zip5(r0.zip), lat: num(r0.latitude), lng: num(r0.longitude),
+        units: int(r0.number_of_units), yb: int(r0.year_built), name: s(r0.property_name),
+        owner: names.length ? {name: names[0], alt: names.slice(1), mail: mail, email: s(r0.owner_1_email).toLowerCase(), phone: phone(r0.owner_1_phone),
+               start: "", src: "Trepp"} : null,
+        alsoOwners: [s(r0.owner_2_name), s(r0.owner_3_name)].join(";").split(/\s*;\s*/).filter(function (x) { return nameKey(x); }),
+        d: {real: k, loans: loans, sub: s(r0.trepp_subtype), occ: num(r0.occupancy_pct), lastSale: day(r0.sales_date), lastPrice: num(r0.sales_price),
+            lastBuyer: s(r0.first_buyer_name), lastSeller: s(r0.first_seller_name), asr: num(r0.asr_total_value), market: s(r0.trepp_submarket)}});
+    });
+
+    /* ---- LoanID: CoStar sale comps (one per sale) ---- */
+    (L[reg].costar || []).forEach(function (r) {
+      var line = s(r.property_address);
+      addRec({src: "C", reg: reg, line: line, city: s(r.portfolio_city) === "Multiple" ? "" : s(r.portfolio_city), zip: zip5(r.portfolio_zip),
+        lat: num(r.latitude), lng: num(r.longitude), units: int(r.number_of_units), yb: int(r.year_built),
+        name: s(r.property_name) !== line ? s(r.property_name) : "",
+        owner: {name: s(r.buyer_recorded_company) || s(r.buyer_true_company), trueCo: s(r.buyer_true_company),
+                mail: {line1: s(r.buyer_true_address), zip: zip5(r.buyer_true_zip_code), full: [s(r.buyer_true_address), s(r.buyer_true_city), s(r.buyer_true_state), s(r.buyer_true_zip_code)].filter(Boolean).join(", ")},
+                start: day(r.sale_date), src: "CoStar",
+                person: s(r.buyer_true_contact_name), phone: phone(r.buyer_true_phone)},
+        seller: s(r.seller_true_company),
+        d: {comp: s(r.comp_id), date: day(r.sale_date), price: num(r.sale_price), ppu: num(r.price_per_unit), cap: num(r.actual_cap_rate),
+            buyer: s(r.buyer_true_company), buyerRec: s(r.buyer_recorded_company), seller: s(r.seller_true_company),
+            lb: s(r.listing_broker_company), lba: [s(r.listing_broker_agent_first_name), s(r.listing_broker_agent_last_name)].join(" ").trim(),
+            bb: [s(r.buyers_broker_agent_first_name), s(r.buyers_broker_agent_last_name)].join(" ").trim(),
+            lender: s(r.first_trust_deed_lender), loan: num(r.first_trust_deed_balance), aff: s(r.affordable_type),
+            portfolio: s(r.portfolio_name || r.multi_sale_name), cls: s(r.building_class)}});
+    });
+  });
+
+  /* ---- PBS8: HAP contracts, grouped on HUD property id ---- */
+  var pbsAsof = "", nP = 0;
+  if (input.pbs8 && input.pbs8.cols) {
+    pbsAsof = s(input.pbs8.asof);
+    var C = {}; input.pbs8.cols.forEach(function (c, i) { C[c] = i; });
+    var g = function (row, c) { return C[c] === undefined ? null : row[C[c]]; };
+    var coords = (input.pbs8Coords && input.pbs8Coords.coords) || {};
+    var byProp = {};
+    input.pbs8.rows.forEach(function (row) {
+      var reg = pbs8Region(s(g(row, "State")), s(g(row, "County")));
+      if (!reg) return;
+      var pid = s(g(row, "Property ID")) || s(g(row, "Contract Number"));
+      (byProp[pid] = byProp[pid] || {reg: reg, rows: []}).rows.push(row);
+    });
+    Object.keys(byProp).forEach(function (pid) {
+      var rows = byProp[pid].rows, r = rows[0];
+      var cts = rows.map(function (x) {
+        return {no: s(g(x, "Contract Number")), prog: s(g(x, "Program Type")), doc: s(g(x, "Doc Type")), units: int(g(x, "Contract Units")),
+          eff: day(g(x, "HAP Effective Date")), exp: day(g(x, "HAP Expiration Date")), ren: s(g(x, "Renewal Type")),
+          safmr: num(g(x, "Rent-to-SAFMR")), fmr: num(g(x, "Rent-to-FMR Ratio"))};
+      });
+      var reac = [];
+      for (var j = 1; j <= 3; j++) { var sc = s(g(r, "Last REAC " + j)); if (sc) reac.push({s: sc, n: int(g(r, "Last REAC " + j + " Numeric")), d: day(g(r, "Last REAC Date " + j))}); }
+      var ll = coords[s(g(r, "Property ID"))] || null;
+      var ownerName = s(g(r, "owner_organization_name")) || s(g(r, "owner_individual_full_name"));
+      nP++;
+      addRec({src: "P", reg: byProp[pid].reg, line: s(g(r, "address_line1_text")), city: s(g(r, "city_name_text")), zip: zip5(g(r, "zip_code")),
+        lat: ll ? ll[0] : null, lng: ll ? ll[1] : null, units: int(g(r, "property_total_unit_count")) || int(g(r, "Total Units")),
+        yb: null, name: s(g(r, "Property Name")),
+        owner: ownerName ? {name: ownerName, pid: s(g(r, "owner_participant_id")), type: s(g(r, "owner_company_type")),
+               mail: {line1: s(g(r, "owner_address_line1")), zip: zip5(g(r, "owner_zip_code")),
+                      full: [s(g(r, "owner_address_line1")), s(g(r, "owner_address_line2")), s(g(r, "owner_city_name")), s(g(r, "owner_state_code")), s(g(r, "owner_zip_code"))].filter(Boolean).join(", ")},
+               email: s(g(r, "owner_contact_email_text")).toLowerCase(), phone: phone(g(r, "owner_main_phone_number_text")),
+               person: s(g(r, "owner_individual_full_name")), personTitle: s(g(r, "owner_individual_title_text")),
+               start: day(g(r, "ownership_effective_date")), src: "HUD"} : null,
+        d: {pid: s(g(r, "Property ID")), contracts: cts, reac: reac, phone: phone(g(r, "property_phone_number")), cov: num(g(r, "Section 8 Coverage")),
+            cat: s(g(r, "property_category_name")), fin: s(g(r, "primary_financing_type")), insured: s(g(r, "is_insured_ind")) === "Y",
+            mgmt: {name: s(g(r, "mgmt_agent_org_name")), type: s(g(r, "mgmt_agent_company_type")), email: s(g(r, "mgmt_contact_email_text")).toLowerCase(),
+                   phone: phone(g(r, "mgmt_agent_main_phone_number")), person: s(g(r, "mgmt_agent_full_name"))},
+            ownSince: day(g(r, "ownership_effective_date")), oz: s(g(r, "is_opportunity_zone_ind")) === "Y"}});
+    });
+  }
+  log("PBS8 properties in the LoanID markets: " + nP);
+
+  /* ---- TOPA (DC): every multifamily-relevant DHCD filing is an event ---- */
+  var TOPA_KINDS = {
+    ofs5: "5+ Offer of Sale", not: "Notice of Transfer", dopa: "DOPA Notice", rofr: "Right of First Refusal", ofs24: "2-4 Offer of Sale",
+    loi: "Tenant Letter of Interest", torg: "Tenant Org Registration", tassoc: "Tenant Association formed", aor: "Assignment of Rights",
+    complaint: "TOPA Complaint", pdr: "Petition for Declaratory Relief", tea: "Tenant Election Application", te5: "Tenant Election (5+ ROFR)",
+    condo: "Condo Registration", nha: "Not-a-Housing Exemption", vac: "Vacancy Exemption", pta: "Property Tax Abatement",
+    lies: "LIES Co-op", nof: "Notice of Foreclosure", raze: "Raze Permit"};
+  var topa = input.topa || {}, tEdits = (topa.overlay && topa.overlay.edits) || {}, nX = 0;
+  Object.keys(TOPA_KINDS).forEach(function (slug) {
+    var sh = topa.sheets && topa.sheets[slug];
+    if (!sh) return;
+    sh.rows.forEach(function (row) {
+      var ed = tEdits[slug + "/" + row.id] || {};
+      var v = function (f) { return ed[f] ? ed[f].v : row[f]; };
+      if (s(v("hidden")) === "1") return;
+      var seller = s(v("seller")), ownerNm = s(v("ownerName")).replace(/\s*\|\s*Property\s*\|\s*Salesforce\s*$/i, "");
+      if (/^\d+\s/.test(ownerNm) && /Salesforce/i.test(s(row.ownerName))) ownerNm = "";      /* a Salesforce property link, not a name */
+      var own = slug === "ofs5" && (seller || ownerNm) ? {name: seller || ownerNm, mail: {line1: s(v("ownerAddress")).split(",")[0], zip: zip5(v("ownerAddress")), full: s(v("ownerAddress"))},
+                 phone: phone(v("phone")), start: "", seen: day(v("date")), src: "TOPA"} : null;
+      nX++;
+      addRec({src: "X", reg: "dc", line: s(v("address")), city: "Washington", zip: "", lat: row.geo ? row.geo[0] : null, lng: row.geo ? row.geo[1] : null,
+        units: int(v("units")), yb: null, name: s(v("name")), owner: own,
+        d: {slug: slug, kind: TOPA_KINDS[slug], date: day(v("date")), type: s(v("type")), units: int(v("units")), price: num(v("price")),
+            buyer: s(v("buyer")), seller: seller, foia: s(v("foia")), broker: s(v("broker")), notes: s(v("notes")).slice(0, 300),
+            id: row.id, sf: s(row.ownerNameUrl), box: s(v("foiaUrl")), org: s(v("orgName"))}});
+    });
+  });
+  log("TOPA filings considered: " + nX);
+
+  /* ============================== 1. merge records into properties === */
+  var P = new DSU(), streets = {};
+  recs.forEach(function (r) {
+    var site = parseSite(r.line);
+    r.site = site;
+    if (!site) return;
+    var cityKey = r.reg === "hampton" ? s(r.city).toUpperCase() : "";
+    var k = r.reg + "|" + site.street + (cityKey ? "|" + cityKey : "");
+    var list = streets[k] || (streets[k] = []);
+    for (var j = 0; j < list.length; j++) {
+      var o = list[j], q = recs[o];
+      if (site.lo > q.site.hi || site.hi < q.site.lo) continue;
+      if (r.zip && q.zip && r.zip !== q.zip && dist(r, q) > 0.25) continue;
+      /* a range only absorbs a single number on it when the two are near each other (or one has no coordinates) */
+      if (dist(r, q) > 0.6) continue;
+      P.union("r" + o, "r" + r.i);
+    }
+    list.push(r.i);
+  });
+  /* TOPA rows with no matched record and no units info are noise for an owner view: drop them later */
+  var groups = {};
+  recs.forEach(function (r) { var k = r.site ? P.find("r" + r.i) : "r" + r.i; (groups[k] = groups[k] || []).push(r); });
+
+  var props = [];
+  Object.keys(groups).forEach(function (k) {
+    var rs = groups[k];
+    var has = {}; rs.forEach(function (r) { has[r.src] = (has[r.src] || 0) + 1; });
+    /* a property needs at least one non-TOPA source, or a 5+ TOPA filing */
+    if (!has.R && !has.T && !has.C && !has.P) {
+      if (!rs.some(function (r) { return r.d.slug === "ofs5" || r.d.slug === "not" || r.d.slug === "dopa" || (r.d.units || 0) >= 5; })) return;
+    }
+    props.push(mergeProp(rs, today));
+  });
+  log("properties: " + props.length);
+
+  /* ============================== 2. group owners ===================== */
+  var O = new DSU(), why = {};              /* why[nameKey] = [{t, v}] link evidence */
+  function link(a, b, t, v) {
+    if (!a || !b || a === b) return;
+    if (input.debug && (a.indexOf(input.debug) >= 0 || b.indexOf(input.debug) >= 0)) log("LINK " + t + " " + a + " <-> " + b + " :: " + v);
+    O.union(a, b);
+    (why[a] = why[a] || []).push({t: t, v: v, w: b});
+    (why[b] = why[b] || []).push({t: t, v: v, w: a});
+  }
+  var keyNames = {};                         /* keyed link value -> set of names */
+  function keyAdd(key, nk) { if (!key || !nk) return; (keyNames[key] = keyNames[key] || {})[nk] = 1; }
+
+  /* a public owner joins a mailing hub only at its own office: the address
+     on at least half of its records (HOC at 10400 Detrick Ave, DCHA at
+     1133 N Capitol St), not a partner's office it shows up at on a JV */
+  var pubMail = {};
+  props.forEach(function (p) {
+    p.claims.forEach(function (c) {
+      if (!c.k || !PUBLIC_RE.test(c.k)) return;
+      var mk = mailKey(c.mail && c.mail.line1, c.mail && c.mail.zip);
+      var pm = pubMail[c.k] || (pubMail[c.k] = {n: 0, a: {}});
+      pm.n++;
+      if (mk) pm.a[mk.bldg] = (pm.a[mk.bldg] || 0) + 1;
+    });
+  });
+  function ownOffice(nk, bldg) { var pm = pubMail[nk]; return pm && pm.a[bldg] * 2 >= pm.n; }
+  props.forEach(function (p) {
+    p.claims.forEach(function (c) {
+      var nk = c.k;
+      if (!nk) return;
+      O.find("n:" + nk);
+      if (c.pid) keyAdd("hud:" + c.pid, nk);
+      var tk = nameKey(c.trueCo);
+      /* CoStar's true buyer is the parent - except a public body, which is a
+         JV partner on half the affordable deals in town, not the parent */
+      if (tk && tk !== nk && (!PUBLIC_RE.test(tk) || PUBLIC_RE.test(nk))) link("n:" + nk, "n:" + tk, "costar", c.trueCo);
+      var isPub = PUBLIC_RE.test(nk);
+      if (!detach[nk] && !detach[ownerKey(nk)]) {
+        if (c.co && !isPub) keyAdd("co:" + c.co, nk);
+        var mk = mailKey(c.mail && c.mail.line1, c.mail && c.mail.zip);
+        if (mk && (!isPub || ownOffice(nk, mk.bldg))) { keyAdd("mb:" + mk.bldg, nk); if (mk.suite) keyAdd("ms:" + mk.bldg + "#" + mk.suite, nk); }
+        var dom = emailDomain(c.email);
+        if (dom && !isPub) keyAdd("dom:" + dom, nk);
+      }
+    });
+  });
+  /* Strong keys first (Reonomy company, HUD participant id; CoStar's true
+     buyer and an identical name are already linked above), then the weak
+     ones: a shared mailing office or a corporate email domain.
+
+     A weak key is a hub: every name at the office joins one group. What it
+     must not do is chain two established groups through one joint-venture
+     LLC that sits at both offices (that fused HOC with MHP). So hubs run
+     biggest first, the names that only live at this hub form the local
+     group, and an outside group joins it only on real overlap: two or more
+     of its names here, or one side small enough that there is nothing to
+     confuse. Up to 60 names per building (WC Smith has 43 in DC alone); a
+     building with several suites in play is used per suite instead. */
+  var AGENT = /\b(CORPORATION SERVICE|CT CORPORATION|REGISTERED AGENT|NATIONAL REGISTERED|COGENCY|INCORP SERVICES|UNITED AGENT|PROPERTY TAX|TAX DEP|RYAN LLC|MARVIN F POER|ALTUS|PARADIGM TAX|KE ANDREWS|K E ANDREWS)\b/;
+  var sharedOffices = {}, strongKeys = [], weakKeys = [];
+  Object.keys(keyNames).forEach(function (key) {
+    var names = Object.keys(keyNames[key]);
+    if (names.length < 2) return;
+    var kind = key.slice(0, key.indexOf(":")), val = key.slice(key.indexOf(":") + 1);
+    if (names.some(function (n) { return AGENT.test(n); })) return;
+    if (kind === "mb") {
+      if (names.length > 60) { sharedOffices[val] = names.length; return; }
+      var nSuite = 0;
+      Object.keys(keyNames).forEach(function (k2) { if (k2.indexOf("ms:" + val + "#") === 0) nSuite++; });
+      if (nSuite >= 3) return;                 /* a multi-tenant building: the ms: suite keys decide */
+    }
+    if (kind === "dom" && names.length > 60) return;
+    var label = kind === "co" ? "Reonomy groups them as one company" : kind === "hud" ? "Same HUD owner participant ID " + val
+              : kind === "dom" ? "Same email domain @" + val : "Same mailing office " + prettyMail(val);
+    /* Reonomy's company grouping is built from the same kind of evidence
+       (shared officers and offices), so it gets the hub rules too */
+    (kind === "hud" ? strongKeys : weakKeys).push({kind: kind === "ms" ? "mb" : kind, label: label, names: names});
+  });
+  strongKeys.forEach(function (k) { for (var i = 1; i < k.names.length; i++) link("n:" + k.names[0], "n:" + k.names[i], k.kind, k.label); });
+  var size = {}, pub = {};                     /* root -> number of names / holds a public owner */
+  Object.keys(O.p).forEach(function (x) { var r = O.find(x); size[r] = (size[r] || 0) + 1; if (PUBLIC_RE.test(x.slice(2))) pub[r] = 1; });
+  function join(a, b, k, nameA, nameB) {
+    var ra = O.find(a), rb = O.find(b);
+    if (ra === rb) return;
+    var sz = (size[ra] || 1) + (size[rb] || 1);
+    link(nameA, nameB, k.kind, k.label);
+    size[O.find(a)] = sz;
+  }
+  weakKeys.sort(function (a, b) { return b.names.length - a.names.length; });
+  weakKeys.forEach(function (k) {
+    var byRoot = {};
+    k.names.forEach(function (n) { var r = O.find("n:" + n); (byRoot[r] = byRoot[r] || []).push(n); });
+    var local = [], outside = [];
+    Object.keys(byRoot).forEach(function (r) {
+      ((size[r] || 1) === byRoot[r].length ? local : outside).push({r: r, names: byRoot[r], size: size[r] || 1});
+    });
+    /* the local group: everything that has no tie anywhere else */
+    var anchor = null;
+    local.forEach(function (g) { if (!anchor) anchor = "n:" + g.names[0]; else join(anchor, "n:" + g.names[0], k, anchor, "n:" + g.names[0]); });
+    var localSize = local.reduce(function (t, g) { return t + g.names.length; }, 0);
+    outside.sort(function (a, b) { return b.names.length - a.names.length || b.size - a.size; });
+    outside.forEach(function (g) {
+      /* overlap has to be real relative to the smaller side, not one JV LLC */
+      var ok = localSize <= 2 || g.size <= 2 || g.names.length >= Math.max(2, Math.ceil(0.25 * Math.min(g.size, localSize)));
+      if (!anchor) { anchor = "n:" + g.names[0]; localSize = g.size; return; }   /* every name here already has a group: the biggest overlap leads */
+      if (ok) { join(anchor, "n:" + g.names[0], k, anchor, "n:" + g.names[0]); localSize += g.size; }
+    });
+  });
+
+  /* ---- owner records ---- */
+  var ownerOf = {};                          /* root -> owner */
+  var owners = [];
+  function ownerFor(nk) {
+    var root = O.find("n:" + nk);
+    var o = ownerOf[root];
+    if (!o) { o = ownerOf[root] = {root: root, names: {}, props: [], claims: []}; owners.push(o); }
+    return o;
+  }
+  props.forEach(function (p, pi) {
+    var cur = p.cur;
+    if (!cur || !cur.k) { p.o = -1; return; }
+    var o = ownerFor(cur.k);
+    o.props.push(pi);
+    p._o = o;
+    p.claims.forEach(function (c) {
+      c.pi = pi;
+      if (!c.k) return;
+      if (O.find("n:" + c.k) === o.root) { o.claims.push(c); }
+    });
+  });
+  /* names seen only on other properties' secondary claims still belong to their group */
+  owners = owners.filter(function (o) { return o.props.length; });
+
+  owners.forEach(function (o, oi) {
+    o.idx = oi;
+    var nameStats = {}, trueCos = {}, contactCos = {}, mails = {}, contacts = {}, emails = {}, phones = {}, types = {}, hud = {}, srcs = {};
+    o.claims.forEach(function (c) {
+      var st = nameStats[c.k] || (nameStats[c.k] = {n: c.name, k: c.k, src: {}, props: {}});
+      st.src[c.src] = 1; st.props[c.pi] = 1;
+      if (c.name.length > st.n.length && c.name.toUpperCase() !== c.name) st.n = c.name;
+      if (c.trueCo) trueCos[c.trueCo] = (trueCos[c.trueCo] || 0) + 1;
+      if (c.mail && c.mail.full) { var mk = c.mail.full.toUpperCase().replace(/\s+/g, " "); (mails[mk] = mails[mk] || {v: c.mail.full, n: 0, src: {}}).n++; mails[mk].src[c.src] = 1; }
+      if (c.email) { (emails[c.email] = emails[c.email] || {v: c.email, src: {}, n: 0}).n++; emails[c.email].src[c.src] = 1; }
+      if (c.phone) { (phones[c.phone] = phones[c.phone] || {v: c.phone, src: {}, n: 0}).n++; phones[c.phone].src[c.src] = 1; }
+      if (c.type) types[c.type] = 1;
+      if (c.pid) hud[c.pid] = 1;
+      srcs[c.src] = 1;
+      if (c.person) addContact(contacts, {n: title(c.person), t: title(c.personTitle), co: title(c.name), ph: c.phone ? [c.phone] : [], em: c.email ? [c.email] : [], src: c.src}, 3);
+    });
+    o.props.forEach(function (pi) {
+      var p = props[pi];
+      (p._contacts || []).forEach(function (ct) { addContact(contacts, ct, 1); });
+      (p._contactCos || []).forEach(function (cc) { contactCos[cc] = (contactCos[cc] || 0) + 1; });
+    });
+    var aliasList = Object.keys(nameStats).map(function (k) { var st = nameStats[k]; return {n: title(st.n), k: k, src: Object.keys(st.src), np: Object.keys(st.props).length}; })
+      .sort(function (a, b) { return b.np - a.np || a.n.localeCompare(b.n); });
+
+    /* display name, scored: the parent CoStar names as true buyer counts
+       most, then a company-style alias (William C Smith & Co, Bernstein
+       Management), then a recurring Reonomy contact company, then any name
+       that is not a single-asset entity. Property-style names ("Greenhills
+       Apts LP", "BDC King Farm LLC") are the last resort. */
+    var cand = {};
+    function credit(n, w, basis) {
+      var k = nameKey(n);
+      if (!k || w <= 0) return;
+      var c = cand[k] || (cand[k] = {n: title(n), w: 0, basis: basis, bw: 0});
+      c.w += w;
+      if (w > c.bw) { c.bw = w; c.basis = basis; }
+      if (/[a-z]/.test(n) && !/[a-z]/.test(c.n)) c.n = title(n);
+    }
+    Object.keys(trueCos).forEach(function (n) {
+      var parts = n.split(/\s*\|\s*/).filter(Boolean);
+      parts.forEach(function (x, i) { if (!propertyLike(x) || companyLike(x)) credit(x, trueCos[n] * (i === 0 ? 6 : 2) / Math.max(1, parts.length - 0.5), "CoStar true buyer"); });
+    });
+    aliasList.forEach(function (a) {
+      if (companyLike(a.n) && !propertyLike(a.n)) credit(a.n, (PUBLIC_RE.test(a.k) ? 8 : 2) + Math.min(a.np, 6), "company name on record");
+      else if (!isSpe(a.n) && !propertyLike(a.n)) credit(a.n, 0.6 * a.np, "most-used owner name");
+      else credit(a.n, 0.15 * a.np, "owner of record");
+    });
+    Object.keys(contactCos).forEach(function (n) { if (contactCos[n] >= 2 || o.props.length <= 2) credit(n, 1.2 * contactCos[n], "Reonomy contact company"); });
+    var bestC = Object.keys(cand).map(function (k) { return cand[k]; }).sort(function (a, b) { return b.w - a.w || a.n.length - b.n.length; })[0];
+    var nm = bestC ? bestC.n : "", basis = bestC ? bestC.basis : "";
+    if (o.props.length >= 3 && (isSpe(nm) || (propertyLike(nm) && bestC.w < 3))) {
+      var topMail = Object.keys(mails).sort(function (a, b) { return mails[b].n - mails[a].n; })[0];
+      var topDom = Object.keys(emails).map(emailDomain).filter(Boolean)[0];
+      if (topDom) { nm = "Owner group · " + topDom; basis = "shared email domain"; }
+      else if (topMail && mails[topMail].n >= 3) { nm = "Owner group at " + title(mails[topMail].v.split(",")[0]); basis = "shared mailing office"; }
+    }
+    o.name = title(nm);
+    o.basis = basis;
+    o.aliases = aliasList;
+    o.mail = Object.keys(mails).map(function (k) { return {v: mails[k].v, n: mails[k].n, src: Object.keys(mails[k].src)}; }).sort(function (a, b) { return b.n - a.n; }).slice(0, 6);
+    o.emails = Object.keys(emails).map(function (k) { return {v: k, n: emails[k].n, src: Object.keys(emails[k].src)}; }).sort(function (a, b) { return b.n - a.n; }).slice(0, 8);
+    o.phones = Object.keys(phones).map(function (k) { return {v: k, n: phones[k].n, src: Object.keys(phones[k].src)}; }).sort(function (a, b) { return b.n - a.n; }).slice(0, 8);
+    o.contacts = Object.keys(contacts).map(function (k) { return contacts[k]; })
+      .sort(function (a, b) { return b.w - a.w || a.n.localeCompare(b.n); }).slice(0, 14)
+      .map(function (c) { return {n: c.n, t: c.t, co: c.co, ph: c.ph.slice(0, 3), em: c.em.slice(0, 3), src: Object.keys(c.src), np: c.np}; });
+    o.types = Object.keys(types);
+    o.kind = ownerKind(aliasList.map(function (a) { return a.k; }), o.types);
+    o.hud = Object.keys(hud);
+    /* the evidence for the grouping, de-duplicated by reason */
+    var ev = {}, keys = aliasList.map(function (a) { return "n:" + a.k; });
+    keys.forEach(function (nk) {
+      (why[nk] || []).forEach(function (w) {
+        var key = w.t + "|" + w.v;
+        var e = ev[key] || (ev[key] = {t: w.t, v: w.v, names: {}});
+        e.names[nk.slice(2)] = 1; e.names[w.w.slice(2)] = 1;
+      });
+    });
+    o.why = Object.keys(ev).map(function (k) { var e = ev[k]; return {t: e.t, v: e.t === "costar" ? "CoStar names the true buyer " + title(e.v) : e.v, names: Object.keys(e.names).length}; })
+      .sort(function (a, b) { return b.names - a.names; }).slice(0, 12);
+    o.id = hash(aliasList.map(function (a) { return a.k; }).sort()[0] || o.name);
+  });
+  /* shared mail drops are listed for the page, not used */
+  log("owner groups: " + owners.length);
+
+  /* ============================== 3. output ============================ */
+  var outProps = props.map(function (p) {
+    return {id: p.id, n: p.n, a: p.a, c: p.c, z: p.z, r: p.r, u: p.u, ue: p.ue || undefined, yb: p.yb, ll: p.ll, src: p.src, o: p._o ? p._o.idx : -1,
+      own: p.cur ? {n: title(p.cur.name), s: p.cur.src, d: p.cur.start || p.cur.seen || ""} : null,
+      other: p.other, R: p.R, T: p.T, C: p.C, P: p.P, X: p.X};
+  });
+  var outOwners = owners.map(function (o) {
+    return {id: o.id, n: o.name, nb: o.basis, al: o.aliases, why: o.why, mail: o.mail, em: o.emails, ph: o.phones, ct: o.contacts,
+      ty: o.types, kd: o.kind, hud: o.hud, p: o.props};
+  });
+  var srcInfo = {pbs8: pbsAsof, topa: topa.index && topa.index.updated || "", loanid: input.loanidSources || {}};
+  return {v: BUILD_VERSION, built: {at: new Date().toISOString(), by: input.by || "", today: today}, regions: REGIONS, sources: srcInfo,
+    sharedOffices: Object.keys(sharedOffices).map(function (k) { return {a: prettyMail(k), n: sharedOffices[k]}; }),
+    props: outProps, owners: outOwners};
+}
+
+function prettyMail(key) {
+  var parts = String(key).split("|");
+  return title(parts[0].replace(/^POBOX /, "PO Box ")) + (parts[1] ? " " + parts[1] : "");
+}
+function addContact(map, c, w) {
+  if (!c || !c.n || c.n.length < 4) return;
+  var k = nameKey(c.n);
+  if (!k || !isPerson(c.n)) return;
+  var x = map[k] || (map[k] = {n: c.n, t: "", co: "", ph: [], em: [], src: {}, w: 0, np: 0});
+  if (!x.t && c.t) x.t = c.t;
+  if (!x.co && c.co) x.co = c.co;
+  x.ph = uniq(x.ph.concat(c.ph || []));
+  x.em = uniq(x.em.concat(c.em || []));
+  x.src[c.src] = 1;
+  x.w += w; x.np++;
+}
+function dist(a, b) {                        /* miles; 0 when either has no (usable) coordinates */
+  if (!a.lat || !b.lat || !a.lng || !b.lng || !inBox(a.reg, a.lat, a.lng) || !inBox(b.reg, b.lat, b.lng)) return 0;
+  var dy = (a.lat - b.lat) * 69, dx = (a.lng - b.lng) * 69 * Math.cos(a.lat * Math.PI / 180);
+  return Math.sqrt(dx * dx + dy * dy);
+}
+
+/* one physical property from all the source rows on it */
+var SRC_RANK = {R: 5, P: 4, T: 3, C: 2, X: 1};
+function mergeProp(rs, today) {
+  rs.sort(function (a, b) { return SRC_RANK[b.src] - SRC_RANK[a.src]; });
+  var p = {R: [], T: [], C: [], P: [], X: [], src: [], claims: [], _contacts: [], _contactCos: []};
+  var first = function (f) { for (var i = 0; i < rs.length; i++) if (rs[i][f]) return rs[i][f]; return null; };
+  var named = rs.filter(function (r) { return r.name && r.src !== "X"; });
+  p.n = title((rs.filter(function (r) { return r.src === "P" && r.name; })[0] || rs.filter(function (r) { return r.src === "T" && r.name; })[0] || named[0] || {}).name || "");
+  var main = rs.filter(function (r) { return r.src !== "X"; })[0] || rs[0];
+  p.a = title(main.line);
+  p.c = title(main.city || first("city") || "");
+  p.z = main.zip || first("zip") || "";
+  p.r = main.reg;
+  var ll = rs.filter(function (r) { return r.lat && r.lng && inBox(r.reg, r.lat, r.lng); })[0];
+  p.ll = ll ? [Math.round(ll.lat * 1e5) / 1e5, Math.round(ll.lng * 1e5) / 1e5] : null;
+  /* units: trust HUD and Trepp first, then Reonomy, then the newest sale */
+  var uOrder = ["P", "T", "R", "C", "X"];
+  p.u = null;
+  for (var ui = 0; ui < uOrder.length && !p.u; ui++) rs.forEach(function (r) { if (r.src === uOrder[ui] && r.units && (!p.u || r.units > p.u)) p.u = r.units; });
+  if (rs.filter(function (r) { return r.src === "R"; }).length > 1) {      /* several parcels: add them up if no better count */
+    var sumR = rs.filter(function (r) { return r.src === "R"; }).reduce(function (t, r) { return t + (r.units || 0); }, 0);
+    if (!rs.some(function (r) { return (r.src === "P" || r.src === "T") && r.units; }) && sumR > (p.u || 0)) p.u = sumR;
+  }
+  p.ue = !!(p.u && !rs.some(function (r) { return r.units === p.u && !r.unitsEst; }));   /* only an estimate behind it */
+  p.yb = first("yb");
+  rs.forEach(function (r) {
+    if (p.src.indexOf(r.src) < 0) p.src.push(r.src);
+    var d = r.d; d._line = r.line !== main.line ? title(r.line) : undefined;
+    p[r.src].push(d);
+    if (r.contacts) p._contacts = p._contacts.concat(r.contacts);
+    if (r.contactCo) p._contactCos.push(title(r.contactCo));
+  });
+  p.C.sort(function (a, b) { return (b.date || "").localeCompare(a.date || ""); });
+  p.X.sort(function (a, b) { return (b.date || "").localeCompare(a.date || ""); });
+  p.id = hash(p.r + "|" + (main.site ? main.site.street + "|" + main.site.lo : main.line));
+
+  /* owner claims: every source's idea of who owns it */
+  var newestSale = p.C[0] ? p.C[0].date : "";
+  rs.forEach(function (r) {
+    if (!r.owner || !r.owner.name) return;
+    if (r.src === "C" && r.d.date !== newestSale) return;         /* older buyers are history, not owners */
+    var c = Object.assign({}, r.owner, {k: nameKey(r.owner.name), name: r.owner.name, srcCode: r.src});
+    if (!c.k) return;
+    p.claims.push(c);
+    (r.owner.alt || []).forEach(function (n) { var k = nameKey(n); if (k) p.claims.push({k: k, name: n, src: r.owner.src, srcCode: r.src, mail: r.owner.mail}); });
+  });
+  if (p.X.length) {
+    var ofs = rs.filter(function (r) { return r.src === "X" && r.owner; }).sort(function (a, b) { return (b.owner.seen || "").localeCompare(a.owner.seen || ""); });
+    p.claims = p.claims.filter(function (c) { return c.srcCode !== "X" || c === ofs[0]; });
+  }
+  /* current owner: the county record (Reonomy) unless a newer sale in
+     CoStar says it changed hands since, then HUD, Trepp, CoStar, TOPA */
+  var pick = null, best = -1;
+  p.claims.forEach(function (c) {
+    var rank = SRC_RANK[c.srcCode] * 10;
+    if (rank > best) { best = rank; pick = c; }
+  });
+  var cos = p.claims.filter(function (c) { return c.srcCode === "C"; })[0];
+  if (pick && cos && pick !== cos && cos.start) {
+    var pStart = pick.start || "";
+    var reoSale = pick.srcCode === "R" ? (p.R[0] && p.R[0].sale) || "" : pStart;
+    if (!reoSale || cos.start > addDays(reoSale, 60)) pick = cos;
+  }
+  p.cur = pick;
+  p.other = [];
+  var seen = {};
+  if (pick) seen[pick.k] = 1;
+  p.claims.forEach(function (c) {
+    if (seen[c.k]) return; seen[c.k] = 1;
+    p.other.push({n: title(c.name), s: c.src});
+  });
+  return p;
+}
+function addDays(d, n) { var t = new Date(d + "T00:00:00Z"); if (isNaN(t)) return d; return new Date(+t + n * 864e5).toISOString().slice(0, 10); }
+
+var api = {build: build, nameKey: nameKey, ownerKey: ownerKey, parseSite: parseSite, mailKey: mailKey, pbs8Region: pbs8Region, REGIONS: REGIONS, BUILD_VERSION: BUILD_VERSION};
+if (typeof module !== "undefined" && module.exports) module.exports = api;
+else root.O360Build = api;
+})(typeof self !== "undefined" ? self : this);
+
+/*BUILD-END*/
+
+/* ---------------------------------------------------------------- utils */
+function $(id) { return document.getElementById(id); }
+function esc(s) { return String(s === null || s === undefined ? "" : s).replace(/[&<>"']/g, function (c) { return {"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]; }); }
+function fmtU(p) { return p.u ? (p.ue ? "~" : "") + fmtN(p.u) : ""; }
+function fmtN(n) { return n === null || n === undefined || isNaN(n) ? "" : Math.round(n).toLocaleString("en-US"); }
+function fmtM(n) {
+  if (n === null || n === undefined || isNaN(n) || n === 0) return "";
+  var a = Math.abs(n);
+  if (a >= 1e9) return "$" + (n / 1e9).toFixed(2) + "B";
+  if (a >= 1e6) return "$" + (n / 1e6).toFixed(a >= 1e8 ? 0 : 1) + "M";
+  if (a >= 1e3) return "$" + Math.round(n / 1e3) + "K";
+  return "$" + Math.round(n);
+}
+var MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+function fmtDate(d) { if (!d) return ""; var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(d); return m ? MON[+m[2] - 1] + " " + (+m[3]) + ", " + m[1] : d; }
+function fmtMon(d) { var m = /^(\d{4})-(\d{2})/.exec(d || ""); return m ? MON[+m[2] - 1] + " " + m[1] : ""; }
+function toast(m, err) { var t = $("toast"); t.textContent = m; t.className = "show" + (err ? " err" : ""); clearTimeout(toast._t); toast._t = setTimeout(function () { t.className = ""; }, err ? 6000 : 3200); }
+function who(email) { var n = String(email || "").split("@")[0].replace(/[._-]+/g, " "); return n.replace(/\b\w/g, function (c) { return c.toUpperCase(); }); }
+function ago(iso) {
+  if (!iso) return "";
+  var s = (Date.now() - new Date(iso)) / 1000;
+  if (s < 60) return "just now"; if (s < 3600) return Math.floor(s / 60) + "m ago"; if (s < 86400) return Math.floor(s / 3600) + "h ago";
+  if (s < 86400 * 30) return Math.floor(s / 86400) + "d ago"; return fmtDate(String(iso).slice(0, 10));
+}
+function b64FromString(str) { var bytes = new TextEncoder().encode(str), s = ""; for (var i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000)); return btoa(s); }
+var TODAY = new Date(); TODAY.setHours(0, 0, 0, 0);
+var TODAY_ISO = new Date(TODAY.getTime() - TODAY.getTimezoneOffset() * 6e4).toISOString().slice(0, 10);
+function monthsFrom(d) { if (!d) return null; var t = new Date(d + "T00:00:00"); return isNaN(t) ? null : (t - TODAY) / (30.4375 * DAY); }
+function rel(d) {
+  var m = monthsFrom(d);
+  if (m === null) return "";
+  var days = Math.round(m * 30.4375);
+  if (Math.abs(days) < 45) return days === 0 ? "today" : days > 0 ? "in " + days + " days" : Math.abs(days) + " days ago";
+  var mm = Math.round(Math.abs(m));
+  var t = mm >= 24 ? (Math.round(Math.abs(m) / 12 * 10) / 10) + " yrs" : mm + " mo";
+  return m > 0 ? "in " + t : t + " ago";
+}
+function debounce(fn, ms) { var t; return function () { var a = arguments, me = this; clearTimeout(t); t = setTimeout(function () { fn.apply(me, a); }, ms); }; }
+function lsGet(k, d) { try { var v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } }
+function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+function csvCell(v) { v = v === null || v === undefined ? "" : String(v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }
+function downloadCsv(name, rows) {
+  var blob = new Blob([rows.map(function (r) { return r.map(csvCell).join(","); }).join("\r\n")], {type: "text/csv"});
+  var a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click();
+  setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+function okey(k) { return String(k || "").toUpperCase().replace(/[^A-Z0-9 &'+\/-]/g, "").replace(/\s+/g, " ").trim().slice(0, 160); }
+
+/* ---------------------------------------------------------------- API */
+function authH() { try { return {Authorization: "Bearer " + (localStorage.getItem(TKEY) || "")}; } catch (e) { return {}; } }
+function expired() { try { localStorage.removeItem(TKEY); } catch (e) {} location.reload(); }
+async function apiGet(path) {
+  var r = await fetch(API + path, {headers: authH(), cache: "no-store"});
+  if (r.status === 401) { expired(); throw new Error("Your sign-in expired"); }
+  if (!r.ok) { var t = ""; try { t = (await r.json()).error; } catch (e) {} throw new Error(t || ("HTTP " + r.status)); }
+  return r.json();
+}
+async function apiPost(path, body) {
+  var r = await fetch(API + path, {method: "POST", headers: Object.assign({"Content-Type": "application/json"}, authH()), body: JSON.stringify(body)});
+  if (r.status === 401) { expired(); throw new Error("Your sign-in expired"); }
+  var j = {}; try { j = await r.json(); } catch (e) {}
+  if (!r.ok || j.ok === false) { var e = new Error(j.error || ("HTTP " + r.status)); e.status = r.status; e.conflict = j.conflict; throw e; }
+  return j;
+}
+
+/* ---------------------------------------------------------------- state */
+var S = {
+  me: null, data: null, files: {}, overlay: {owners: {}, detach: {}},
+  view: "owners", sel: -1, region: "", q: "", sort: "score", sig: [], kinds: ["Private", "Non-profit", "Co-op", "Individual"],
+  pmin: null, umin: null, status: "", assn: "", horizon: 24, other: "", shown: 120,
+  cWin: 12, cTypes: [], cQ: "", cPast: false,
+  pRegion: "", pQ: "", pSrc: [], pNoOwner: false, pPage: 0, pSort: {k: "u", d: -1}
+};
+var REG_NAMES = {hampton: "Hampton Roads", dc: "DC", montgomery: "Montgomery", princegeorges: "Prince George's"};
+var REG_SHORT = {hampton: "Hampton Rds", dc: "DC", montgomery: "MoCo", princegeorges: "PG"};
+var SRC_NAMES = {R: "Reonomy", T: "Trepp", C: "CoStar", P: "PBS8 (HUD)", X: "TOPA (DHCD)"};
+var KINDS = ["Private", "Non-profit", "Public", "Co-op", "Individual"];
+var STATUSES = [["new", "New lead", "#1a73e8"], ["researching", "Researching", "#9334e6"], ["contacted", "Contacted", "#f9ab00"], ["dialogue", "In dialogue", "#fa7b17"],
+  ["pitching", "Pitching", "#d93025"], ["client", "Client", "#188038"], ["pass", "Pass", "#80868b"], ["dnc", "Do not call", "#202124"]];
+var STATUS_BY = {}; STATUSES.forEach(function (s) { STATUS_BY[s[0]] = s; });
+var CAT = {
+  debt: {l: "Debt", c: "#1a73e8"}, hap: {l: "HAP", c: "#9334e6"}, topa: {l: "TOPA", c: "#188038"}, distress: {l: "Distress", c: "#d93025"},
+  redev: {l: "Redevelopment", c: "#e8710a"}, tenant: {l: "Tenants", c: "#007b83"}, hold: {l: "Long hold", c: "#80868b"}
+};
+var SIGNAL_FILTERS = [
+  {k: "mat", l: "Loan maturing", cat: "debt", test: function (s) { return s.k === "mat" || s.k === "rmat"; }},
+  {k: "open", l: "Prepay opening", cat: "debt", test: function (s) { return s.k === "open"; }},
+  {k: "hap", l: "HAP expiring", cat: "hap", test: function (s) { return s.k === "hap"; }},
+  {k: "mtm", l: "Below-market HAP", cat: "hap", test: function (s) { return s.k === "mtm"; }},
+  {k: "topa", l: "Offer of sale", cat: "topa", test: function (s) { return s.k === "ofs"; }},
+  {k: "distress", l: "Distress", cat: "distress", test: function (s) { return s.cat === "distress"; }},
+  {k: "redev", l: "Redevelopment", cat: "redev", test: function (s) { return s.cat === "redev"; }},
+  {k: "hold", l: "Long hold 10y+", cat: "hold", test: function (s) { return s.k === "hold"; }}
+];
+
+/* ============================================================ signals ===
+   Every reason to call, per property, from dates in the data. pts feed the
+   score; d is the date the event happens (or happened). */
+function propSignals(p, horizon) {
+  if (p._sig && p._sigH === horizon) return p._sig;
+  var out = [], H = horizon || 24;
+  function add(o) { o.p = p; out.push(o); }
+  var treppMats = [];
+  (p.T || []).forEach(function (t) {
+    (t.loans || []).forEach(function (l) {
+      if (l.bal === 0) return;
+      var desc = [fmtM(l.bal) || (l.obal ? fmtM(l.obal) + " orig." : ""), l.src || l.deal, l.orig ? "from " + l.orig : "", l.rate ? l.rate + "%" : ""].filter(Boolean).join(" · ");
+      if (l.mat) {
+        var m = monthsFrom(l.mat);
+        if (m < 0 && m > -36 && (l.bal > 0 || (l.past || 0) > 0)) add({k: "pastmat", cat: "distress", l: "Loan past maturity", d: l.mat, pts: 25, x: desc});
+        else if (m >= 0 && m <= H) { treppMats.push(l.mat); add({k: "mat", cat: "debt", l: "Loan matures", d: l.mat, pts: m <= 12 ? 30 : m <= 24 ? 20 : 10, x: desc}); }
+      }
+      if (l.open) { var mo = monthsFrom(l.open); if (mo >= 0 && mo <= Math.min(H, 18) && (!l.mat || l.open < l.mat)) add({k: "open", cat: "debt", l: "Prepayment window opens", d: l.open, pts: 10, x: (l.pre ? l.pre + " ends · " : "") + desc}); }
+      if (l.ss) add({k: "ss", cat: "distress", l: "In special servicing", d: "", pts: 25, x: (l.ssr ? l.ssr + " · " : "") + desc});
+      else if (l.wl) add({k: "wl", cat: "distress", l: "On servicer watchlist", d: "", pts: 12, x: desc});
+      if (l.dq && !/^(current|performing|$)/i.test(l.dq) && !/not delinquent|^0$/i.test(l.dq)) add({k: "dq", cat: "distress", l: "Delinquent: " + l.dq, d: "", pts: 25, x: desc});
+      if (l.dscr && l.dscr > 0 && l.dscr < 1.0) add({k: "dscr", cat: "distress", l: "DSCR " + l.dscr.toFixed(2) + "x", d: "", pts: 15, x: desc});
+      else if (l.dscr && l.dscr > 0 && l.dscr < 1.15) add({k: "dscr", cat: "distress", l: "Thin DSCR " + l.dscr.toFixed(2) + "x", d: "", pts: 6, x: desc});
+    });
+  });
+  (p.R || []).forEach(function (r) {
+    (r.mort || []).forEach(function (mt) {
+      if (!mt.mat) return;
+      var m = monthsFrom(mt.mat);
+      if (m < 0 || m > H) return;
+      if (treppMats.some(function (d) { return Math.abs(monthsFrom(d) - m) < 3; })) return;   /* same loan as Trepp's */
+      add({k: "rmat", cat: "debt", l: "Mortgage matures (county record)", d: mt.mat, pts: m <= 12 ? 24 : m <= 24 ? 16 : 8, x: [fmtM(mt.amt), mt.lender ? "from " + mt.lender : "", mt.rec ? "recorded " + fmtDate(mt.rec) : ""].filter(Boolean).join(" · ")});
+    });
+    if (r.pfc && r.pfc.d) {
+      var pm = monthsFrom(r.pfc.d);
+      if (pm > -24) {
+        var auc = r.pfc.auction && monthsFrom(r.pfc.auction) >= 0;
+        add({k: "pfc", cat: "distress", l: auc ? "Foreclosure auction scheduled" : "Pre-foreclosure: " + (r.pfc.doc || "filing"), d: auc ? r.pfc.auction : r.pfc.d, pts: auc ? 30 : 25,
+             x: [r.pfc.plaintiff ? "Plaintiff " + r.pfc.plaintiff : "", r.pfc.amt ? "Judgment " + fmtM(r.pfc.amt) : ""].filter(Boolean).join(" · ")});
+      }
+    }
+  });
+  (p.P || []).forEach(function (h) {
+    var mtm = null;
+    (h.contracts || []).forEach(function (c) {
+      var m = monthsFrom(c.exp);
+      if (m !== null && m >= 0 && m <= H) add({k: "hap", cat: "hap", l: "HAP contract expires", d: c.exp, pts: m <= 12 ? 20 : 15,
+        x: [c.units ? c.units + " units" : "", c.prog, c.no, c.safmr ? "rent/SAFMR " + c.safmr.toFixed(2) : ""].filter(Boolean).join(" · ")});
+      if (c.safmr && c.safmr < 0.9 && m !== null && m <= 60 && (!mtm || c.safmr < mtm.safmr)) mtm = c;
+    });
+    if (mtm) add({k: "mtm", cat: "hap", l: "HAP rents below market", d: mtm.exp, pts: 10, x: "Rent-to-SAFMR " + mtm.safmr.toFixed(2) + " · mark-up-to-market candidate at renewal (" + fmtMon(mtm.exp) + ")"});
+    var re = (h.reac || [])[0];
+    if (re && re.n !== null && re.n !== undefined) {
+      if (re.n < 60) add({k: "reac", cat: "distress", l: "Failing REAC score " + re.s, d: re.d, pts: 15, x: "Inspected " + fmtDate(re.d)});
+      else if (re.n < 70) add({k: "reac", cat: "distress", l: "Low REAC score " + re.s, d: re.d, pts: 6, x: "Inspected " + fmtDate(re.d)});
+    }
+  });
+  var since = p.own && p.own.d;
+  if (since) {
+    var yrs = -monthsFrom(since) / 12;
+    if (yrs >= 10) add({k: "hold", cat: "hold", l: "Owned " + Math.floor(yrs) + " years", d: since, pts: yrs >= 15 ? 10 : 6, x: "Since " + fmtDate(since) + " (" + p.own.s + ")"});
+  }
+  var seenOfs = false, seenTen = false, seenRedev = false;
+  (p.X || []).forEach(function (x) {
+    var age = -monthsFrom(x.date);
+    if (age === null || isNaN(age)) return;
+    var soldAfter = (p.C || []).some(function (c) { return c.date && c.date > x.date; });
+    if (/^(ofs5|dopa|rofr|ofs24)$/.test(x.slug) && !seenOfs) {
+      if (age <= 12 && !soldAfter) { seenOfs = true; add({k: "ofs", cat: "topa", l: x.kind + " filed", d: x.date, pts: 25, x: [x.type, x.price ? fmtM(x.price) : "", x.units ? x.units + " units" : "", x.buyer ? "Buyer " + x.buyer : ""].filter(Boolean).join(" · ")}); }
+      else if (age <= 36 && !soldAfter) { seenOfs = true; add({k: "ofs", cat: "topa", l: x.kind + " filed (" + Math.round(age) + " mo ago)", d: x.date, pts: 6, x: "No closing found since - may still be for sale"}); }
+    } else if (x.slug === "nof" && age <= 24) add({k: "nof", cat: "distress", l: "Notice of Foreclosure (DHCD)", d: x.date, pts: 25, x: x.notes || ""});
+    else if (/^(condo|nha|vac|raze)$/.test(x.slug) && age <= 24 && !seenRedev) { seenRedev = true; add({k: "redev", cat: "redev", l: x.kind, d: x.date, pts: 8, x: "Redevelopment signal"}); }
+    else if (/^(torg|tassoc|loi|complaint|pdr|tea|te5)$/.test(x.slug) && age <= 18 && !seenTen) { seenTen = true; add({k: "ten", cat: "tenant", l: x.kind, d: x.date, pts: 5, x: x.org || x.notes || ""}); }
+    else if (x.slug === "not" && age <= 12) add({k: "not", cat: "topa", l: "Notice of Transfer filed", d: x.date, pts: 0, x: "The owner may have just changed"});
+  });
+  p._sig = out; p._sigH = horizon;
+  return out;
+}
+function sizeFactor(u) { return Math.max(0.6, Math.min(2, Math.sqrt(Math.max(u || 0, 5) / 40))); }
+function propScore(p, horizon) {
+  var sig = propSignals(p, horizon);
+  return Math.min(60, sig.reduce(function (t, s) { return t + s.pts; }, 0)) * sizeFactor(p.u);
+}
+function gsTouch(p) {
+  if (p._gs !== undefined) return p._gs;
+  var g = "";
+  (p.X || []).forEach(function (x) { if (!g && /greysteel/i.test(x.foia + " " + x.broker)) g = "TOPA FOIA / broker (" + fmtDate(x.date) + ")"; });
+  (p.C || []).forEach(function (c) { if (!g && /greysteel/i.test((c.lb || "") + " " + (c.bb || ""))) g = "Greysteel brokered the " + fmtDate(c.date) + " sale"; });
+  return (p._gs = g);
+}
+
+/* ====================================================== owner derived === */
+function ownerStats(o) {
+  if (o._st && o._stH === S.horizon) return o._st;
+  var D = S.data, ps = o.p.map(function (i) { return D.props[i]; });
+  var st = {props: ps.length, units: 0, debt: 0, hap: 0, asr: 0, regions: {}, sig: [], score: 0, next: null, gs: "", contact: false};
+  var scores = [];
+  ps.forEach(function (p) {
+    st.units += p.u || 0;
+    st.regions[p.r] = (st.regions[p.r] || 0) + 1;
+    var tb = 0;
+    (p.T || []).forEach(function (t) { (t.loans || []).forEach(function (l) { if (l.bal > 0) tb += l.bal; }); });
+    if (!tb) (p.R || []).forEach(function (r) { (r.mort || []).forEach(function (m) { if (m.amt && (!m.mat || m.mat >= TODAY_ISO)) tb += m.amt; }); });
+    st.debt += tb;
+    (p.P || []).forEach(function (h) { st.hap += (h.contracts || []).reduce(function (t, c) { return t + (c.units || 0); }, 0); });
+    (p.R || []).forEach(function (r) { st.asr += r.asr || 0; });
+    var sg = propSignals(p, S.horizon);
+    st.sig = st.sig.concat(sg);
+    scores.push(propScore(p, S.horizon));
+    if (!st.gs) st.gs = gsTouch(p);
+  });
+  scores.sort(function (a, b) { return b - a; });
+  var top = scores[0] || 0, rest = scores.slice(1).reduce(function (t, x) { return t + x; }, 0);
+  st.score = Math.round(100 * (1 - Math.exp(-(top + 0.35 * rest) / 90)));
+  st.sig.sort(function (a, b) { return b.pts - a.pts || (a.d || "9").localeCompare(b.d || "9"); });
+  st.next = st.sig.filter(function (s) { return s.d && s.d >= TODAY_ISO && s.pts > 0; }).sort(function (a, b) { return a.d.localeCompare(b.d); })[0] || null;
+  st.contact = !!((o.ph && o.ph.length) || (o.em && o.em.length) || (o.ct || []).some(function (c) { return (c.ph && c.ph.length) || (c.em && c.em.length); }));
+  st.cats = {};
+  st.sig.forEach(function (s) { if (s.pts > 0) st.cats[s.cat] = (st.cats[s.cat] || 0) + 1; });
+  o._st = st; o._stH = S.horizon;
+  return st;
+}
+/* the overlay entries that belong to an owner: any of its names */
+var OV_INDEX = {};
+function indexOverlay() {
+  OV_INDEX = {};
+  var keyToOwner = {};
+  (S.data ? S.data.owners : []).forEach(function (o, i) { (o.al || []).forEach(function (a) { keyToOwner[okey(a.k)] = i; }); });
+  Object.keys(S.overlay.owners || {}).forEach(function (k) {
+    var i = keyToOwner[k];
+    if (i === undefined) return;
+    (OV_INDEX[i] = OV_INDEX[i] || []).push(k);
+  });
+}
+function ownerKeyFor(i) {
+  var ks = OV_INDEX[i];
+  if (ks && ks.length) return ks[0];
+  var o = S.data.owners[i];
+  return okey((o.al[0] || {}).k || o.n);
+}
+function ovRec(i) {
+  var ks = OV_INDEX[i] || [], out = {notes: [], stars: {}};
+  ks.forEach(function (k) {
+    var r = S.overlay.owners[k] || {};
+    ["status", "assignee", "next", "nextNote"].forEach(function (f) { if (r[f] && (!out[f] || r[f].at > out[f].at)) out[f] = r[f]; });
+    (r.notes || []).forEach(function (n) { out.notes.push(Object.assign({k: k}, n)); });
+    Object.keys(r.stars || {}).forEach(function (e) { out.stars[e] = 1; });
+  });
+  out.notes.sort(function (a, b) { return b.at.localeCompare(a.at); });
+  return out;
+}
+var SEARCH = [];
+function buildSearch() {
+  var D = S.data;
+  SEARCH = D.owners.map(function (o) {
+    var parts = [o.n];
+    (o.al || []).forEach(function (a) { parts.push(a.n); });
+    (o.ct || []).forEach(function (c) { parts.push(c.n, c.co, (c.em || []).join(" ")); });
+    (o.em || []).forEach(function (e) { parts.push(e.v); });
+    (o.mail || []).forEach(function (m) { parts.push(m.v); });
+    o.p.forEach(function (i) { var p = D.props[i]; parts.push(p.n, p.a); });
+    return parts.join(" | ").toLowerCase();
+  });
+}
+
+/* ========================================================== owners list === */
+function filteredOwners() {
+  var D = S.data, q = S.q.trim().toLowerCase(), me = S.me && S.me.email;
+  var terms = q ? q.split(/\s+/) : [];
+  var out = [];
+  D.owners.forEach(function (o, i) {
+    if (S.kinds.length && S.kinds.indexOf(o.kd) < 0) return;
+    var st = ownerStats(o);
+    if (S.region && !st.regions[S.region]) return;
+    if (S.pmin && st.props < S.pmin) return;
+    if (S.umin && st.units < S.umin) return;
+    if (terms.length && !terms.every(function (t) { return SEARCH[i].indexOf(t) >= 0; })) return;
+    if (S.sig.length && !S.sig.every(function (k) { var f = SIGNAL_FILTERS.filter(function (x) { return x.k === k; })[0]; return st.sig.some(f.test); })) return;
+    if (S.status || S.assn || S.other === "star" || S.other === "notes") {
+      var ov = ovRec(i);
+      if (S.status === "-" && ov.status) return;
+      if (S.status && S.status !== "-" && (!ov.status || ov.status.v !== S.status)) return;
+      if (S.assn === "-" && ov.assignee) return;
+      if (S.assn === "me" && (!ov.assignee || ov.assignee.v.toLowerCase() !== String(me).toLowerCase())) return;
+      if (S.other === "star" && !ov.stars[me]) return;
+      if (S.other === "notes" && !ov.notes.length) return;
+    }
+    if (S.other === "contact" && !st.contact) return;
+    if (S.other === "gs" && !st.gs) return;
+    out.push(i);
+  });
+  var key = {
+    score: function (i) { var st = ownerStats(D.owners[i]); return -(st.score * 1e6 + st.units); },
+    units: function (i) { return -ownerStats(D.owners[i]).units; },
+    props: function (i) { var st = ownerStats(D.owners[i]); return -(st.props * 1e6 + st.units); },
+    debt: function (i) { return -ownerStats(D.owners[i]).debt; },
+    next: function (i) { var n = ownerStats(D.owners[i]).next; return n ? +n.d.replace(/-/g, "") : 99999999; },
+    name: null
+  }[S.sort];
+  if (key) out.sort(function (a, b) { return key(a) - key(b); });
+  else out.sort(function (a, b) { return D.owners[a].n.localeCompare(D.owners[b].n); });
+  return out;
+}
+function scoreCls(s) { return s >= 70 ? "s3" : s >= 45 ? "s2" : s >= 20 ? "s1" : ""; }
+function sigPill(s, short) {
+  var lbl = short ? shortLabel(s) : s.l;
+  return '<span class="sp ' + s.cat + '" title="' + esc(s.l + (s.d ? " · " + fmtDate(s.d) : "") + (s.p ? " · " + (s.p.n || s.p.a) : "")) + '">' + esc(lbl) + "</span>";
+}
+function shortLabel(s) {
+  var w = s.d && s.d >= TODAY_ISO ? " " + fmtMon(s.d).replace(/ (\d{2})(\d{2})$/, " '$2") : "";
+  return ({mat: "Maturity", rmat: "Maturity", open: "Prepay opens", hap: "HAP exp.", mtm: "Below-mkt HAP", ofs: "Offer of sale", pastmat: "Past maturity", ss: "Special servicing",
+    wl: "Watchlist", dq: "Delinquent", dscr: "Low DSCR", pfc: "Pre-foreclosure", reac: "Low REAC", hold: s.l, nof: "Foreclosure notice", redev: "Redevelopment", ten: "Tenants", not: "Transfer"}[s.k] || s.l) + (s.k === "hold" ? "" : w);
+}
+function renderOwnerList() {
+  var D = S.data, ids = filteredOwners();
+  S.list = ids;
+  var units = 0, props = 0, hot = 0;
+  ids.forEach(function (i) { var st = ownerStats(D.owners[i]); units += st.units; props += st.props; if (st.score >= 45) hot++; });
+  $("oStats").innerHTML = [["Owners", fmtN(ids.length)], ["Properties", fmtN(props)], ["Units", fmtN(units)], ["Score 45+", fmtN(hot)]]
+    .map(function (x) { return '<div class="ms-stat"><div class="v">' + x[1] + '</div><div class="l">' + x[0] + "</div></div>"; }).join("");
+  $("oCount").innerHTML = fmtN(ids.length) + " owner" + (ids.length === 1 ? "" : "s") + (S.sort === "score" ? " · ranked by why-call-now" : "");
+  var html = ids.slice(0, S.shown).map(function (i) {
+    var o = D.owners[i], st = ownerStats(o), ov = ovRec(i);
+    var regs = Object.keys(st.regions).map(function (r) { return REG_NAMES[r]; }).join(", ");
+    var seen = {}, pills = st.sig.filter(function (s) { var lb = shortLabel(s); if (s.pts <= 0 || seen[lb]) return false; seen[lb] = 1; return true; }).slice(0, 3).map(function (s) { return sigPill(s, true); }).join("");
+    if (st.gs) pills += '<span class="sp gs" title="' + esc(st.gs) + '">G</span>';
+    var stat = ov.status && STATUS_BY[ov.status.v];
+    return '<div class="mc' + (i === S.sel ? " sel" : "") + '" data-i="' + i + '"><div class="r1"><div class="ad">' + esc(o.n) + '</div><span class="score ' + scoreCls(st.score) + '" title="Why-call-now score">' + st.score + "</span></div>" +
+      '<div class="nm">' + esc(o.kd) + " · " + esc(regs) + (ov.stars[S.me && S.me.email] ? ' · <span style="color:var(--yellow)">&#9733;</span>' : "") + "</div>" +
+      '<div class="r2">' + fmtN(st.props) + " propert" + (st.props === 1 ? "y" : "ies") + " · " + fmtN(st.units) + " units" + (st.debt ? " · " + fmtM(st.debt) + " debt" : "") +
+      (stat ? '<span class="ml-auto" style="display:inline-flex;align-items:center;gap:5px"><span class="st-dot" style="background:' + stat[2] + '"></span>' + stat[1] + "</span>" : "") + "</div>" +
+      (pills ? '<div class="sig">' + pills + "</div>" : "") + "</div>";
+  }).join("");
+  if (ids.length > S.shown) html += '<button class="more" id="oShowMore">Show ' + Math.min(200, ids.length - S.shown) + " more of " + fmtN(ids.length - S.shown) + "</button>";
+  if (!ids.length) html = '<div class="empty">No owners match these filters.</div>';
+  $("oList").innerHTML = html;
+  var sm = $("oShowMore"); if (sm) sm.onclick = function () { S.shown += 200; renderOwnerList(); };
+  var active = S.q || S.sig.length || S.region || S.pmin || S.umin || S.status || S.assn || S.other || S.kinds.join() !== "Private,Non-profit,Co-op,Individual";
+  $("oReset").className = "clearall" + (active ? " on" : ""); $("oReset").title = active ? "Clear every filter" : "Nothing to clear";
+  saveFilters();
+  if (S.view === "map") renderBigMap();
+}
+function saveFilters() { lsSet("o360_f", {region: S.region, sort: S.sort, sig: S.sig, kinds: S.kinds, horizon: S.horizon}); }
+
+/* ======================================================= owner profile === */
+var _omap = null;
+function openOwner(i, opts) {
+  if (S.sel !== i) renderProfile.allAl = false;
+  S.sel = i;
+  if (S.view !== "owners") setView("owners");
+  document.querySelectorAll("#oList .mc").forEach(function (el) { el.classList.toggle("sel", +el.dataset.i === i); });
+  $("ov").classList.add("pick");
+  try { history.replaceState(null, "", location.pathname + location.search + "#o=" + encodeURIComponent(S.data.owners[i].id)); } catch (e) {}
+  renderProfile();
+  if (!opts || !opts.keepScroll) $("omain").scrollTop = 0;
+}
+function renderProfile() {
+  var i = S.sel, D = S.data;
+  if (i < 0 || !D.owners[i]) return;
+  var o = D.owners[i], st = ownerStats(o), ov = ovRec(i), me = S.me && S.me.email;
+  var ps = o.p.map(function (k) { return D.props[k]; }).sort(function (a, b) { return propScore(b, S.horizon) - propScore(a, S.horizon) || (b.u || 0) - (a.u || 0); });
+  var regs = Object.keys(st.regions).map(function (r) { return '<span class="pill gray">' + REG_NAMES[r] + " · " + st.regions[r] + "</span>"; }).join("");
+  var kindPill = {Private: "blue", "Non-profit": "green", Public: "purple", "Co-op": "orange", Individual: "gray"}[o.kd] || "gray";
+  var h = '<div class="wrap"><button class="btn sm mback" id="pBack">&larr; All owners</button>';
+  h += '<div class="ph"><div style="min-width:0"><div class="t">' + esc(o.n) + '</div><div class="s"><span class="pill ' + kindPill + '">' + esc(o.kd) + "</span>" + regs +
+    '<span>' + (o.al.length > 1 ? "Grouped from " + o.al.length + " entity names" : "1 entity") + ' · named from ' + esc(o.nb || "owner of record") + "</span>" +
+    (st.gs ? '<span class="sp gs">G</span><span>' + esc(st.gs) + "</span>" : "") + "</div></div>" +
+    '<div class="acts"><span class="score lg ' + scoreCls(st.score) + '" title="Why-call-now score (0-100)">' + st.score + "</span>" +
+    '<button class="ibtn' + (ov.stars[me] ? " on" : "") + '" id="pStar" title="Star (just for you)"><svg viewBox="0 0 24 24" fill="' + (ov.stars[me] ? "currentColor" : "none") + '" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>' +
+    '<button class="btn sm" id="pBrief" title="Copy a call brief to the clipboard">Copy call brief</button><button class="btn sm" id="pCsv">Export</button></div></div>';
+
+  var nextTxt = st.next ? '<div class="k-v sm">' + esc(fmtMon(st.next.d)) + '</div><div class="k-d" title="' + esc(st.next.l + " · " + (st.next.p.n || st.next.p.a)) + '">' + esc(shortLabel(st.next).replace(/ [A-Z][a-z]{2} '\d\d$/, "")) + " · " + esc(st.next.p.n || st.next.p.a) + "</div>" : '<div class="k-v sm">-</div><div class="k-d">Nothing dated ahead</div>';
+  h += '<div class="grid g-kpi6">' +
+    kpi("Properties", fmtN(st.props), Object.keys(st.regions).length + " market" + (Object.keys(st.regions).length > 1 ? "s" : "")) +
+    kpi("Units", fmtN(st.units), st.props ? "avg " + fmtN(st.units / st.props) + " per property" : "") +
+    kpi("Debt on record", fmtM(st.debt) || "-", "Trepp + county mortgages") +
+    kpi("HAP units", st.hap ? fmtN(st.hap) : "-", st.hap ? "Project-based Section 8" : "No HAP contract") +
+    kpi("Assessed value", fmtM(st.asr) || "-", "Reonomy assessor") +
+    '<div class="card kpi"><div class="k-l">Next event</div>' + nextTxt + "</div></div>";
+
+  /* why now + contacts */
+  var seen = {}, why = st.sig.filter(function (s) { if (s.pts <= 0 || s.k === "hold") return false; var k = s.k + "|" + s.p.id + "|" + (s.d || ""); if (seen[k]) return false; seen[k] = 1; return true; });
+  /* long holds are context, not events: one summary row instead of one per property */
+  var holds = st.sig.filter(function (s) { return s.k === "hold"; }).sort(function (a, b) { return a.d.localeCompare(b.d); });
+  h += '<div class="grid g-2 mt"><div class="card"><div class="card-h"><div><div class="card-t">Why call now</div><div class="card-s">' +
+    (why.length ? why.length + " signal" + (why.length > 1 ? "s" : "") + " across " + uniqN(why.map(function (s) { return s.p.id; })) + " propert" + (uniqN(why.map(function (s) { return s.p.id; })) > 1 ? "ies" : "y") + " · within " + S.horizon + " months" : "No dated signals in the next " + S.horizon + " months") +
+    '</div></div></div><div class="why">' + (why.slice(0, 14).map(function (s) {
+      return '<div class="wy' + (s.d && s.d < TODAY_ISO && s.cat === "distress" ? " past" : "") + '" data-p="' + esc(s.p.id) + '"><div class="d">' + (s.d ? esc(fmtDate(s.d)) + '<div class="small">' + esc(rel(s.d)) + "</div>" : "Now") + "</div>" +
+        '<div><div class="l">' + sigPill(s) + " " + esc(s.p.n || s.p.a) + '</div><div class="x">' + esc(s.x || "") + (s.p.u ? (s.x ? " · " : "") + fmtN(s.p.u) + " units" : "") + "</div></div>" +
+        '<div class="p">' + esc(s.p.a !== s.p.n ? s.p.a : "") + "</div></div>";
+    }).join("") || (holds.length ? "" : '<div class="empty" style="padding:28px">Nothing pressing. Long-term relationship.</div>')) +
+    (holds.length ? '<div class="wy" data-p="' + esc(holds[0].p.id) + '"><div class="d">Held</div><div><div class="l"><span class="sp hold">Long hold</span> ' + fmtN(holds.length) + " propert" + (holds.length > 1 ? "ies" : "y") + ' owned 10+ years</div><div class="x">Longest: ' + esc(holds[0].p.n || holds[0].p.a) + " since " + esc(fmtDate(holds[0].d)) + " · ripe for a disposition or recap conversation</div></div><div class=\"p\"></div></div>" : "") +
+    (why.length > 14 ? '<div class="evr muted">+' + (why.length - 14) + " more in the Calendar tab</div>" : "") + "</div></div>";
+  h += '<div class="card"><div class="card-h"><div><div class="card-t">Contacts</div><div class="card-s">People and offices on record across sources</div></div></div>' + contactsHtml(o) + "</div></div>";
+
+  /* timeline */
+  h += '<div class="card mt"><div class="card-h"><div><div class="card-t">Timeline</div><div class="card-s">Last 12 months and next 36: every dated event on this portfolio</div></div></div><div class="card-b"><div class="tline" id="pTl"></div></div></div>';
+
+  /* properties */
+  h += '<div class="card mt pcard"><div class="card-h"><div><div class="card-t">Properties</div><div class="card-s">' + fmtN(st.props) + " in the LoanID markets · click a row for every source on it</div></div></div>" +
+    '<div class="scroll-x"><table class="dt"><thead><tr><th>Property</th><th class="num">Units</th><th>Owned since</th><th>Debt</th><th>HAP</th><th>TOPA</th><th>Signals</th><th>Sources</th></tr></thead><tbody>' +
+    ps.map(function (p) { return propRow(p); }).join("") + "</tbody></table></div></div>";
+
+  /* map + notes */
+  h += '<div class="grid g-2e mt"><div class="card"><div class="card-h"><div><div class="card-t">Map</div><div class="card-s">' + ps.filter(function (p) { return p.ll; }).length + " of " + ps.length + ' mapped</div></div></div><div id="omap"></div></div>';
+  h += '<div class="card notes"><div class="card-h"><div><div class="card-t">Outreach</div><div class="card-s">Shared with the team · saved to the private repo</div></div></div>' + notesHtml(i, ov) + "</div></div>";
+
+  /* grouping evidence */
+  h += '<div class="card mt"><div class="card-h"><div><div class="card-t">Why these names are one owner</div><div class="card-s">Grouped on Reonomy companies, CoStar true buyers, HUD owner IDs, shared mailing offices and corporate email domains. Mark a name that does not belong; it is regrouped at the next rebuild.</div></div></div>' +
+    (o.why && o.why.length ? '<div class="ev">' + o.why.map(function (w) { return '<div class="evr"><span class="h">' + esc(w.v) + '</span> <span class="muted small">· ' + w.names + " names</span></div>"; }).join("") + "</div>" : "") +
+    '<table class="al"><thead><tr><th>Entity name</th><th>Sources</th><th class="n">Properties</th><th></th></tr></thead><tbody>' +
+    o.al.slice(0, renderProfile.allAl ? 9999 : 12).map(function (a) {
+      var dk = okey(a.k), det = S.overlay.detach && S.overlay.detach[dk];
+      return '<tr class="' + (det ? "det" : "") + '"><td>' + esc(a.n) + '</td><td class="muted small">' + a.src.map(esc).join(", ") + '</td><td class="n">' + a.np + '</td><td class="n">' +
+        (o.al.length > 1 || det ? '<a class="nx" data-detach="' + esc(dk) + '" data-on="' + (det ? 0 : 1) + '">' + (det ? "Undo - pending rebuild" : "Not this owner") + "</a>" : "") + "</td></tr>";
+    }).join("") + "</tbody></table>" + (o.al.length > 12 ? '<button class="more" id="alMore">' + (renderProfile.allAl ? "Show fewer" : "Show all " + o.al.length + " names") + "</button>" : "") + "</div>";
+  h += '<div class="small muted" style="margin:16px 2px">Owner id ' + esc(o.id) + " · built " + esc(ago(D.built.at)) + "</div></div>";
+  $("omain").innerHTML = h;
+
+  /* wire */
+  $("omain").querySelectorAll("[data-p]").forEach(function (el) { el.onclick = function () { openProp(el.dataset.p); }; });
+  $("pBack").onclick = function () { $("ov").classList.remove("pick"); };
+  $("pStar").onclick = function () { edit([{t: "star", k: ownerKeyFor(i), on: !ov.stars[me]}]); };
+  $("pBrief").onclick = function () { copyBrief(i); };
+  $("pCsv").onclick = function () { exportOwner(i); };
+  $("omain").querySelectorAll("[data-detach]").forEach(function (el) {
+    el.onclick = function (e) {
+      e.stopPropagation();
+      var on = el.dataset.on === "1";
+      if (on && !confirm("Mark \"" + el.closest("tr").firstChild.textContent + "\" as not part of " + o.n + "?\n\nFrom the next rebuild it is grouped only on exact identity (same name, HUD owner ID or CoStar parent), not shared offices or email domains.")) return;
+      edit([{t: "detach", k: el.dataset.detach, v: on}], on ? "Saved - rebuild to apply" : "Undone");
+    };
+  });
+  if ($("alMore")) $("alMore").onclick = function () { renderProfile.allAl = !renderProfile.allAl; var y = $("omain").scrollTop; renderProfile(); $("omain").scrollTop = y; };
+  wireNotes(i, ov);
+  drawTimeline(st, ps);
+  drawOwnerMap(ps);
+}
+function uniqN(a) { var s = {}; a.forEach(function (x) { s[x] = 1; }); return Object.keys(s).length; }
+function kpi(l, v, d) { return '<div class="card kpi"><div class="k-l">' + l + '</div><div class="k-v sm">' + v + '</div><div class="k-d">' + esc(d) + "</div></div>"; }
+function srcChips(p) { return '<span class="srcs">' + ["R", "T", "C", "P", "X"].filter(function (s) { return p.src.indexOf(s) >= 0; }).map(function (s) { return '<b class="' + s + '" title="' + SRC_NAMES[s] + '">' + (s === "X" ? "T" : s === "P" ? "H" : s === "T" ? "L" : s) + "</b>"; }).join("") + "</span>"; }
+function propRow(p) {
+  var sig = propSignals(p, S.horizon).filter(function (s) { return s.pts > 0; });
+  var loans = [];
+  (p.T || []).forEach(function (t) { (t.loans || []).forEach(function (l) { if (l.bal !== 0) loans.push(l); }); });
+  loans.sort(function (a, b) { return (a.mat || "9").localeCompare(b.mat || "9"); });
+  var debt = loans.length ? loans.map(function (l) { return '<div class="sub">' + esc([fmtM(l.bal) || "Balance n/a", l.mat ? "matures " + fmtMon(l.mat) : "", l.orig].filter(Boolean).join(" · ")) + "</div>"; }).slice(0, 2).join("") : "";
+  if (!debt) { var ms = []; (p.R || []).forEach(function (r) { (r.mort || []).forEach(function (m) { ms.push(m); }); }); debt = ms.slice(0, 2).map(function (m) { return '<div class="sub">' + esc([fmtM(m.amt), m.mat ? "matures " + fmtMon(m.mat) : (m.rec ? "rec. " + fmtMon(m.rec) : ""), m.lender].filter(Boolean).join(" · ")) + "</div>"; }).join(""); }
+  var hap = "";
+  (p.P || []).forEach(function (h) { (h.contracts || []).slice(0, 2).forEach(function (c) { hap += '<div class="sub">' + esc([c.units ? c.units + "u" : "", c.prog, c.exp ? "exp. " + fmtMon(c.exp) : "", c.safmr ? c.safmr.toFixed(2) + "x SAFMR" : ""].filter(Boolean).join(" · ")) + "</div>"; }); });
+  var x = (p.X || [])[0];
+  var topa = x ? '<div class="sub">' + esc(x.kind) + "<br>" + esc(fmtDate(x.date)) + (p.X.length > 1 ? " · +" + (p.X.length - 1) : "") + "</div>" : "";
+  var own = p.own ? '<div class="sub">' + esc(p.own.d ? fmtMon(p.own.d) : "-") + '</div><div class="sub" style="color:var(--text3)">' + esc(p.own.n) + "</div>" : "";
+  return '<tr data-p="' + esc(p.id) + '"><td><div class="pn">' + esc(p.n || p.a) + '</div><div class="pa">' + esc(p.n ? p.a + (p.c ? ", " + p.c : "") : (p.c || "")) + " · " + REG_NAMES[p.r] + '</div></td><td class="num nw"' + (p.ue ? ' title="Estimated from building area - the source unit count was implausible"' : "") + '>' + fmtU(p) + "</td><td>" + own + "</td><td>" + debt + "</td><td>" + hap + "</td><td>" + topa + "</td><td>" +
+    sig.slice(0, 3).map(function (s) { return sigPill(s, true); }).join(" ") + '</td><td class="nw">' + srcChips(p) + "</td></tr>";
+}
+function contactsHtml(o) {
+  var h = '<div class="ct">';
+  (o.ct || []).slice(0, 8).forEach(function (c) {
+    h += '<div class="cp"><div class="n">' + esc(c.n) + '<span class="src">' + esc(c.src.join(", ")) + (c.np > 1 ? " · on " + c.np + " records" : "") + "</span></div>" +
+      '<div class="r">' + esc([c.t, c.co].filter(Boolean).join(" · ")) + "</div>" +
+      ((c.ph && c.ph.length) || (c.em && c.em.length) ? '<div class="r">' + (c.ph || []).map(function (p) { return '<a href="tel:' + esc(p.replace(/[^\d+]/g, "")) + '">' + esc(p) + "</a>"; }).join("") + (c.em || []).map(function (e) { return '<a href="mailto:' + esc(e) + '">' + esc(e) + "</a>"; }).join("") + "</div>" : "") + "</div>";
+  });
+  if (!(o.ct || []).length) h += '<div class="cp"><div class="r">No named people on record. Reonomy and HUD list contacts for most owners; this one has none yet.</div></div>';
+  h += "</div>";
+  var kv = [];
+  if (o.ph && o.ph.length) kv.push(["Phones", o.ph.slice(0, 4).map(function (p) { return '<a href="tel:' + esc(p.v.replace(/[^\d+]/g, "")) + '">' + esc(p.v) + '</a> <span class="m">' + esc(p.src.join(", ")) + "</span>"; }).join("<br>")]);
+  if (o.em && o.em.length) kv.push(["Emails", o.em.slice(0, 4).map(function (e) { return '<a href="mailto:' + esc(e.v) + '">' + esc(e.v) + '</a> <span class="m">' + esc(e.src.join(", ")) + "</span>"; }).join("<br>")]);
+  if (o.mail && o.mail.length) kv.push(["Mailing", o.mail.slice(0, 3).map(function (m) { return esc(m.v) + ' <span class="m">' + m.n + "x · " + esc(m.src.join(", ")) + "</span>"; }).join("<br>")]);
+  if (o.hud && o.hud.length) kv.push(["HUD owner ID", esc(o.hud.join(", "))]);
+  if (kv.length) h += '<div class="kv">' + kv.map(function (x) { return '<div class="k">' + x[0] + '</div><div class="v">' + x[1] + "</div>"; }).join("") + "</div>";
+  return h;
+}
+
+/* ---------------------------------------------------------- timeline --- */
+function drawTimeline(st, ps) {
+  var el = $("pTl"); if (!el) return;
+  var W = el.clientWidth || 900, lanes = ["debt", "hap", "topa", "distress", "redev", "tenant"], LH = 26, top = 8, left = 104, right = 12;
+  var start = new Date(TODAY); start.setMonth(start.getMonth() - 12); start.setDate(1);
+  var end = new Date(TODAY); end.setMonth(end.getMonth() + 36); end.setDate(1);
+  var x = function (d) { var t = new Date(d + "T00:00:00"); return left + (t - start) / (end - start) * (W - left - right); };
+  var evs = [];
+  ps.forEach(function (p) { propSignals(p, 36).forEach(function (s) { if (s.d && s.d >= start.toISOString().slice(0, 10) && s.d <= end.toISOString().slice(0, 10)) evs.push(s); }); });
+  var used = lanes.filter(function (c) { return evs.some(function (s) { return s.cat === c; }); });
+  if (!used.length) { el.innerHTML = '<div class="empty" style="padding:20px">No dated events in this window.</div>'; return; }
+  var H = top + used.length * LH + 26;
+  var svg = '<svg viewBox="0 0 ' + W + " " + H + '" height="' + H + '">';
+  for (var m = new Date(start); m <= end; m.setMonth(m.getMonth() + 3)) {
+    var iso = m.toISOString().slice(0, 10), xx = x(iso);
+    svg += '<line class="gl" x1="' + xx + '" x2="' + xx + '" y1="' + top + '" y2="' + (H - 20) + '"/>';
+    if (m.getMonth() === 0 || xx < left + 5) svg += '<text class="ax" x="' + xx + '" y="' + (H - 6) + '" text-anchor="middle">' + (m.getMonth() === 0 ? m.getFullYear() : MON[m.getMonth()] + " " + String(m.getFullYear()).slice(2)) + "</text>";
+    else svg += '<text class="ax" x="' + xx + '" y="' + (H - 6) + '" text-anchor="middle">' + MON[m.getMonth()] + "</text>";
+  }
+  used.forEach(function (c, li) {
+    var y = top + li * LH + LH / 2;
+    svg += '<text class="lane" x="0" y="' + (y + 4) + '">' + CAT[c].l + "</text>";
+    svg += '<line class="gl" x1="' + left + '" x2="' + (W - right) + '" y1="' + y + '" y2="' + y + '"/>';
+  });
+  var nx = x(TODAY_ISO);
+  svg += '<line class="now" x1="' + nx + '" x2="' + nx + '" y1="' + (top - 4) + '" y2="' + (H - 20) + '"/><text class="ax" x="' + nx + '" y="' + (top - 6 < 0 ? 8 : top - 0) + '" text-anchor="middle" style="fill:var(--blue)"></text>';
+  evs.forEach(function (s, k) {
+    var li = used.indexOf(s.cat); if (li < 0) return;
+    var y = top + li * LH + LH / 2, r = 4 + Math.min(5, Math.sqrt((s.p.u || 10) / 25) * 2);
+    svg += '<circle data-k="' + k + '" cx="' + x(s.d) + '" cy="' + y + '" r="' + r + '" fill="' + CAT[s.cat].c + '" fill-opacity="' + (s.d < TODAY_ISO ? 0.45 : 0.9) + '"/>';
+  });
+  el.innerHTML = svg + "</svg>";
+  var tip = $("tip");
+  el.querySelectorAll("circle").forEach(function (c) {
+    var s = evs[+c.dataset.k];
+    c.onmousemove = function (e) { tip.innerHTML = "<b>" + esc(s.l) + "</b><br>" + esc(s.p.n || s.p.a) + "<br>" + esc(fmtDate(s.d)) + " · " + esc(rel(s.d)) + (s.x ? "<br>" + esc(s.x) : ""); tip.style.display = "block"; tip.style.left = Math.min(e.clientX + 14, innerWidth - 340) + "px"; tip.style.top = (e.clientY + 14) + "px"; };
+    c.onmouseleave = function () { tip.style.display = "none"; };
+    c.onclick = function () { tip.style.display = "none"; openProp(s.p.id); };
+  });
+}
+
+/* ------------------------------------------------------------- maps --- */
+function tiles(map) {
+  /* the Esri light-gray canvas TOPA and LoanID use */
+  L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}", {maxNativeZoom: 15, maxZoom: 18, attribution: "Tiles &copy; Esri"}).addTo(map);
+  L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}", {maxNativeZoom: 15, maxZoom: 18}).addTo(map);
+}
+function topCat(p) {
+  var sg = propSignals(p, S.horizon).filter(function (s) { return s.pts > 0; }).sort(function (a, b) { return b.pts - a.pts; });
+  return sg.length ? sg[0].cat : null;
+}
+function dotFor(p, big) {
+  var c = topCat(p), col = c ? CAT[c].c : "#9aa0a6", r = big ? Math.max(4, Math.min(13, 3 + Math.sqrt((p.u || 5) / 6))) : Math.max(5, Math.min(12, 4 + Math.sqrt((p.u || 5) / 10)));
+  return L.circleMarker(p.ll, {radius: r, color: "#fff", weight: 1.5, fillColor: col, fillOpacity: c ? 0.9 : 0.55});
+}
+function popupHtml(p, withOwner) {
+  var o = p.o >= 0 ? S.data.owners[p.o] : null, sg = propSignals(p, S.horizon).filter(function (s) { return s.pts > 0; }).slice(0, 4);
+  return '<div class="pu-a">' + esc(p.n || p.a) + '</div><div class="pu-n">' + esc((p.n ? p.a + " · " : "") + fmtN(p.u) + " units") + "</div>" +
+    (sg.length ? '<div style="display:flex;flex-wrap:wrap;gap:4px;margin:8px 0">' + sg.map(function (s) { return sigPill(s, true); }).join("") + "</div>" : "") +
+    (withOwner && o ? '<div class="pu-n">Owner: <b>' + esc(o.n) + "</b></div>" : "") +
+    '<div class="pu-f"><a href="#" data-pp="' + esc(p.id) + '">Property details</a>' + (withOwner && o ? '<a href="#" data-po="' + p.o + '">Open owner</a>' : "") + "</div>";
+}
+function wirePopup(map) {
+  map.on("popupopen", function (e) {
+    var el = e.popup.getElement();
+    el.querySelectorAll("[data-pp]").forEach(function (a) { a.onclick = function (ev) { ev.preventDefault(); openProp(a.dataset.pp); }; });
+    el.querySelectorAll("[data-po]").forEach(function (a) { a.onclick = function (ev) { ev.preventDefault(); openOwner(+a.dataset.po); }; });
+  });
+}
+function drawOwnerMap(ps) {
+  if (_omap) { _omap.remove(); _omap = null; }
+  var el = $("omap"); if (!el || !window.L) return;
+  var pts = ps.filter(function (p) { return p.ll; });
+  if (!pts.length) { el.innerHTML = '<div class="empty">No coordinates for these properties.</div>'; return; }
+  _omap = L.map(el, {zoomControl: true, scrollWheelZoom: false});
+  tiles(_omap); wirePopup(_omap);
+  var b = [];
+  pts.forEach(function (p) { dotFor(p).bindPopup(popupHtml(p, false)).addTo(_omap); b.push(p.ll); });
+  if (b.length === 1) _omap.setView(b[0], 15); else _omap.fitBounds(b, {padding: [24, 24], maxZoom: 15});
+}
+var _bmap = null, _blayer = null;
+function renderBigMap() {
+  if (!window.L) return;
+  if (!_bmap) {
+    _bmap = L.map("bigmap", {zoomControl: true, preferCanvas: true});
+    tiles(_bmap); wirePopup(_bmap);
+    _bmap.setView([38.6, -76.9], 8);
+  }
+  if (_blayer) _blayer.remove();
+  _blayer = L.layerGroup().addTo(_bmap);
+  var D = S.data, ids = S.list || [], n = 0, b = [], pts = [];
+  ids.forEach(function (i) {
+    D.owners[i].p.forEach(function (k) {
+      var p = D.props[k];
+      if (!p.ll || (S.region && p.r !== S.region)) return;
+      pts.push(p); n++; b.push(p.ll);
+    });
+  });
+  /* grey (no signal) first so the coloured dots sit on top */
+  pts.sort(function (a, b) { return (topCat(a) ? 1 : 0) - (topCat(b) ? 1 : 0) || (b.u || 0) - (a.u || 0); });
+  pts.forEach(function (p) { dotFor(p, true).bindPopup(popupHtml(p, true)).addTo(_blayer); });
+  $("mpT").textContent = fmtN(n) + " properties · " + fmtN(ids.length) + " owners";
+  $("mpS").textContent = "Same filters as the Owners tab" + (S.sig.length ? " · " + S.sig.length + " signal filter" + (S.sig.length > 1 ? "s" : "") : "");
+  $("mLegend").innerHTML = '<div class="lt">Strongest signal</div>' + Object.keys(CAT).map(function (c) { return '<div class="lr"><span class="mdot" style="background:' + CAT[c].c + '"></span>' + CAT[c].l + "</div>"; }).join("") + '<div class="lr"><span class="mdot" style="background:#9aa0a6"></span>No signal</div><div class="lr small muted">Dot size = units</div>';
+  if (b.length && (!renderBigMap._fit || renderBigMap._fit !== (S.region || "*"))) {
+    var box = S.region && D.regions[S.region].box;
+    if (box) _bmap.fitBounds([[box[0], box[1]], [box[2], box[3]]], {padding: [20, 20]});
+    else _bmap.fitBounds(b, {padding: [30, 30]});
+    renderBigMap._fit = S.region || "*";
+  }
+  setTimeout(function () { _bmap.invalidateSize(); }, 50);
+}
+
+/* ----------------------------------------------------- property drawer --- */
+var PROP_BY_ID = {};
+function openProp(id) {
+  var p = PROP_BY_ID[id]; if (!p) return;
+  var D = S.data, o = p.o >= 0 ? D.owners[p.o] : null;
+  $("drH").innerHTML = '<div class="t">' + esc(p.n || p.a) + '</div><div class="s">' + esc((p.n ? p.a + ", " : "") + (p.c || "") + (p.z ? " " + p.z : "") + " · " + REG_NAMES[p.r]) + "</div>" +
+    '<div class="chips">' + srcChips(p) + (p.u ? '<span class="pill gray"' + (p.ue ? ' title="Estimated from building area"' : "") + ">" + fmtU(p) + " units</span>" : "") + (p.yb ? '<span class="pill gray">Built ' + p.yb + "</span>" : "") + "</div>";
+  var h = "";
+  var sg = propSignals(p, 36).filter(function (s) { return s.pts > 0; });
+  if (sg.length) h += '<div class="dr-sec">Signals</div>' + sg.map(function (s) { return '<div class="citem"><div class="ct">' + sigPill(s) + (s.d ? " " + esc(fmtDate(s.d)) + ' <span class="muted small">' + esc(rel(s.d)) + "</span>" : "") + '</div><div class="muted">' + esc(s.x || "") + "</div></div>"; }).join("");
+  h += '<div class="dr-sec">Ownership</div><div class="statbox">' +
+    row("Owner group", o ? '<a href="#" id="drOwn">' + esc(o.n) + "</a>" : "Not found") +
+    row("Owner of record", p.own ? esc(p.own.n) + ' <span class="muted small">(' + esc(p.own.s) + ")</span>" : "-") +
+    row("Since", p.own && p.own.d ? esc(fmtDate(p.own.d)) + ' <span class="muted small">' + esc(rel(p.own.d)) + "</span>" : "-") +
+    (p.other && p.other.length ? row("Also on record", p.other.map(function (x) { return esc(x.n) + ' <span class="muted small">(' + esc(x.s) + ")</span>"; }).join("<br>")) : "") + "</div>";
+  var loans = [];
+  (p.T || []).forEach(function (t) { (t.loans || []).forEach(function (l) { loans.push(l); }); });
+  if (loans.length) h += '<div class="dr-sec">Loans (Trepp)</div><table class="dtab"><thead><tr><th>Lender / type</th><th class="num">Balance</th><th>Rate</th><th>Matures</th><th>DSCR</th></tr></thead><tbody>' +
+    loans.map(function (l) { return "<tr><td>" + esc(l.orig || "-") + '<div class="muted small">' + esc([l.src, l.deal, l.amort, l.pre ? "Prepay: " + l.pre : "", l.open ? "opens " + fmtDate(l.open) : ""].filter(Boolean).join(" · ")) + (l.ssr || l.mod ? '<div style="color:var(--red)">' + esc([l.ssr, l.mod, l.wo].filter(Boolean).join(" · ")) + "</div>" : "") + '</div></td><td class="num">' + (fmtM(l.bal) || '<span class="muted">n/a</span>') + "</td><td>" + (l.rate ? l.rate + "%" : "") + "</td><td>" + esc(fmtDate(l.mat)) + "</td><td>" + (l.dscr ? l.dscr.toFixed(2) + "x" : "") + "</td></tr>"; }).join("") + "</tbody></table>";
+  var morts = [];
+  (p.R || []).forEach(function (r) { (r.mort || []).forEach(function (m) { morts.push(m); }); });
+  if (morts.length) h += '<div class="dr-sec">Recorded mortgages (Reonomy)</div><table class="dtab"><thead><tr><th>Lender</th><th class="num">Amount</th><th>Recorded</th><th>Matures</th></tr></thead><tbody>' +
+    morts.map(function (m) { return "<tr><td>" + esc(m.lender || "-") + '</td><td class="num">' + fmtM(m.amt) + "</td><td>" + esc(fmtDate(m.rec)) + "</td><td>" + esc(fmtDate(m.mat)) + "</td></tr>"; }).join("") + "</tbody></table>";
+  (p.P || []).forEach(function (hp) {
+    h += '<div class="dr-sec">HAP contracts (PBS8)</div><table class="dtab"><thead><tr><th>Contract</th><th class="num">Units</th><th>Expires</th><th>Rent/SAFMR</th></tr></thead><tbody>' +
+      (hp.contracts || []).map(function (c) { return "<tr><td>" + esc(c.no) + '<div class="muted small">' + esc([c.prog, c.ren].filter(Boolean).join(" · ")) + '</div></td><td class="num">' + fmtN(c.units) + "</td><td>" + esc(fmtDate(c.exp)) + "</td><td>" + (c.safmr ? c.safmr.toFixed(2) : "") + "</td></tr>"; }).join("") + "</tbody></table>" +
+      '<div class="statbox">' + row("REAC", (hp.reac || []).map(function (r) { return esc(r.s) + ' <span class="muted small">' + esc(fmtMon(r.d)) + "</span>"; }).join(" · ") || "-") +
+      row("Management", esc([hp.mgmt && hp.mgmt.name, hp.mgmt && hp.mgmt.type].filter(Boolean).join(" · ")) + (hp.mgmt && (hp.mgmt.phone || hp.mgmt.email) ? '<br><span class="small">' + esc([hp.mgmt.person, hp.mgmt.phone, hp.mgmt.email].filter(Boolean).join(" · ")) + "</span>" : "")) +
+      row("Category", esc([hp.cat, hp.fin, hp.insured ? "HUD-insured" : ""].filter(Boolean).join(" · "))) + row("HUD property ID", esc(hp.pid)) + "</div>";
+  });
+  if ((p.C || []).length) h += '<div class="dr-sec">Sales (CoStar)</div><table class="dtab"><thead><tr><th>Date</th><th>Buyer / seller</th><th class="num">Price</th><th class="num">$/unit</th></tr></thead><tbody>' +
+    p.C.map(function (c) { return "<tr><td>" + esc(fmtDate(c.date)) + "</td><td>" + esc(c.buyer || c.buyerRec || "-") + '<div class="muted small">from ' + esc(c.seller || "-") + (c.lb ? " · listed by " + esc(c.lb) : "") + (c.cap ? " · " + c.cap + "% cap" : "") + '</div></td><td class="num">' + fmtM(c.price) + '</td><td class="num">' + fmtM(c.ppu) + "</td></tr>"; }).join("") + "</tbody></table>";
+  if ((p.X || []).length) h += '<div class="dr-sec">TOPA filings (DHCD)</div><table class="dtab"><thead><tr><th>Date</th><th>Filing</th><th class="num">Price</th></tr></thead><tbody>' +
+    p.X.slice(0, 25).map(function (x) { return "<tr><td>" + esc(fmtDate(x.date)) + "</td><td>" + esc(x.kind) + '<div class="muted small">' + esc([x.type, x.units ? x.units + " units" : "", x.buyer ? "Buyer " + x.buyer : "", x.seller ? "Seller " + x.seller : "", x.foia ? "FOIA " + x.foia : ""].filter(Boolean).join(" · ")) + '</div></td><td class="num">' + fmtM(x.price) + "</td></tr>"; }).join("") + "</tbody></table>";
+  (p.R || []).forEach(function (r, k) {
+    h += '<div class="dr-sec">Parcel' + (p.R.length > 1 ? " " + (k + 1) : "") + " (Reonomy)</div><div class=\"statbox\">" + row("APN", esc(r.apn || "-")) + row("Assessed", fmtM(r.asr) || "-") + row("Building SF", fmtN(r.gba) || "-") +
+      row("Last sale", r.sale ? esc(fmtDate(r.sale)) + (r.price ? " · " + fmtM(r.price) : "") : "-") + (r._line ? row("Address", esc(r._line)) : "") + "</div>";
+  });
+  var links = [];
+  if (p.ll) links.push('<a class="btn sm" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=' + p.ll[0] + "," + p.ll[1] + '">Google Maps</a>');
+  (p.R || []).forEach(function (r) { if (r.link) links.push('<a class="btn sm" target="_blank" rel="noopener" href="' + esc(r.link) + '">Reonomy parcel</a>'); if (r.owner) links.push('<a class="btn sm" target="_blank" rel="noopener" href="' + esc(r.owner) + '">Reonomy owner</a>'); });
+  (p.X || []).forEach(function (x) { if (x.sf && links.join().indexOf(x.sf) < 0) links.push('<a class="btn sm" target="_blank" rel="noopener" href="' + esc(x.sf) + '">Salesforce</a>'); if (x.box && links.join().indexOf(x.box) < 0) links.push('<a class="btn sm" target="_blank" rel="noopener" href="' + esc(x.box) + '">FOIA in Box</a>'); });
+  if (p.P && p.P.length) links.push('<a class="btn sm" target="_blank" rel="noopener" href="https://mrare-cmd.github.io/HAP-Database/">PBS8</a>');
+  if (p.X && p.X.length) links.push('<a class="btn sm" target="_blank" rel="noopener" href="https://mrare-cmd.github.io/greysteel-topa/">TOPA Tracker</a>');
+  if (p.R.length || p.T.length || p.C.length) links.push('<a class="btn sm" target="_blank" rel="noopener" href="https://mrare-cmd.github.io/greysteel-hampton-roads/">LoanID</a>');
+  h += '<div class="dr-sec">Open in</div><div class="lnks">' + links.join("") + "</div>";
+  $("drB").innerHTML = h;
+  var a = $("drOwn"); if (a) a.onclick = function (e) { e.preventDefault(); closeDrawer(); openOwner(p.o); };
+  $("drawer").classList.add("open");
+}
+function row(k, v) { return '<div class="row"><span class="muted">' + k + '</span><span style="text-align:right;max-width:70%">' + v + "</span></div>"; }
+function closeDrawer() { $("drawer").classList.remove("open"); }
+
+/* ------------------------------------------------------- notes / edits --- */
+function notesHtml(i, ov) {
+  var me = S.me && S.me.email;
+  var opts = '<option value="">-</option>' + STATUSES.map(function (s) { return '<option value="' + s[0] + '"' + (ov.status && ov.status.v === s[0] ? " selected" : "") + ">" + s[1] + "</option>"; }).join("");
+  var h = '<div class="nrow"><div class="f"><label>Status' + (ov.status ? '<span class="who">' + esc(who(ov.status.by)) + " · " + esc(ago(ov.status.at)) + "</span>" : "") + '</label><select id="nStatus">' + opts + "</select></div>" +
+    '<div class="f"><label>Assigned to' + (ov.assignee ? '<span class="who">' + esc(ago(ov.assignee.at)) + "</span>" : "") + '</label><input id="nAssn" placeholder="name@greysteel.com" value="' + esc(ov.assignee ? ov.assignee.v : "") + '" list="nPeople"></div></div>' +
+    '<div class="nrow"><div class="f"><label>Next step date</label><input type="date" id="nNext" value="' + esc(ov.next ? ov.next.v : "") + '"></div>' +
+    '<div class="f"><label>Next step</label><input id="nNextNote" placeholder="e.g. Call re: 2027 maturity" value="' + esc(ov.nextNote ? ov.nextNote.v : "") + '"></div></div>' +
+    '<datalist id="nPeople">' + people().map(function (e) { return '<option value="' + esc(e) + '">'; }).join("") + "</datalist>" +
+    '<div class="nadd"><textarea id="nText" placeholder="Add a note for the team - call recap, relationship, what they own outside these markets..."></textarea><button class="btn primary sm" id="nAdd">Add note</button></div>' +
+    '<div class="nthread">' + (ov.notes.map(function (n) {
+      return '<div class="nt"><div class="h"><b>' + esc(who(n.by)) + "</b><span>" + esc(ago(n.at)) + "</span>" + (n.by === me ? '<a data-del="' + esc(n.id) + '" data-k="' + esc(n.k) + '">Delete</a>' : "") + '</div><div class="b">' + esc(n.t) + "</div></div>";
+    }).join("") || '<div class="small muted" style="padding:0 0 12px">No notes yet.</div>') + "</div>";
+  return h;
+}
+function people() {
+  var s = {}; if (S.me) s[S.me.email] = 1;
+  Object.keys(S.overlay.owners || {}).forEach(function (k) { var r = S.overlay.owners[k]; ["status", "assignee", "next"].forEach(function (f) { if (r[f]) { s[r[f].by] = 1; if (f === "assignee") s[r[f].v] = 1; } }); (r.notes || []).forEach(function (n) { s[n.by] = 1; }); });
+  return Object.keys(s).filter(function (e) { return /@/.test(e); }).sort();
+}
+function wireNotes(i, ov) {
+  var k = ownerKeyFor(i);
+  $("nStatus").onchange = function () { edit([{t: "set", k: k, f: "status", v: this.value || null}]); };
+  $("nAssn").onchange = function () { edit([{t: "set", k: k, f: "assignee", v: this.value.trim() || null}]); };
+  $("nNext").onchange = function () { edit([{t: "set", k: k, f: "next", v: this.value || null}]); };
+  $("nNextNote").onchange = function () { edit([{t: "set", k: k, f: "nextNote", v: this.value.trim() || null}]); };
+  $("nAdd").onclick = function () { var t = $("nText").value.trim(); if (!t) return; this.disabled = true; edit([{t: "note", k: k, text: t}], "Note saved"); };
+  $("omain").querySelectorAll("[data-del]").forEach(function (a) { a.onclick = function () { if (confirm("Delete this note?")) edit([{t: "notedel", k: a.dataset.k, id: a.dataset.del}], "Note deleted"); }; });
+}
+async function edit(ops, msg) {
+  setSync("busy");
+  try {
+    var j = await apiPost("/owner360/edit", {ops: ops});
+    S.overlay = j.overlay || S.overlay;
+    if (j.sha) S.files["overlay.json"] = j.sha;
+    indexOverlay();
+    setSync("");
+    if (msg) toast(msg);
+    renderProfile.keep = true;
+    renderOwnerList();
+    var y = $("omain").scrollTop; renderProfile(); $("omain").scrollTop = y;
+  } catch (e) { setSync("err"); toast("Could not save: " + e.message, true); renderProfile(); }
+}
+function setSync(st) { $("syncDot").className = st || ""; $("syncDot").querySelector("span").textContent = st === "busy" ? "Saving" : st === "err" ? "Offline" : "Live"; }
+
+/* ------------------------------------------------------- brief + export --- */
+function copyBrief(i) {
+  var D = S.data, o = D.owners[i], st = ownerStats(o), L = [];
+  L.push(o.n + " (" + o.kd + ")");
+  L.push(fmtN(st.props) + " properties · " + fmtN(st.units) + " units in " + Object.keys(st.regions).map(function (r) { return REG_NAMES[r]; }).join(", ") + (st.debt ? " · " + fmtM(st.debt) + " debt on record" : "") + (st.hap ? " · " + fmtN(st.hap) + " HAP units" : ""));
+  if (st.gs) L.push("Greysteel history: " + st.gs);
+  var seen = {}, why = st.sig.filter(function (s) { if (s.pts <= 0) return false; var k = s.k + s.p.id; if (seen[k]) return false; seen[k] = 1; return true; }).slice(0, 8);
+  if (why.length) { L.push(""); L.push("Why now:"); why.forEach(function (s) { L.push("- " + s.l + (s.d ? " " + fmtDate(s.d) : "") + " - " + (s.p.n || s.p.a) + (s.x ? " (" + s.x + ")" : "")); }); }
+  var cts = (o.ct || []).slice(0, 4);
+  if (cts.length || (o.ph || []).length) {
+    L.push(""); L.push("Contacts:");
+    cts.forEach(function (c) { L.push("- " + c.n + (c.t ? ", " + c.t : "") + ((c.ph || []).length ? " · " + c.ph[0] : "") + ((c.em || []).length ? " · " + c.em[0] : "")); });
+    (o.ph || []).slice(0, 2).forEach(function (p) { L.push("- Office " + p.v); });
+  }
+  L.push(""); L.push("Top properties:");
+  o.p.map(function (k) { return D.props[k]; }).sort(function (a, b) { return (b.u || 0) - (a.u || 0); }).slice(0, 8).forEach(function (p) { L.push("- " + (p.n ? p.n + ", " : "") + p.a + " · " + fmtN(p.u) + " units" + (p.own && p.own.d ? " · owned since " + p.own.d.slice(0, 4) : "")); });
+  var txt = L.join("\n");
+  (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).then(function () { toast("Call brief copied"); }, function () { prompt("Copy the brief:", txt); });
+}
+function exportOwner(i) {
+  var D = S.data, o = D.owners[i];
+  var rows = [["Owner", "Property", "Address", "City", "Market", "Units", "Year built", "Owner of record", "Owned since", "Loan balance", "Next maturity", "Lender", "HAP units", "HAP expires", "Rent/SAFMR", "Latest TOPA filing", "TOPA date", "Signals", "Sources"]];
+  o.p.forEach(function (k) { rows.push(propCsvRow(D.props[k], o)); });
+  downloadCsv(o.n.replace(/[^\w ]+/g, "").slice(0, 60) + " - Owner 360.csv", rows);
+}
+function propCsvRow(p, o) {
+  var loans = []; (p.T || []).forEach(function (t) { (t.loans || []).forEach(function (l) { if (l.bal !== 0) loans.push(l); }); });
+  loans.sort(function (a, b) { return (a.mat || "9").localeCompare(b.mat || "9"); });
+  var bal = loans.reduce(function (t, l) { return t + (l.bal || 0); }, 0), c0 = null, hu = 0;
+  (p.P || []).forEach(function (h) { (h.contracts || []).forEach(function (c) { hu += c.units || 0; if (!c0 || (c.exp && c.exp < c0.exp)) c0 = c; }); });
+  var x = (p.X || [])[0];
+  return [o ? o.n : "", p.n, p.a, p.c, REG_NAMES[p.r], p.u, p.yb, p.own ? p.own.n : "", p.own ? p.own.d : "", bal || "", loans[0] ? loans[0].mat : "", loans[0] ? loans[0].orig : "", hu || "", c0 ? c0.exp : "", c0 && c0.safmr ? c0.safmr : "", x ? x.kind : "", x ? x.date : "",
+    propSignals(p, S.horizon).filter(function (s) { return s.pts > 0; }).map(function (s) { return s.l + (s.d ? " " + s.d : ""); }).join("; "), p.src.map(function (s) { return SRC_NAMES[s]; }).join(", ")];
+}
+
+/* ------------------------------------------------------------ calendar --- */
+var CAL_TYPES = [["mat", "Loan maturity", "debt"], ["open", "Prepay opens", "debt"], ["hap", "HAP expiration", "hap"], ["ofs", "Offer of sale", "topa"], ["distress", "Distress", "distress"], ["other", "Other", "hold"]];
+function calType(s) { return s.k === "mat" || s.k === "rmat" ? "mat" : s.k === "open" ? "open" : s.k === "hap" || s.k === "mtm" ? "hap" : s.k === "ofs" ? "ofs" : s.cat === "distress" ? "distress" : "other"; }
+function calEvents() {
+  var D = S.data, ids = S.list || [], q = S.cQ.trim().toLowerCase(), out = [];
+  var lo = new Date(TODAY); if (S.cPast) lo.setMonth(lo.getMonth() - 6);
+  var hi = new Date(TODAY); hi.setMonth(hi.getMonth() + S.cWin);
+  var loI = lo.toISOString().slice(0, 10), hiI = hi.toISOString().slice(0, 10);
+  ids.forEach(function (i) {
+    var o = D.owners[i];
+    o.p.forEach(function (k) {
+      var p = D.props[k];
+      if (S.region && p.r !== S.region) return;
+      propSignals(p, 36).forEach(function (s) {
+        if (!s.d || s.d < loI || s.d > hiI || s.k === "hold" || s.k === "not" || s.k === "mtm") return;
+        if (!S.cPast && s.d < TODAY_ISO) return;
+        var ty = calType(s);
+        if (S.cTypes.length && S.cTypes.indexOf(ty) < 0) return;
+        if (q && (o.n + " " + p.n + " " + p.a).toLowerCase().indexOf(q) < 0) return;
+        out.push({s: s, o: o, oi: i, p: p});
+      });
+    });
+  });
+  out.sort(function (a, b) { return a.s.d.localeCompare(b.s.d) || (b.p.u || 0) - (a.p.u || 0); });
+  return out;
+}
+function renderCal() {
+  var ev = calEvents(), h = "<thead><tr><th>Date</th><th>Event</th><th>Property</th><th class=\"num\">Units</th><th>Owner</th><th>Detail</th><th class=\"num\">Owner score</th></tr></thead><tbody>", mon = "";
+  ev.slice(0, 1500).forEach(function (e) {
+    var m = e.s.d.slice(0, 7);
+    if (m !== mon) { mon = m; h += '<tr class="mon"><td colspan="7">' + fmtMon(e.s.d) + "</td></tr>"; }
+    var sc = ownerStats(e.o).score;
+    h += '<tr class="clk" data-o="' + e.oi + '" data-p="' + esc(e.p.id) + '"><td class="nw">' + esc(fmtDate(e.s.d)) + "</td><td>" + sigPill(e.s, false) + "</td><td>" + esc(e.p.n || e.p.a) + '<span class="muted small"> · ' + REG_NAMES[e.p.r] + '</span></td><td class="num">' + fmtN(e.p.u) + '</td><td><a class="own" href="#" data-oo="' + e.oi + '">' + esc(e.o.n) + '</a></td><td class="small muted" style="max-width:360px">' + esc(e.s.x || "") + '</td><td class="num"><span class="score ' + scoreCls(sc) + '">' + sc + "</span></td></tr>";
+  });
+  if (!ev.length) h += '<tr><td colspan="7" class="empty">No events in this window for the owners filtered on the Owners tab.</td></tr>';
+  $("cTable").innerHTML = h + "</tbody>";
+  $("cCount").textContent = fmtN(ev.length) + " event" + (ev.length === 1 ? "" : "s") + (ev.length > 1500 ? " (first 1,500 shown)" : "") + " · owners filtered on the Owners tab";
+  $("cTable").querySelectorAll("[data-oo]").forEach(function (a) { a.onclick = function (e) { e.preventDefault(); e.stopPropagation(); openOwner(+a.dataset.oo); }; });
+  $("cTable").querySelectorAll("tr.clk").forEach(function (tr) { tr.onclick = function () { openProp(tr.dataset.p); }; });
+}
+
+/* ---------------------------------------------------------- properties --- */
+function filteredProps() {
+  var D = S.data, q = S.pQ.trim().toLowerCase(), terms = q ? q.split(/\s+/) : [];
+  var out = D.props.filter(function (p) {
+    if (S.pRegion && p.r !== S.pRegion) return false;
+    if (S.pNoOwner && p.o >= 0) return false;
+    if (S.pSrc.length && !S.pSrc.every(function (s) { return p.src.indexOf(s) >= 0; })) return false;
+    if (terms.length) {
+      var hay = p._hay || (p._hay = [p.n, p.a, p.c, p.z, p.own && p.own.n, p.o >= 0 ? D.owners[p.o].n : ""].join(" ").toLowerCase());
+      if (!terms.every(function (t) { return hay.indexOf(t) >= 0; })) return false;
+    }
+    return true;
+  });
+  var k = S.pSort.k, d = S.pSort.d;
+  var val = {
+    n: function (p) { return (p.n || p.a || "").toLowerCase(); }, u: function (p) { return p.u || 0; }, o: function (p) { return p.o >= 0 ? D.owners[p.o].n.toLowerCase() : "~"; },
+    since: function (p) { return p.own && p.own.d || "0"; }, sc: function (p) { return propScore(p, S.horizon); }, r: function (p) { return p.r; }
+  }[k];
+  out.sort(function (a, b) { var x = val(a), y = val(b); return (x < y ? -1 : x > y ? 1 : 0) * d; });
+  return out;
+}
+function renderProps() {
+  var ps = filteredProps(), per = 100, pages = Math.max(1, Math.ceil(ps.length / per));
+  if (S.pPage >= pages) S.pPage = pages - 1;
+  var cols = [["n", "Property"], ["r", "Market"], ["u", "Units", 1], ["o", "Owner group"], ["since", "Owned since"], ["sc", "Signals"], ["", "Sources"]];
+  var h = "<thead><tr>" + cols.map(function (c) { return '<th data-k="' + c[0] + '" class="' + (c[2] ? "num " : "") + (S.pSort.k === c[0] ? "sorted" : "") + '">' + c[1] + (S.pSort.k === c[0] ? '<span class="ar">' + (S.pSort.d > 0 ? "&#9650;" : "&#9660;") + "</span>" : "") + "</th>"; }).join("") + "</tr></thead><tbody>";
+  ps.slice(S.pPage * per, S.pPage * per + per).forEach(function (p) {
+    var o = p.o >= 0 ? S.data.owners[p.o] : null, sg = propSignals(p, S.horizon).filter(function (s) { return s.pts > 0; });
+    h += '<tr class="clk" data-p="' + esc(p.id) + '"><td class="adr"><span class="adt"><b style="font-weight:500">' + esc(p.n || p.a) + "</b>" + (p.n ? ' <span class="muted small">' + esc(p.a) + "</span>" : "") + "</span></td><td>" + REG_NAMES[p.r] + '</td><td class="num">' + fmtU(p) + "</td><td>" + (o ? '<a class="own" href="#" data-oo="' + p.o + '">' + esc(o.n) + "</a>" : '<span class="muted">' + esc(p.own ? p.own.n : "Unknown") + "</span>") + "</td><td>" + esc(p.own && p.own.d ? fmtMon(p.own.d) : "") + "</td><td>" + sg.slice(0, 3).map(function (s) { return sigPill(s, true); }).join(" ") + "</td><td>" + srcChips(p) + "</td></tr>";
+  });
+  $("pTable").innerHTML = h + "</tbody>";
+  $("pCount").textContent = fmtN(ps.length) + " properties";
+  $("pPage").textContent = "Page " + (S.pPage + 1) + " of " + pages;
+  $("pPrev").disabled = S.pPage === 0; $("pNext").disabled = S.pPage >= pages - 1;
+  $("pTable").querySelectorAll("th[data-k]").forEach(function (th) { if (!th.dataset.k) return; th.onclick = function () { var k = th.dataset.k; S.pSort = {k: k, d: S.pSort.k === k ? -S.pSort.d : (k === "n" || k === "o" || k === "r" ? 1 : -1)}; renderProps(); }; });
+  $("pTable").querySelectorAll("[data-oo]").forEach(function (a) { a.onclick = function (e) { e.preventDefault(); e.stopPropagation(); openOwner(+a.dataset.oo); }; });
+  $("pTable").querySelectorAll("tr.clk").forEach(function (tr) { tr.onclick = function () { openProp(tr.dataset.p); }; });
+}
+
+/* ---------------------------------------------------------------- views */
+function setView(v) {
+  S.view = v;
+  document.querySelectorAll(".tab").forEach(function (t) { t.classList.toggle("active", t.dataset.view === v); });
+  document.querySelectorAll(".view").forEach(function (s) { s.classList.remove("active"); });
+  $({owners: "vOwners", cal: "vCal", map: "vMap", props: "vProps"}[v]).classList.add("active");
+  if (v === "cal") renderCal();
+  if (v === "map") renderBigMap();
+  if (v === "props") renderProps();
+  if (v === "owners" && _omap) setTimeout(function () { _omap.invalidateSize(); }, 50);
+}
+
+/* ------------------------------------------------------------ data modal */
+function openModal(html) { $("mbox").innerHTML = html; $("modal").classList.add("open"); }
+function closeModal() { $("modal").classList.remove("open"); }
+function dataModal() {
+  var D = S.data, src = D.sources || {}, lid = src.loanid || {};
+  var reg = Object.keys(D.regions).map(function (r) {
+    var n = D.props.filter(function (p) { return p.r === r; }).length;
+    var s = lid[r] || {};
+    return '<div class="k">' + D.regions[r].name + "</div><div>" + fmtN(n) + " properties" + (s.reonomy || s.trepp || s.costar ? ' <span class="muted small">· Reonomy ' + esc(String(s.reonomy || "-").slice(0, 10)) + " · Trepp " + esc(String(s.trepp || "-").slice(0, 10)) + " · CoStar " + esc(String(s.costar || "-").slice(0, 10)) + "</span>" : "") + "</div>";
+  }).join("");
+  openModal('<div class="mh"><div><div class="t">Where this comes from</div><div class="s">Built ' + esc(fmtDate(D.built.at.slice(0, 10))) + " (" + esc(ago(D.built.at)) + ")" + (D.built.by ? " by " + esc(who(D.built.by)) : "") + '</div></div><button class="dr-x" style="position:static;margin-left:auto" onclick="closeModal()">&times;</button></div>' +
+    '<div class="mb howto"><div class="srcgrid">' + reg +
+    '<div class="k">PBS8 (HUD)</div><div>HAP contracts as of ' + esc(fmtDate(src.pbs8)) + '</div><div class="k">TOPA Tracker</div><div>DHCD filings, updated ' + esc(ago(src.topa)) + "</div></div>" +
+    '<ol style="margin-top:14px"><li><b>Properties</b> are merged across sources on street plus overlapping house numbers, inside a market.</li>' +
+    "<li><b>Owners</b> are grouped on Reonomy's company, CoStar's true buyer, HUD's owner participant ID, a shared mailing office and a corporate email domain. A single joint-venture LLC cannot fuse two established sponsors, and public agencies only group at their own office.</li>" +
+    "<li><b>Why-call-now</b> is computed live from dates: loan maturities and prepayment windows (Trepp, county mortgages), HAP expirations and below-market rents (PBS8), offers of sale, foreclosure and redevelopment filings (TOPA), distress and hold period. Larger properties weigh more.</li></ol>" +
+    '<div class="note">Rebuild pulls the newest PBS8, LoanID and TOPA data through the sign-in Worker (~75 MB), rebuilds in your browser and saves it for everyone. Notes and statuses are never touched. Use it after a LoanID upload, a TOPA import, or after marking "Not this owner".</div>' +
+    '<div id="rbBox" hidden><div class="prog"><i id="rbBar"></i></div><div class="small muted" id="rbMsg"></div></div></div>' +
+    '<div class="mf"><span class="small muted">' + fmtN(D.owners.length) + " owner groups · " + fmtN(D.props.length) + ' properties</span><span class="ml-auto"></span><button class="btn" onclick="closeModal()">Close</button><button class="btn primary" id="rbGo">Rebuild now</button></div>');
+  $("rbGo").onclick = rebuild;
+}
+async function rebuild() {
+  if (!window.O360Build) { toast("The builder is not in this page", true); return; }
+  var btn = $("rbGo"); btn.disabled = true; $("rbBox").hidden = false;
+  var bar = $("rbBar"), msg = $("rbMsg"), steps = 0, total = 1;
+  function tick(m) { steps++; bar.style.width = Math.min(98, steps / total * 100) + "%"; if (m) msg.textContent = m; }
+  try {
+    msg.textContent = "Reading manifests...";
+    var lm = await apiGet("/owner360/manifest?fresh=1"), tm = await apiGet("/topa/manifest?fresh=1");
+    var base = lm.files["owners.json"] || null;
+    var regions = Object.keys(O360Build.REGIONS), lfiles = [];
+    regions.forEach(function (r) { ["reonomy", "trepp", "costar", "salesforce"].forEach(function (f) { var p = r + "/data_" + f + ".json"; if (lm.loanid[p]) lfiles.push(p); }); });
+    var topaIdx = tm.files["index.json"];
+    total = 3 + lfiles.length + 2 + 20;
+    var get = function (path, label) { return apiGet(path).then(function (j) { tick("Loaded " + label); return j; }); };
+    var pbs8P = get("/data/hap_state.json?src=owner360", "PBS8 contracts"), coordsP = get("/data/property_coords.json?src=owner360", "PBS8 coordinates");
+    var loanid = {}, loanidSources = {};
+    await Promise.all(lfiles.map(function (p) {
+      return get("/loanid/data/" + p + "?v=" + lm.loanid[p] + "&src=owner360", p).then(function (j) {
+        var r = p.split("/")[0], f = p.split("/")[1].replace(/^data_|\.json$/g, "");
+        loanid[r] = loanid[r] || {};
+        if (f === "salesforce") loanidSources[r] = j.sources || {}; else loanid[r][f] = j;
+      });
+    }));
+    var index = await get("/topa/data/index.json?v=" + topaIdx, "TOPA index");
+    var tov = await get("/topa/data/overlay.json?v=" + tm.files["overlay.json"], "TOPA edits");
+    var sheets = {}, want = ["ofs5", "not", "dopa", "rofr", "ofs24", "loi", "torg", "tassoc", "aor", "complaint", "pdr", "tea", "te5", "condo", "nha", "vac", "pta", "lies", "nof", "raze"];
+    total = steps + want.length + 3;
+    await Promise.all(want.map(function (slug) { var p = "sheets/" + slug + ".json"; if (!tm.files[p]) { tick(); return null; } return get("/topa/data/" + p + "?v=" + tm.files[p], "TOPA " + slug).then(function (j) { sheets[slug] = j; }); }));
+    var pbs8 = await pbs8P, coords = await coordsP;
+    var ovl = await apiGet("/owner360/data/overlay.json" + (lm.files["overlay.json"] ? "?v=" + lm.files["overlay.json"] : ""));
+    msg.textContent = "Joining and grouping owners...";
+    await new Promise(function (r) { setTimeout(r, 30); });
+    var out = O360Build.build({pbs8: pbs8, pbs8Coords: coords, loanid: loanid, loanidSources: loanidSources, topa: {sheets: sheets, overlay: tov, index: index}, overlay: ovl, by: S.me.email, today: TODAY_ISO});
+    tick("Saving " + fmtN(out.owners.length) + " owner groups...");
+    var j = await apiPost("/owner360/publish", {content: b64FromString(JSON.stringify(out)), base: base, message: out.props.length + " properties, " + out.owners.length + " owner groups"});
+    bar.style.width = "100%";
+    msg.textContent = "Saved. Reloading...";
+    toast("Rebuilt: " + fmtN(out.owners.length) + " owner groups");
+    setTimeout(function () { location.reload(); }, 900);
+  } catch (e) {
+    btn.disabled = false;
+    msg.textContent = "Rebuild failed: " + e.message;
+    toast("Rebuild failed: " + e.message, true);
+  }
+}
+
+/* ---------------------------------------------------------------- boot */
+async function boot() {
+  var m = await apiGet("/owner360/manifest?load=1");
+  S.files = m.files || {};
+  if (!S.files["owners.json"]) throw new Error("owners.json has not been built yet. Run tools/build.js --write in the Owner360 folder, or use Data > Rebuild.");
+  var dp = apiGet("/owner360/data/owners.json?v=" + S.files["owners.json"]);
+  var op = apiGet("/owner360/data/overlay.json" + (S.files["overlay.json"] ? "?v=" + S.files["overlay.json"] : ""));
+  S.data = await dp; S.overlay = await op;
+  S.overlay.owners = S.overlay.owners || {}; S.overlay.detach = S.overlay.detach || {};
+  S.data.props.forEach(function (p) { PROP_BY_ID[p.id] = p; });
+  buildSearch(); indexOverlay();
+  var f = lsGet("o360_f", null);
+  if (f) { S.region = f.region || ""; S.sort = f.sort || "score"; S.sig = f.sig || []; S.kinds = f.kinds || S.kinds; S.horizon = f.horizon || 24; }
+  wireFilters();
+  $("dataLbl").textContent = "Built " + ago(S.data.built.at);
+  renderOwnerList();
+  $("boot").style.display = "none";
+  var hm = /#o=([^&]+)/.exec(location.hash);
+  if (hm) { var id = decodeURIComponent(hm[1]); var ix = S.data.owners.findIndex(function (o) { return o.id === id; }); if (ix >= 0) openOwner(ix); }
+  setInterval(poll, 30000);
+}
+async function poll() {
+  if (document.hidden) return;
+  try {
+    var m = await apiGet("/owner360/manifest");
+    if (m.files["overlay.json"] && m.files["overlay.json"] !== S.files["overlay.json"]) {
+      S.overlay = await apiGet("/owner360/data/overlay.json?v=" + m.files["overlay.json"]);
+      S.overlay.owners = S.overlay.owners || {}; S.overlay.detach = S.overlay.detach || {};
+      S.files["overlay.json"] = m.files["overlay.json"]; indexOverlay(); renderOwnerList();
+      if (S.sel >= 0 && !document.activeElement.closest("#omain")) { var y = $("omain").scrollTop; renderProfile(); $("omain").scrollTop = y; }
+    }
+    if (m.files["owners.json"] && m.files["owners.json"] !== S.files["owners.json"] && !poll.told) { poll.told = true; toast("A newer build is available - reload the page to see it"); }
+    setSync("");
+  } catch (e) { setSync("err"); }
+}
+function wireFilters() {
+  var regs = [["", "All"]].concat(Object.keys(S.data.regions).map(function (r) { return [r, REG_SHORT[r]]; }));
+  function seg(el, cur, onPick) {
+    el.innerHTML = regs.map(function (r) { return '<button data-v="' + r[0] + '"' + (r[0] === cur ? ' class="on"' : "") + ">" + r[1] + "</button>"; }).join("");
+    el.querySelectorAll("button").forEach(function (b) { b.onclick = function () { el.querySelectorAll("button").forEach(function (x) { x.classList.toggle("on", x === b); }); onPick(b.dataset.v); }; });
+  }
+  seg($("oRegion"), S.region, function (v) { S.region = v; S.shown = 120; renderOwnerList(); });
+  seg($("pRegion"), S.pRegion, function (v) { S.pRegion = v; S.pPage = 0; renderProps(); });
+  function drawSig() {
+    $("oSig").innerHTML = SIGNAL_FILTERS.map(function (f) { return '<span class="chip' + (S.sig.indexOf(f.k) >= 0 ? " on" : "") + '" data-k="' + f.k + '"><i style="background:' + CAT[f.cat].c + '"></i>' + f.l + "</span>"; }).join("");
+    $("oSig").querySelectorAll(".chip").forEach(function (c) { c.onclick = function () { var k = c.dataset.k, ix = S.sig.indexOf(k); if (ix >= 0) S.sig.splice(ix, 1); else S.sig.push(k); S.shown = 120; drawSig(); renderOwnerList(); }; });
+  }
+  drawSig();
+  function drawKind() {
+    var cnt = {}; S.data.owners.forEach(function (o) { cnt[o.kd] = (cnt[o.kd] || 0) + 1; });
+    $("oKind").innerHTML = KINDS.map(function (k) { return '<span class="chip' + (S.kinds.indexOf(k) >= 0 ? " on" : "") + '" data-k="' + k + '">' + k + ' <span class="c">' + fmtN(cnt[k] || 0) + "</span></span>"; }).join("");
+    $("oKind").querySelectorAll(".chip").forEach(function (c) { c.onclick = function () { var k = c.dataset.k, ix = S.kinds.indexOf(k); if (ix >= 0) S.kinds.splice(ix, 1); else S.kinds.push(k); drawKind(); renderOwnerList(); }; });
+  }
+  drawKind();
+  $("oSort").value = S.sort; $("oHorizon").value = String(S.horizon);
+  $("oSort").onchange = function () { S.sort = this.value; renderOwnerList(); };
+  $("oq").oninput = debounce(function () { S.q = $("oq").value; S.shown = 120; renderOwnerList(); }, 150);
+  $("gq").oninput = debounce(function () { $("oq").value = $("gq").value; S.q = $("gq").value; S.shown = 120; if (S.view !== "owners") setView("owners"); renderOwnerList(); }, 150);
+  $("gq").onkeydown = function (e) { if (e.key === "Enter" && S.list && S.list.length) openOwner(S.list[0]); };
+  $("oMore").onclick = function () { var f = $("oFilters"); f.hidden = !f.hidden; this.textContent = f.hidden ? "More filters" : "Fewer filters"; };
+  $("oPmin").oninput = debounce(function () { S.pmin = +$("oPmin").value || null; renderOwnerList(); }, 200);
+  $("oUmin").oninput = debounce(function () { S.umin = +$("oUmin").value || null; renderOwnerList(); }, 200);
+  $("oStatus").innerHTML = '<option value="">Any</option><option value="-">No status yet</option>' + STATUSES.map(function (s) { return '<option value="' + s[0] + '">' + s[1] + "</option>"; }).join("");
+  $("oStatus").onchange = function () { S.status = this.value; renderOwnerList(); };
+  $("oAssn").onchange = function () { S.assn = this.value; renderOwnerList(); };
+  $("oOther").onchange = function () { S.other = this.value; renderOwnerList(); };
+  $("oHorizon").onchange = function () { S.horizon = +this.value; renderOwnerList(); if (S.sel >= 0) renderProfile(); };
+  $("oReset").onclick = function () {
+    S.q = ""; S.sig = []; S.region = ""; S.pmin = S.umin = null; S.status = S.assn = S.other = ""; S.kinds = ["Private", "Non-profit", "Co-op", "Individual"];
+    ["oq", "gq", "oPmin", "oUmin"].forEach(function (id) { $(id).value = ""; }); ["oStatus", "oAssn", "oOther"].forEach(function (id) { $(id).value = ""; });
+    wireFilters(); renderOwnerList();
+  };
+  $("oList").onclick = function (e) { var mc = e.target.closest(".mc"); if (mc) openOwner(+mc.dataset.i); };
+  /* calendar */
+  $("cTypes").innerHTML = CAL_TYPES.map(function (t) { return '<span class="chip" data-k="' + t[0] + '"><i style="background:' + CAT[t[2]].c + '"></i>' + t[1] + "</span>"; }).join("");
+  $("cTypes").querySelectorAll(".chip").forEach(function (c) { c.onclick = function () { var k = c.dataset.k, ix = S.cTypes.indexOf(k); if (ix >= 0) S.cTypes.splice(ix, 1); else S.cTypes.push(k); c.classList.toggle("on"); renderCal(); }; });
+  $("cWin").querySelectorAll("button").forEach(function (b) { b.onclick = function () { $("cWin").querySelectorAll("button").forEach(function (x) { x.classList.toggle("on", x === b); }); S.cWin = +b.dataset.v; renderCal(); }; });
+  $("cq").oninput = debounce(function () { S.cQ = $("cq").value; renderCal(); }, 150);
+  $("cPast").onclick = function (e) { e.preventDefault(); S.cPast = !S.cPast; this.classList.toggle("on", S.cPast); renderCal(); };
+  $("cCsv").onclick = function () {
+    var rows = [["Date", "Event", "Property", "Address", "Market", "Units", "Owner", "Detail", "Owner score"]];
+    calEvents().forEach(function (e) { rows.push([e.s.d, e.s.l, e.p.n, e.p.a, REG_NAMES[e.p.r], e.p.u, e.o.n, e.s.x, ownerStats(e.o).score]); });
+    downloadCsv("Owner 360 calendar.csv", rows);
+  };
+  /* properties */
+  $("pSrc").innerHTML = ["R", "T", "C", "P", "X"].map(function (s) { return '<span class="chip" data-k="' + s + '">' + SRC_NAMES[s] + "</span>"; }).join("");
+  $("pSrc").querySelectorAll(".chip").forEach(function (c) { c.onclick = function () { var k = c.dataset.k, ix = S.pSrc.indexOf(k); if (ix >= 0) S.pSrc.splice(ix, 1); else S.pSrc.push(k); c.classList.toggle("on"); S.pPage = 0; renderProps(); }; });
+  $("pq").oninput = debounce(function () { S.pQ = $("pq").value; S.pPage = 0; renderProps(); }, 150);
+  $("pNoOwner").onclick = function (e) { e.preventDefault(); S.pNoOwner = !S.pNoOwner; this.classList.toggle("on", S.pNoOwner); S.pPage = 0; renderProps(); };
+  $("pPrev").onclick = function () { S.pPage--; renderProps(); $("pTable").parentNode.scrollTop = 0; };
+  $("pNext").onclick = function () { S.pPage++; renderProps(); $("pTable").parentNode.scrollTop = 0; };
+  $("pCsv").onclick = function () { var rows = [["Owner", "Property", "Address", "City", "Market", "Units", "Year built", "Owner of record", "Owned since", "Loan balance", "Next maturity", "Lender", "HAP units", "HAP expires", "Rent/SAFMR", "Latest TOPA filing", "TOPA date", "Signals", "Sources"]]; filteredProps().forEach(function (p) { rows.push(propCsvRow(p, p.o >= 0 ? S.data.owners[p.o] : null)); }); downloadCsv("Owner 360 properties.csv", rows); };
+}
+function wire() {
+  document.querySelectorAll(".tab").forEach(function (t) { t.onclick = function () { setView(t.dataset.view); }; });
+  $("drX").onclick = closeDrawer;
+  $("dataBtn").onclick = function () { if (S.data) dataModal(); };
+  $("modal").onclick = function (e) { if (e.target === this) closeModal(); };
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") { closeDrawer(); closeModal(); } });
+  window.addEventListener("resize", debounce(function () { if (S.sel >= 0 && S.view === "owners") { var o = S.data.owners[S.sel]; drawTimeline(ownerStats(o), o.p.map(function (k) { return S.data.props[k]; })); } }, 200));
+}
+
+/* ---------------------------------------------------------------- sign-in */
+(function () {
+  function tokenGet() { try { return localStorage.getItem(TKEY); } catch (e) { return null; } }
+  function tokenSet(t) { try { t ? localStorage.setItem(TKEY, t) : localStorage.removeItem(TKEY); } catch (e) {} }
+  var gate = $("authGate");
+  function msg(m, ok) { var el = $("agMsg"); el.textContent = m || ""; el.className = "ag-msg" + (ok ? " ok" : ""); }
+  function showGate(m) { gate.classList.remove("hidden", "gone"); $("agBtn").disabled = false; msg(m || "", !m); }
+  function hideGate() { gate.classList.add("hidden"); setTimeout(function () { gate.classList.add("gone"); }, 400); }
+  $("agBtn").onclick = function () { $("agBtn").disabled = true; msg("Redirecting to Microsoft…", true); location.href = API + "/login?return=" + encodeURIComponent(location.origin + location.pathname); };
+  $("signOutBtn").onclick = function () { tokenSet(null); location.href = location.origin + location.pathname; };
+  var chip = $("userChip"), menu = $("userMenu");
+  chip.onclick = function (e) { e.stopPropagation(); menu.classList.toggle("open"); };
+  document.addEventListener("click", function (e) { if (!e.target.closest("#userWrap")) menu.classList.remove("open"); });
+  var returned = false, m = /[#&]auth=([^&]+)/.exec(location.hash || "");
+  if (m) { tokenSet(decodeURIComponent(m[1])); returned = true; try { history.replaceState(null, "", location.pathname + location.search); } catch (e) {} }
+  if (returned) msg("Signing you in…", true);
+  var t = tokenGet();
+  (t ? fetch(API + "/me", {headers: {Authorization: "Bearer " + t}, cache: "no-store"}).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }) : Promise.resolve(null)).then(function (a) {
+    if (!a || !a.ok) { tokenSet(null); showGate(returned ? "Sign-in did not complete. Please try again." : ""); return; }
+    S.me = a;
+    var full = a.name || a.email, parts = full.indexOf(",") > -1 ? full.split(",").reverse() : full.split(/\s+/);
+    $("ucAv").textContent = ((parts[0] || "").trim().charAt(0) + ((parts[parts.length - 1] || "").trim().charAt(0) || "")).toUpperCase();
+    $("ucName").textContent = (a.given || parts[0] || "").trim(); $("umName").textContent = full; $("umEmail").textContent = a.email;
+    $("userWrap").hidden = false; hideGate();
+    wire();
+    boot().catch(function (e) {
+      $("boot").innerHTML = '<div style="max-width:520px;text-align:center;line-height:1.6"><b>Could not load Owner 360.</b><br><span class="small">' + esc(e.message) + "</span><br><button class=\"btn sm\" onclick=\"location.reload()\" style=\"margin-top:10px\">Try again</button></div>";
+    });
+  });
+})();
+</script>
+</body>
+</html>
