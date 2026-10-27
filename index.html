@@ -950,7 +950,8 @@ function companyLike(n) { return COMPANY_WORDS.test(s(n).toUpperCase()); }
 function propertyLike(n) { var t = s(n).toUpperCase(); return PROPERTY_WORDS.test(t) || /^\d/.test(t) || /\b(LP|L P|LIMITED PARTNERSHIP|LTD PARTNERSHIP|ASSOC(IATES)?)$/.test(t.replace(/[.,]/g, "")); }
 function isPerson(n) {
   var t = s(n).toUpperCase();
-  if (/\b(LLC|LP|INC|CORP|TRUST|ASSOC|ASSOCS?|ASSOCIATES?|ASSOCIATION|ASSN|PARTNERS|PARTNERSHIP|LTD PTNSHP|HOUSING|APARTMENTS?|PROPERT|COMPANY|CO|GROUP|FUND|VENTURES?|HOLDINGS?|REALTY|DEVELOPMENT|MANAGEMENT|CHURCH|AUTHORITY|COMMISSION|FOUNDATION|COOPERATIVE|LTD|BANK|CAPITAL|INVEST|ESTATE|HOMES?|MANOR|TOWERS?|GARDENS?|PLAZA|VILLAGE|HOUSE|CENTER|COMMUNITY|SERVICES|ENTERPRISES|ASSOCIATION)\b/.test(t)) return false;
+  if (/PROPERT|INVEST|VENTURE|HOLDING|PARTNER|DEVELOP|REALT|APARTMENT|COMPAN|ENTERPRISE|MANAGEMENT|CAPITAL|EQUIT|RESIDENTIAL|COMMUNIT|ASSOCIAT|GROUP|FUND|TRUST|ESTATE/.test(t)) return false;
+  if (/\b(LLC|LP|INC|CORP|CORPORATION|TRUST|ASSOC|ASSOCS?|ASSOCIATES?|ASSOCIATION|ASSN|PARTNERS|PARTNERSHIP|LTD PTNSHP|HOUSING|APARTMENTS?|PROPERT|COMPANY|CO|GROUP|FUND|VENTURES?|HOLDINGS?|REALTY|DEVELOPMENT|MANAGEMENT|CHURCH|AUTHORITY|COMMISSION|FOUNDATION|COOPERATIVE|LTD|BANK|CAPITAL|INVEST|ESTATE|HOMES?|MANOR|TOWERS?|GARDENS?|PLAZA|VILLAGE|HOUSE|CENTER|COMMUNITY|SERVICES|ENTERPRISES|ASSOCIATION)\b/.test(t)) return false;
   var w = t.split(/\s+/);
   return w.length >= 2 && w.length <= 4 && /^[A-Z' -]+$/.test(t);
 }
@@ -958,14 +959,34 @@ function isPerson(n) {
 /* public owners: grouped on exact identity only, never through a shared
    office (housing authorities sit in every JV and would chain sponsors) */
 /* ground lessors and placeholder owners of record: never a sponsor hub */
-var GROUND_RE = /\b(UNIVERSITY|CHURCH|SUPREME COUNCIL|LAND ONLY|GROUND (OWNER|LESSOR|LEASE)|COOPERATIVE|CO ?OP|ASSIGNMENT CORP|HOUSING FINANCE|BAPTIST|DIOCESE|ARCHDIOCESE|TEMPLE|MINISTRIES|CONGREGATION)\b/;
+var GROUND_RE = /\b(TENANTS? ASSOCIATION|TENANTS? ASSN|UNIVERSITY|CHURCH|SUPREME COUNCIL|LAND ONLY|GROUND (OWNER|LESSOR|LEASE)|COOPERATIVE|CO ?OP|ASSIGNMENT CORP|HOUSING FINANCE|BAPTIST|DIOCESE|ARCHDIOCESE|TEMPLE|MINISTRIES|CONGREGATION)\b/;
+/* tax-credit investors and banks Yardi sometimes lists as "owner" (Bank of America on Enterprise's
+   Meadowbrook Run): never a sponsor, never an owner link, never a domain link */
+var INVESTOR_RE = /\b(BANK OF AMERICA|BANK NA|BANK N A|NATIONAL BANK|SAVINGS BANK|BANCORP|WELLS FARGO|JPMORGAN|JP MORGAN|CHASE BANK|JPMORGAN CHASE|CITIBANK|CITIGROUP|PNC BANK|PNC REAL ESTATE|CAPITAL ONE|TRUIST|SUNTRUST|BB AND T|US BANCORP|US BANK|M AND T BANK|RAYMOND JAMES|BOSTON CAPITAL|NATIONAL EQUITY FUND|HUNT CAPITAL|R4 CAPITAL|RICHMAN GROUP|RICHMAN TAX|MERRITT COMMUNITY CAPITAL|AEGON|TAX CREDIT|HOUSING EQUITY FUND|ENTERPRISE COMMUNITY INVESTMENT|ENTERPRISE HOUSING CREDIT|NATIONAL AFFORDABLE HOUSING TRUST|AFFORDABLE HSNG|AFFORDABLE HOUSING COMMUNITY DEV)\b/;
+var INVESTOR_DOM = /^(bankofamerica|bofa|wellsfargo|jpmorgan|chase|citi|pnc|capitalone|truist|usbank|mtb|raymondjames|rjfinancial|bostoncapital|nefinc|huntcompanies|r4cap|enterprisecommunity)\./;
+/* housing authorities sponsor through their own affiliates (HOC: RAD 6 Development Corp): they may
+   name their group even when affiliates hold most of it */
+var AUTHORITY_RE = /\b(HOUSING AUTHORITY|REDEVELOPMENT AND HOUSING|HOUSING OPPORTUNIT(Y|IES) COMMISSION|HOUSING COMMISSION)\b|^(PRHA|NRHA|NNRHA|HRHA|CRHA|DCHA|HOC|[A-Z]{1,2} R AND H A)$/;
+/* corporate families the data can't see (verified): first name names the group */
+var FAMILIES = [
+  /* Donohoe merged with Borger Management 2023-01-01; Borger Residential is Donohoe's apartment arm */
+  ["THE DONOHOE COMPANIES (BORGER RESIDENTIAL)", /^(DONOHOE|DONOHOE COMPANIES|BORGER RESIDENTIAL|BORGER MANAGEMENT|G THOMAS BORGER)$/],
+  /* AvalonBay + Equity Residential merged as Vivmark Residential, Aug 2026 */
+  ["VIVMARK RESIDENTIAL", /^(VIVMARK RESIDENTIAL|AVALONBAY COMMUNITIES|EQUITY RESIDENTIAL)$/]
+];
+/* co-op corporations, however spelled ("Coooperative", "Coopertive", "1705 Lanier Place NW Inc",
+   "Netherlands Owners Inc"): each building is its own owner, never a sponsor */
+var COOP_RE = /CO+P+E?R?A?T+I?VE|\bCO ?OPS?\b|\bOWNERS (INC|CORP|CORPORATION)$|INTENTIONAL COMMUNITY|\bTENANTS? (INC|CORP)$|\b(NW|NE|SW|SE) INC$|^\d.*\bINC$/;
 var PUBLIC_RE = /\b(HOUSING AUTHORITY|REDEVELOPMENT AND HOUSING|HOUSING OPPORTUNIT(Y|IES) COMMISSION|HOUSING COMMISSION|HOUSING FINANCE AGENCY|UNITED STATES|USA|COMMONWEALTH OF|STATE OF|CITY OF|COUNTY OF|COUNTY COUNCIL|COUNTY GOVERNMENT|BOARD OF EDUCATION|DEPARTMENT OF|SECRETARY OF HOUSING|FEDERAL NATIONAL|FANNIE MAE|FREDDIE MAC|WASHINGTON METROPOLITAN AREA TRANSI(T|TY)|WASH METRO AREA TRANSIT|M A T A|DEPUTY MAYOR|WMATA|REVENUE AUTHORITY|ECONOMIC DEVELOPMENT AUTHORITY)\b|^(DISTRICT OF COLUMBIA|MONTGOMERY COUNTY|PRINCE GEORGES COUNTY|PRHA|NRHA|HRHA|CRHA|DCHA|HOC|[A-Z]{1,2} R AND H A|CITY OF [A-Z ]+|(NORFOLK|PORTSMOUTH|CHESAPEAKE|HAMPTON|SUFFOLK|NEWPORT NEWS|VIRGINIA BEACH) CITY)$/;
-function ownerKind(names, hudTypes) {
+function ownerKind(al, npShare, nProps, display) {
+  var names = al.map(function (a) { return a.k; });
   var all = names.join(" | ");
-  if (names.some(function (n) { return PUBLIC_RE.test(n); })) return "Public";
-  if (/\bCOOPERATIVE|\bCO OP\b|\bCOOP\b/.test(all) && names.filter(function (n) { return /COOPERATIVE|COOP/.test(n); }).length * 2 >= names.length) return "Co-op";
-  if (hudTypes.indexOf("Non-Profit") >= 0 || /\b(FOUNDATION|CHURCH|MINISTR|COMMUNITY DEVELOPMENT CORP|CDC|HABITAT FOR HUMANITY|ARCHDIOCESE|DIOCESE|VOLUNTEERS OF AMERICA|SALVATION ARMY|NONPROFIT|NON PROFIT|SOME)\b/.test(all)) return "Non-profit";
-  if (names.length && names.every(function (n) { return isPerson(n); })) return "Individual";
+  var share = function (re, raw) { return al.filter(function (a) { return re.test(raw ? s(a.n).toUpperCase().replace(/[.,]/g, "") : a.k); }).reduce(function (t2, a) { return t2 + a.np; }, 0) / Math.max(1, nProps); };
+  /* a housing authority sponsors through its own affiliates (HOC, PRHA): its group is public */
+  if (share(PUBLIC_RE) >= 0.5 || share(AUTHORITY_RE) >= 0.15 || AUTHORITY_RE.test(nameKey(display))) return "Public";
+  if (share(COOP_RE, true) >= 0.5) return "Co-op";
+  if (npShare >= 0.2 || /\b(MHP|HOUSING PARTNERSHIP|COMMUNITY HOUSING|MISSION FIRST|MANNA|JUBILEE HOUSING|NATIONAL HOUSING TRUST|NHP FOUNDATION|ENTERPRISE COMMUNITY|SOME|FOUNDATION|MINISTR|COMMUNITY DEVELOPMENT CORP|CDC|HABITAT FOR HUMANITY|VOLUNTEERS OF AMERICA|SALVATION ARMY|NONPROFIT|NON PROFIT|COMMUNITY BUILDERS|MERCY HOUSING|VICTORY HOUSING|WESLEY HOUSING|AHC|HOUSING UP)\b/.test(s(display).toUpperCase().replace(/[^A-Z0-9 ]/g, " "))) return "Non-profit";
+  if (names.length && names.every(function (n) { return isPerson(n); }) && isPerson(display)) return "Individual";
   return "Private";
 }
 
@@ -1054,6 +1075,14 @@ function facIds(p) {
   var ids = {};
   (p.T || []).forEach(function (t) { (t.loans || []).forEach(function (l) { if (isFacility(l) && l.sec) ids[l.sec] = 1; }); });
   return Object.keys(ids);
+}
+
+function sameOrg(a, b) {
+  var ka = nameKey(a), kb = nameKey(b);
+  if (!ka || !kb) return false;
+  if (ka === kb) return true;
+  var w = function (k) { return k.split(" ").filter(function (x) { return x.length >= 4 && !/^(THE|REAL|ESTATE|PROPERTY|PROPERTIES|MANAGEMENT|RESIDENTIAL|COMMUNITY|HOUSING|GROUP|COMPANY|COMPANIES|PARTNERS|DEVELOPMENT|REALTY|CAPITAL|HOLDINGS|AMERICAN|NATIONAL|WASHINGTON)$/.test(x); })[0]; };
+  return !!w(ka) && w(ka) === w(kb);
 }
 
 /* ---------------------------------------------------------- union-find */
@@ -1171,13 +1200,13 @@ function build(input, log) {
       if (mgr && nameKey(r.manager) !== nameKey(r.owner)) contacts.push({n: title(mgr), t: "Property manager", co: title(r.manager), ph: phone(r.manager_contact_phone_number) ? [phone(r.manager_contact_phone_number)] : [], em: [], src: "Yardi"});
       addRec({src: "Y", reg: reg, line: s(r.address), city: s(r.city), zip: zip5(r.zip), lat: num(r.latitude), lng: num(r.longitude),
         units: int(r.units), yb: int(s(r.completion_date).slice(0, 4)), name: s(r.property_name),
-        owner: s(r.owner) ? {name: s(r.owner), parent: true, mail: {line1: s(r.owner_address), zip: zip5(r.owner_zip),
+        owner: s(r.owner) && !INVESTOR_RE.test(nameKey(r.owner)) ? {name: s(r.owner), parent: true, mail: {line1: s(r.owner_address), zip: zip5(r.owner_zip),
                full: [s(r.owner_address), s(r.owner_city), s(r.owner_state), s(r.owner_zip)].filter(Boolean).join(", ")},
                email: s(r.owner_contact_email).toLowerCase(), web: web, phone: phone(r.owner_contact_phone_number), start: "", src: "Yardi"} : null,
         contacts: contacts,
         d: {name: s(r.property_name), status: s(r.property_special_status), impr: s(r.impr_rating), loc: s(r.loc_rating), sub: s(r.submarket),
             owner: s(r.owner), web: web, mgr: s(r.manager), mgrWeb: s(r.manager_website), ss: s(r.special_servicer),
-            mgrBldg: (mailKey(s(r.manager_address), r.manager_zip) || {}).bldg || "", mgrSame: nameKey(r.owner) === nameKey(r.manager),
+            mgrBldg: (mailKey(s(r.manager_address), r.manager_zip) || {}).bldg || "", mgrSame: sameOrg(r.owner, r.manager),
             ssContact: [s(r.special_servicer_contact_first_name), s(r.special_servicer_contact_last_name)].join(" ").trim(),
             ssPhone: phone(r.special_servicer_contact_phone_number), sqft: num(r.sqft)}});
     });
@@ -1392,13 +1421,40 @@ function build(input, log) {
     pr.y.d.how = pr.score === 0.5 ? "name" : pr.score === 2 ? "pin" : "address";
     if (pr.score === 2) pr.y.d.pin = Math.round(pr.d);
     var g = G[pr.k];
-    if (!y_units_ok(pr.y, g)) absorbSiblings(pr.y, g, pr.k);
+    if (!y_units_ok(pr.y, g)) applyPlan(pr.k, siblingPlan(pr.y, g, pr.k));
+  });
+  /* A Yardi complex no record matched (Garden Village: Yardi's leasing pin, parcels owned by
+     "Parklands Manor Association") takes the nearest plain parcel within 60 m when that parcel
+     plus its same-owner neighbours add up to Yardi's unit count (+-25%). A lone small building
+     next door (Gelmarc Towers' 5-unit neighbour) never adds up, so it is never taken. */
+  recs.forEach(function (y) {
+    if (y.src !== "Y" || takenY[y.i] || !y.units || !y.lat || !inBox(y.reg, y.lat, y.lng)) return;
+    var best = null;
+    Object.keys(G).forEach(function (k) {
+      var g = G[k];
+      if (takenG[k] || g.onlyX || g.coop || g.recs[0].reg !== y.reg || !g.recs.every(function (r) { return r.src === "R" || r.src === "X"; })) return;
+      var d = gDist(y, g);
+      if (d === null || d > 60) return;
+      var yw2 = words([y.name, y.owner && y.owner.name, y.d.mgr].join(" "));
+      var pw2 = {}; g.recs.forEach(function (r) { if (r.owner && r.owner.name) words(r.owner.name).forEach(function (w) { pw2[w] = 1; }); });
+      var CORPW = /^(DEVELOPMENT|DEVELOPERS|ASSOCIATES|ASSOCIATION|PARTNERS|PARTNERSHIP|COMMUNITY|COMMUNITIES|HOUSING|REALTY|PROPERTIES|PROPERTY|MANAGEMENT|RESIDENTIAL|GROUP|COMPANY|COMPANIES|HOLDINGS|CAPITAL|INVESTMENTS?|LIMITED|WASHINGTON|NATIONAL|AMERICAN|CORPORATION|FOUNDATION|ENTERPRISES?|SERVICES|WOMENS?)$/;
+      if (!yw2.some(function (w) { return pw2[w] && !CORPW.test(w); })) return;      /* Tobias Henson is not SE Washington Development's */
+      var plan = siblingPlan(y, g, k);
+      var tot = g.units + plan.units;
+      if (Math.abs(tot - y.units) <= 0.25 * y.units && (!best || d < best.d)) best = {k: k, d: d, plan: plan};
+    });
+    if (!best) return;
+    takenY[y.i] = 1; takenG[best.k] = 1;
+    P.union(best.k, "r" + y.i);
+    y.d.how = "pin"; y.d.pin = Math.round(best.d);
+    applyPlan(best.k, best.plan);
   });
   function y_units_ok(y, g) { return !y.units || !g.units || g.units * 1.5 >= y.units; }
-  function absorbSiblings(y, g, root) {
-    var owners = {};
+  function applyPlan(root, plan) { plan.keys.forEach(function (k2) { if (!takenG[k2]) { P.union(root, k2); takenG[k2] = 1; } }); }
+  function siblingPlan(y, g, root) {
+    var owners = {}, plan = {keys: [], units: 0};
     g.recs.forEach(function (r) { if (r.src === "R" && r.owner && r.owner.name) owners[nameKey(r.owner.name)] = 1; });
-    if (!Object.keys(owners).length) return;
+    if (!Object.keys(owners).length) return plan;
     var have = g.units, cands = [];
     Object.keys(G).forEach(function (k2) {
       if (k2 === root || takenG[k2]) return;
@@ -1412,9 +1468,41 @@ function build(input, log) {
     cands.sort(function (a, b) { return a.d - b.d; });
     cands.forEach(function (c) {
       if (have >= y.units * 0.95 || have + c.h.units > y.units * 1.1) return;
-      P.union(root, c.k); takenG[c.k] = 1; have += c.h.units;
+      plan.keys.push(c.k); plan.units += c.h.units; have += c.h.units;
     });
+    return plan;
   }
+  var D = {};
+  recs.forEach(function (r) {
+    if (r.src === "X" || r.src === "C") return;
+    var k = P.find("r" + r.i), g = D[k] || (D[k] = {k: k, owners: {}, words: {}, src: {}, units: 0, streets: {}, recs: [], y: false});
+    g.recs.push(r);
+    g.src[r.src] = 1;
+    if (r.src === "Y") g.y = true;
+    if (r.owner && r.owner.name && !r.owner.parent) g.owners[nameKey(r.owner.name)] = 1;
+    var stw = {}; words(r.site ? r.site.street : "").forEach(function (w) { stw[w] = 1; });
+    words([r.name, r.owner && !r.owner.parent ? r.owner.name : ""].join(" ")).forEach(function (w) { if (!stw[w]) g.words[w] = 1; });
+    if (r.skey) g.streets[r.skey] = 1;
+    var pooled = r.src === "T" && (r.d.loans || []).some(function (l) { return (l.np || 0) > 1; });
+    if (!pooled && r.units > g.units) g.units = r.units;
+  });
+  var byStreet = {};
+  Object.keys(D).forEach(function (k) { Object.keys(D[k].streets).forEach(function (s2) { (byStreet[s2] = byStreet[s2] || []).push(D[k]); }); });
+  Object.keys(byStreet).forEach(function (s2) {
+    var list = byStreet[s2];
+    for (var i = 0; i < list.length; i++) for (var j = i + 1; j < list.length; j++) {
+      var a = list[i], b = list[j];
+      if (P.find(a.k) === P.find(b.k) || (a.y && b.y) || !a.units || !b.units) continue;
+      /* two halves of ONE record set: the same complex seen by different sources, never two of a kind */
+      if ((a.src.R && b.src.R) || (a.src.T && b.src.T) || (a.src.P && b.src.P)) continue;
+      if (Math.abs(a.units - b.units) > 0.1 * Math.max(a.units, b.units)) continue;
+      var sameOwner2 = Object.keys(a.owners).some(function (o) { return o && b.owners[o]; });
+      var sameWord = Object.keys(a.words).some(function (w) { return b.words[w]; });
+      if (!sameOwner2 && !sameWord) continue;
+      var near = a.recs.some(function (r) { return b.recs.some(function (q) { var dd = dist(r, q); return dd > 0 && dd <= 0.1; }); });
+      if (near) P.union(a.k, b.k);
+    }
+  });
   /* TOPA rows with no matched record and no units info are noise for an owner view: drop them later */
   var groups = {};
   recs.forEach(function (r) { var k = P.find("r" + r.i); (groups[k] = groups[k] || []).push(r); });
@@ -1463,6 +1551,20 @@ function build(input, log) {
     var y = p.claims.filter(function (c) { return c.parent && !c.stale; })[0];
     if (y && p.cur && p.cur !== y && p.cur.k) (yParents[p.cur.k] = yParents[p.cur.k] || {})[y.k] = 1;
   });
+  /* an entity whose mail Yardi shows going to its manager's office on one property is managed
+     there everywhere (Mar Cal LLC: Cafritz's Hill House and 10829 Georgia Ave, both mailed to Borger) */
+  var mgrOffice = {};
+  props.forEach(function (p) {
+    var y = p.claims.filter(function (c) { return c.parent; })[0];
+    if (!y || !y.mgrBldg) return;
+    p.claims.forEach(function (c) {
+      if (c.parent || !c.k) return;
+      var mk2 = mailKey(c.mail && c.mail.line1, c.mail && c.mail.zip);
+      if (mk2 && mk2.bldg === y.mgrBldg) (mgrOffice[c.k] = mgrOffice[c.k] || {})[mk2.bldg] = 1;
+    });
+  });
+  var coopKey = {};
+  props.forEach(function (p) { p.claims.forEach(function (c) { if (c.k && COOP_RE.test(s(c.name).toUpperCase().replace(/[.,]/g, "").replace(/\s+/g, " ").trim())) coopKey[c.k] = 1; }); });
   var trueCoTarget = {};
   props.forEach(function (p) {
     p.claims.forEach(function (c) {
@@ -1475,19 +1577,22 @@ function build(input, log) {
       /* CoStar's true buyer is the parent - except a public body, which is a
          JV partner on half the affordable deals in town, not the parent */
       if (tk && tk !== nk && (!PUBLIC_RE.test(tk) || PUBLIC_RE.test(nk))) { link("n:" + nk, "n:" + tk, "costar", c.trueCo); trueCoTarget[tk] = 1; trueCoTarget[nk] = 1; }
-      var isPub = PUBLIC_RE.test(nk), noHub = isPub || GROUND_RE.test(nk);
+      var isPub = PUBLIC_RE.test(nk), noHub = isPub || GROUND_RE.test(nk) || INVESTOR_RE.test(nk) || COOP_RE.test(nk) || coopKey[nk];
       if (!detach[nk] && !detach[ownerKey(nk)]) {
         if (c.co && !noHub) keyAdd("co:" + c.co, nk);
         /* Yardi owner addresses are a parent's HQ, often a multi-tenant tower: not an office hub.
            A tax bill sent to the Yardi-listed manager's office says who manages, not who owns. */
         var ycl = p.claims.filter(function (x) { return x.parent; })[0];
         var mk = c.parent ? null : mailKey(c.mail && c.mail.line1, c.mail && c.mail.zip);
-        if (mk && c === p.cur && ycl && ycl.mgrBldg && ycl.mgrBldg === mk.bldg) mk = null;
-        if (mk && (isPub ? ownOffice(nk, mk.bldg) : !noHub)) { keyAdd("mb:" + mk.bldg, nk); if (mk.suite) keyAdd("ms:" + mk.bldg + "#" + mk.suite, nk); }
+        /* (d) a tax bill or borrower address at the Yardi-listed manager's office says who manages */
+        if (mk && ((ycl && ycl.mgrBldg && ycl.mgrBldg === mk.bldg) || (mgrOffice[nk] && mgrOffice[nk][mk.bldg]))) mk = null;
+        if (mk && ycl && !ycl.stale && ycl.mgrOther && !c.parent) mk = null;
+        var mr = mk && mk.bldg + "@" + (p.r === "hampton" ? "hr" : "dmv");   /* one metro: DC + Montgomery + Prince George's */
+        if (mk && (isPub ? ownOffice(nk, mk.bldg) : !noHub)) { keyAdd("mb:" + mr, nk); if (mk.suite) keyAdd("ms:" + mr + "#" + mk.suite, nk); }
         var dom = emailDomain(c.email);
-        if (dom && !noHub) keyAdd("dom:" + dom, nk);
+        if (dom && !noHub && !INVESTOR_DOM.test(dom)) keyAdd("dom:" + dom, nk);
         if (c === p.cur && !noHub) facIds(p).forEach(function (id) { keyAdd("fac:" + id, nk); });
-        if (c.web && !noHub && !FREE_MAIL.test(c.web)) keyAdd("dom:" + c.web, nk);
+        if (c.web && !noHub && !FREE_MAIL.test(c.web) && !INVESTOR_DOM.test(c.web)) keyAdd("dom:" + c.web, nk);
         /* Yardi names the parent: the parent itself, and the property's owner of record unless
            Yardi's owner looks stale or the owner of record is claimed by two parents */
         if (!noHub && ycl && ycl.k && !ycl.stale) {
@@ -1516,6 +1621,7 @@ function build(input, log) {
     if (names.length < 2) return;
     var kind = key.slice(0, key.indexOf(":")), val = key.slice(key.indexOf(":") + 1);
     if (names.some(function (n) { return AGENT.test(n); })) return;
+    if ((kind === "mb" || kind === "ms") && names.filter(function (n) { return COOP_RE.test(n) || coopKey[n]; }).length * 2 >= names.length) return;
     if (kind === "mb") {
       if (names.length > 60) { sharedOffices[val] = names.length; return; }
       var nSuite = 0;                          /* suites here that hold 2+ names (a lone co-op in Ste 106 doesn't count) */
@@ -1579,7 +1685,11 @@ function build(input, log) {
           var own = members(g.r).some(function (n) { return !inHub[n] && (trueCoTarget[n] || (companyLike(n) && !propertyLike(n) && !isPerson(n))); });
           var share = g.names.length / g.size;
           var single = g.size === 1 && !trueCoTarget[g.names[0]] && !(companyLike(g.names[0]) && !propertyLike(g.names[0]));
-          if (single || (!own && share >= 0.5) || (g.names.length >= 2 && g.names.length >= 0.25 * g.size)) { join(anchor, "n:" + g.names[0], k, anchor, "n:" + g.names[0]); aSize += g.size; }
+          var votes = {};
+          members(g.r).forEach(function (n) { Object.keys(yParents[n] || {}).forEach(function (yp) { votes[yp] = (votes[yp] || 0) + 1; }); });
+          var mine = votes[k.val] || 0, rival = Object.keys(votes).filter(function (yp) { return yp !== k.val; }).reduce(function (m, yp) { return Math.max(m, votes[yp]); }, 0);
+          var claimed = mine >= 3 && mine > rival;
+          if (single || claimed || (!own && share >= 0.5) || (g.names.length >= 2 && g.names.length >= 0.25 * g.size)) { join(anchor, "n:" + g.names[0], k, anchor, "n:" + g.names[0]); aSize += g.size; }
         });
         return;
       }
@@ -1602,7 +1712,7 @@ function build(input, log) {
      shares a name word with that group, is that group's parent (Fort Lincoln Realty at
      3298 Fort Lincoln Dr NE). */
   var mbNames = {};
-  Object.keys(keyNames).forEach(function (key) { if (key.indexOf("mb:") === 0) mbNames[key.slice(3)] = Object.keys(keyNames[key]); });
+  Object.keys(keyNames).forEach(function (key) { if (key.indexOf("mb:") === 0) { var b2 = key.slice(3).replace(/@[a-z]+$/, ""); mbNames[b2] = (mbNames[b2] || []).concat(Object.keys(keyNames[key])); } });
   var YW = function (n) { return s(n).toUpperCase().split(/[^A-Z0-9]+/).filter(function (w) { return w.length >= 4 && !/^(REALTY|PROPERTIES|PROPERTY|GROUP|COMPANY|COMPANIES|MANAGEMENT|PARTNERS|HOLDINGS|RESIDENTIAL|DEVELOPMENT|APARTMENTS|ASSOCIATES|CAPITAL|INVESTMENTS|LIMITED|PARTNERSHIP|WASHINGTON|SENIOR|VILLAGE|HOUSE|PLACE|TOWERS|COURT|GARDENS|STREET|AVENUE)$/.test(w); }); };
   var yOffices = {};
   props.forEach(function (p) { p.claims.forEach(function (c) { if (c.parent && c.k && !c.stale && !PUBLIC_RE.test(c.k) && !GROUND_RE.test(c.k)) { var mk = mailKey(c.mail && c.mail.line1, c.mail && c.mail.zip); if (mk) (yOffices[mk.bldg] = yOffices[mk.bldg] || {})[c.k] = 1; } }); });
@@ -1612,13 +1722,20 @@ function build(input, log) {
     var roots = {}; names.forEach(function (n) { roots[O.find("n:" + n)] = 1; });
     if (Object.keys(roots).length !== 1) return;
     var pw = YW(parents[0]);
-    var hit = members(Object.keys(roots)[0]).some(function (n) { var w = YW(n); return w.some(function (x) { return pw.indexOf(x) >= 0; }); });
+    var hit = names.some(function (n) { var w = YW(n); return w.some(function (x) { return pw.indexOf(x) >= 0; }); });
     if (hit) link("n:" + parents[0], "n:" + names[0], "mb", "Yardi's owner " + title(parents[0]) + " is at the group's mailing office " + prettyMail(b));
   });
 
+  FAMILIES.forEach(function (f) {
+    var hits = Object.keys(O.p).filter(function (x) { return f[1].test(x.slice(2)); });
+    for (var i = 1; i < hits.length; i++) link(hits[0], hits[i], "family", "Same company: " + title(f[0]));
+  });
+
   /* ---- owner records ---- */
+  function makeOwners() {
   var ownerOf = {};                          /* root -> owner */
   var owners = [];
+  props.forEach(function (p) { p._o = null; p.viaFac = false; });
   function ownerFor(nk) {
     var root = O.find("n:" + nk);
     var o = ownerOf[root];
@@ -1660,8 +1777,7 @@ function build(input, log) {
       var st = nameStats[c.k] || (nameStats[c.k] = {n: c.name, k: c.k, src: {}, props: {}});
       st.src[c.src] = 1; st.props[c.pi] = 1;
       if (c.name.length > st.n.length && c.name.toUpperCase() !== c.name) st.n = c.name;
-      if (c.trueCo) trueCos[c.trueCo] = (trueCos[c.trueCo] || 0) + 1;
-      if (c.parent && !c.stale) yardiCos[c.name] = (yardiCos[c.name] || 0) + (c.weak ? 0.33 : 1);
+
       if (c.mail && c.mail.full) { var mk = c.mail.full.toUpperCase().replace(/\s+/g, " "); (mails[mk] = mails[mk] || {v: c.mail.full, n: 0, src: {}}).n++; mails[mk].src[c.src] = 1; }
       if (c.email) { (emails[c.email] = emails[c.email] || {v: c.email, src: {}, n: 0}).n++; emails[c.email].src[c.src] = 1; }
       if (c.phone) { (phones[c.phone] = phones[c.phone] || {v: c.phone, src: {}, n: 0}).n++; phones[c.phone].src[c.src] = 1; }
@@ -1672,6 +1788,12 @@ function build(input, log) {
     });
     o.props.forEach(function (pi) {
       var p = props[pi];
+      p.claims.forEach(function (c) {
+        /* CoStar: only a sale whose buyer is in this group (an older sale names a past owner) */
+        if (c.trueCo && c.k && O.find("n:" + c.k) === o.root) trueCos[c.trueCo] = (trueCos[c.trueCo] || 0) + 1;
+        /* Yardi: what it says owns each property in the group, wherever its own name sits */
+        if (c.parent && !c.stale) yardiCos[c.name] = (yardiCos[c.name] || 0) + (c.weak ? 0.33 : 1);
+      });
       (p._contacts || []).forEach(function (ct) { addContact(contacts, ct, 1); });
       (p._contactCos || []).forEach(function (cc) { contactCos[cc] = (contactCos[cc] || 0) + 1; });
     });
@@ -1693,25 +1815,46 @@ function build(input, log) {
       if (w > c.bw) { c.bw = w; c.basis = basis; }
       if (/[a-z]/.test(n) && !/[a-z]/.test(c.n)) c.n = title(n);
     }
+    var pubShare0 = aliasList.filter(function (b) { return PUBLIC_RE.test(b.k) || GROUND_RE.test(b.k); }).reduce(function (t2, b) { return t2 + b.np; }, 0) / Math.max(1, o.props.length);
     Object.keys(trueCos).forEach(function (n) {
       var parts = n.split(/\s*\|\s*/).filter(Boolean);
-      parts.forEach(function (x, i) { if (!propertyLike(x) || companyLike(x)) credit(x, trueCos[n] * (i === 0 ? 6 : 2) / Math.max(1, parts.length - 0.5), "CoStar true buyer"); });
+      parts.forEach(function (x, i) {
+        if (propertyLike(x) && !companyLike(x)) return;
+        var pb = (PUBLIC_RE.test(nameKey(x)) || GROUND_RE.test(nameKey(x)) || INVESTOR_RE.test(nameKey(x))) && !AUTHORITY_RE.test(nameKey(x));
+        credit(x, trueCos[n] * (i === 0 ? 6 : 2 / Math.max(1, parts.length - 1)) * (pb && pubShare0 < 0.9 ? 0.02 : 1), "CoStar true buyer");
+      });
     });
     Object.keys(yardiCos).forEach(function (n) { credit(n, yardiCos[n] * 6, "Yardi Matrix owner"); });
     aliasList.forEach(function (a) {
-      if (companyLike(a.n) && !propertyLike(a.n)) credit(a.n, (PUBLIC_RE.test(a.k) ? 8 : 2) + Math.min(a.np, 6), "company name on record");
+      var pubShare = aliasList.filter(function (b) { return PUBLIC_RE.test(b.k) || GROUND_RE.test(b.k); }).reduce(function (t2, b) { return t2 + b.np; }, 0) / Math.max(1, o.props.length);
+      if ((PUBLIC_RE.test(a.k) || GROUND_RE.test(a.k)) && !AUTHORITY_RE.test(a.k) && pubShare < 0.9) credit(a.n, 0.05, "owner of record");
+      else if (companyLike(a.n) && !propertyLike(a.n)) credit(a.n, (PUBLIC_RE.test(a.k) ? 8 : 2) + Math.min(a.np, 6), "company name on record");
       else if (!isSpe(a.n) && !propertyLike(a.n)) credit(a.n, 0.6 * a.np, "most-used owner name");
       else credit(a.n, 0.15 * a.np, "owner of record");
     });
-    Object.keys(contactCos).forEach(function (n) { if (contactCos[n] >= 2 || o.props.length <= 2) credit(n, 1.2 * contactCos[n], "Reonomy contact company"); });
+    Object.keys(contactCos).forEach(function (n) {
+      var pb = (PUBLIC_RE.test(nameKey(n)) || GROUND_RE.test(nameKey(n)) || INVESTOR_RE.test(nameKey(n))) && !AUTHORITY_RE.test(nameKey(n));
+      if (contactCos[n] >= 2 || o.props.length <= 2) credit(n, 1.2 * contactCos[n] * (pb && pubShare0 < 0.9 ? 0.02 : 1), "Reonomy contact company");
+    });
     var bestC = Object.keys(cand).map(function (k) { return cand[k]; }).sort(function (a, b) { return b.w - a.w || a.n.length - b.n.length; })[0];
     var nm = bestC ? bestC.n : "", basis = bestC ? bestC.basis : "";
     if (o.props.length >= 3 && (isSpe(nm) || (propertyLike(nm) && bestC.w < 3))) {
       var topMail = Object.keys(mails).sort(function (a, b) { return mails[b].n - mails[a].n; })[0];
       var topDom = Object.keys(emails).map(emailDomain).filter(Boolean)[0];
-      if (topDom) { nm = "Owner group · " + topDom; basis = "shared email domain"; }
-      else if (topMail && mails[topMail].n >= 3) { nm = "Owner group at " + title(mails[topMail].v.split(",")[0]); basis = "shared mailing office"; }
+      if (topDom) {
+        var lab = topDom.split(".")[0].replace(/[^a-z0-9]/g, "").toUpperCase().replace(/^THE/, "").replace(/(LLC|INC|CORP)$/, "");
+        var pool = Object.keys(cand).map(function (k2) { return cand[k2].n; }).concat(aliasList.map(function (a) { return a.n; }));
+        o.props.forEach(function (pi) { (props[pi].C || []).forEach(function (c3) { if (c3.buyer) pool.push(c3.buyer); }); });
+        var hitN = pool.filter(function (n2) { var c2 = s(n2).split("|")[0].toUpperCase().replace(/^THE\s+/, "").replace(/[^A-Z0-9]/g, ""); return c2.length >= 3 && (c2.indexOf(lab) === 0 || lab.indexOf(c2) === 0); })[0];
+        if (hitN) nm = s(hitN).split("|")[0].trim();
+        else nm = lab.length <= 8 ? (lab.length <= 5 ? lab : title(lab)) : "Owner group · " + topDom;
+        basis = "email domain " + topDom;
+      }
+      else if (topMail && mails[topMail].n >= 3) { var off = s(mails[topMail].v.split(",")[0]).replace(UNIT_RE, "").replace(/\s+[A-Z]?\d+[A-Z]?$/i, "").replace(/^(\d+)\s+P\.?\s?O\.?\s+BOX$/i, "PO Box $1").replace(/^P\.?\s?O\.?\s+BOX\s+(\d+)$/i, "PO Box $1");
+        nm = "Owner group at " + (/^PO Box/.test(off) ? off : title(off)); basis = "shared mailing office"; }
     }
+    var fam = FAMILIES.filter(function (f) { return aliasList.some(function (a) { return f[1].test(a.k); }); })[0];
+    if (fam) { nm = fam[0]; basis = "known corporate family"; }
     o.name = title(nm);
     o.basis = basis;
     o.aliases = aliasList;
@@ -1722,7 +1865,9 @@ function build(input, log) {
       .sort(function (a, b) { return b.w - a.w || a.n.localeCompare(b.n); }).slice(0, 14)
       .map(function (c) { return {n: c.n, t: c.t, co: c.co, ph: c.ph.slice(0, 3), em: c.em.slice(0, 3), src: Object.keys(c.src), np: c.np}; });
     o.types = Object.keys(types);
-    o.kind = ownerKind(aliasList.map(function (a) { return a.k; }), o.types);
+    var npProps = {};
+    o.claims.forEach(function (c) { if (c.type === "Non-Profit") npProps[c.pi] = 1; });
+    o.kind = ownerKind(aliasList, Object.keys(npProps).length / Math.max(1, o.props.length), o.props.length, o.name);
     o.hud = Object.keys(hud);
     /* the evidence for the grouping, de-duplicated by reason */
     var ev = {}, keys = aliasList.map(function (a) { return "n:" + a.k; });
@@ -1738,6 +1883,28 @@ function build(input, log) {
     if (o.facProps) o.why.unshift({t: "fac", v: o.facProps + " propert" + (o.facProps > 1 ? "ies" : "y") + " with no owner name joined through a shared credit facility", names: 0});
     o.id = hash(aliasList.map(function (a) { return a.k; }).sort()[0] || o.name);
   });
+  return owners;
+  }
+  var owners = makeOwners();
+  /* Groups the anti-chaining rules kept apart whose OWN strongest evidence names the same company
+     (Yardi parent, CoStar true buyer, a verified family, a company-style name) are one owner:
+     Jair Lynch 11 + 5 + 1, MidCity 19 + 3, Vesta 2 + 2. Not for "Owner group at ..." fallbacks,
+     individuals or co-ops, whose names say nothing about common control. */
+  var STRONG = /^(Yardi Matrix owner|CoStar true buyer|known corporate family|company name on record|Reonomy contact company|most-used owner name)$/;
+  var byName = {}, merged = 0;
+  owners.forEach(function (o) {
+    if (/^Owner group/.test(o.name) || isSpe(o.name) || (isPerson(o.name) && !STRONG.test(o.basis))) return;
+    var k = nameKey(o.name);
+    if (!k) return;
+    (byName[k] = byName[k] || []).push(o);
+  });
+  Object.keys(byName).forEach(function (k) {
+    var list = byName[k];
+    if (list.length < 2 || !list.some(function (o) { return STRONG.test(o.basis) || /^email domain/.test(o.basis); })) return;
+    for (var i = 1; i < list.length; i++) if (O.find(list[0].root) !== O.find(list[i].root)) { link(list[0].root, list[i].root, "same", "Each part names " + list[0].name + " as its owner"); merged++; }
+  });
+  if (merged) owners = makeOwners();
+  log("same-parent groups merged: " + merged);
   /* shared mail drops are listed for the page, not used */
   log("owner groups: " + owners.length);
 
@@ -1759,7 +1926,7 @@ function build(input, log) {
 }
 
 function prettyMail(key) {
-  var parts = String(key).split("|");
+  var parts = String(key).replace(/@[a-z]+(?=#|$)/, "").split("|");
   return title(parts[0].replace(/^POBOX /, "PO Box ")) + (parts[1] ? " " + parts[1] : "");
 }
 function addContact(map, c, w) {
@@ -1850,12 +2017,13 @@ function mergeProp(rs, today) {
   if (ycl) {
     var tb = p.C[0] && nameKey(p.C[0].buyer);
     var tbParts = p.C[0] ? s(p.C[0].buyer).split(/\s*\|\s*/).map(nameKey) : [];
-    if (tb && tbParts.indexOf(ycl.k) < 0) ycl.stale = true;
+    if (tb && tbParts.indexOf(ycl.k) < 0 && p.C[0].date && p.C[0].date >= addDays(today, -1095) && !propertyLike(p.C[0].buyer)) ycl.stale = true;
     var cut = addDays(today, -730);
     if (p.X.some(function (x) { return /^(ofs5|not|dopa|rofr)$/.test(x.slug) && x.date >= cut; })) ycl.stale = true;
     var yd = p.Y[0] || {};
     ycl.weak = !!(yd.mgrSame && tb && tbParts.indexOf(ycl.k) < 0);
     ycl.mgrBldg = yd.mgrSame ? "" : yd.mgrBldg;
+    ycl.mgrOther = !!(yd.mgr && !yd.mgrSame);
     /* a ground lessor or placeholder of record (university, church, "Land Only") is not the sponsor */
     /* a TOPA sale filing in the last two years whose buyer is Yardi's owner means the county
        record is the stale one (FPA bought 3801 Connecticut from Elme in 2026): Yardi owns it */
@@ -1864,7 +2032,7 @@ function mergeProp(rs, today) {
       ywords.some(function (w) { return new RegExp("\\b" + w + "\\b").test(s(x.buyer).toUpperCase()); }); });
     if (bought) { ycl.stale = false; ycl.fresh = true; pick = ycl; }
     /* ... nor is a public body that owns the land under a private building (Claridge Towers) */
-    if (pick && !ycl.stale && (GROUND_RE.test(pick.k) || (PUBLIC_RE.test(pick.k) && !PUBLIC_RE.test(ycl.k)))) pick = ycl;
+    if (pick && !ycl.stale && (GROUND_RE.test(pick.k) || INVESTOR_RE.test(pick.k) || (PUBLIC_RE.test(pick.k) && ycl.k !== pick.k))) pick = ycl;
   }
   p.cur = pick;
   p.other = [];
