@@ -570,6 +570,8 @@ tr.hidden-row td{opacity:.45}
 .chip .c{font-size:11px;color:var(--text3);font-weight:400}
 .chip.on .c{color:var(--blue)}
 .mc .sc{margin-left:auto}
+.hqh{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:8px;padding:7px 14px;background:var(--bg);border-bottom:1px solid var(--border2);font-family:'Google Sans',sans-serif;font-size:13px;font-weight:500;color:var(--text)}
+.hqh span{margin-left:auto;font-family:'Roboto',sans-serif;font-size:11.5px;font-weight:400;color:var(--text3)}
 .score{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:24px;padding:0 7px;border-radius:12px;font-family:'Google Sans',sans-serif;font-size:13px;font-weight:500;background:#f1f3f4;color:var(--text2);flex-shrink:0;font-variant-numeric:tabular-nums}
 .score.s1{background:var(--yellow-light);color:#b06000}
 .score.s2{background:var(--orange-light);color:#b5520c}
@@ -707,7 +709,7 @@ tr.hidden-row td{opacity:.45}
     <div class="mark">O</div>
     <span class="brand-name">Greysteel</span><span class="brand-sep">|</span>
     <span class="brand-page">Owner 360</span>
-    <span id="verBadge" title="Page version">v5</span>
+    <span id="verBadge" title="Page version">v6</span>
   </div>
   <nav class="tabs">
     <button class="tab active" data-view="owners"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span class="tl">Owners</span></button>
@@ -742,7 +744,7 @@ tr.hidden-row td{opacity:.45}
           <span class="fld search" style="flex:1"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input id="oq" type="search" placeholder="Owner, LLC, person, address"></span>
           <select id="oSort" class="fld" style="flex:0 0 auto;padding:0 8px">
             <option value="score">Why-call-now score</option><option value="units">Units</option><option value="props">Properties</option>
-            <option value="next">Next event</option><option value="debt">Debt on record</option><option value="name">Name</option>
+            <option value="next">Next event</option><option value="debt">Debt on record</option><option value="hq">HQ location</option><option value="name">Name</option>
           </select>
         </div>
         <div class="chips" id="oSig"></div>
@@ -754,6 +756,7 @@ tr.hidden-row td{opacity:.45}
           <div class="ms-f"><label>Status</label><select id="oStatus"><option value="">Any</option><option value="-">No status yet</option></select></div>
           <div class="ms-f"><label>Assigned</label><select id="oAssn"><option value="">Anyone</option><option value="me">Me</option><option value="-">Unassigned</option></select></div>
           <div class="ms-f"><label>Signals within</label><select id="oHorizon"><option value="12">12 months</option><option value="24" selected>24 months</option><option value="36">36 months</option></select></div>
+          <div class="ms-f"><label>Headquarters</label><select id="oHq"><option value="">Anywhere</option></select></div>
           <div class="ms-f"><label>Other</label><select id="oOther"><option value="">-</option><option value="star">Starred by me</option><option value="contact">Has phone or email</option><option value="gs">Greysteel history</option><option value="notes">Has notes</option></select></div>
         </div>
       </div>
@@ -1083,6 +1086,22 @@ function sameOrg(a, b) {
   if (ka === kb) return true;
   var w = function (k) { return k.split(" ").filter(function (x) { return x.length >= 4 && !/^(THE|REAL|ESTATE|PROPERTY|PROPERTIES|MANAGEMENT|RESIDENTIAL|COMMUNITY|HOUSING|GROUP|COMPANY|COMPANIES|PARTNERS|DEVELOPMENT|REALTY|CAPITAL|HOLDINGS|AMERICAN|NATIONAL|WASHINGTON)$/.test(x); })[0]; };
   return !!w(ka) && w(ka) === w(kb);
+}
+
+/* "1111 14th St NW 200, Washington, Dc 20005" / "300 W FREEMASON ST, NORFOLK, VA, 23510" /
+   "10349 Warwick Blvd, _x0000_ _x0000_, Newport News, VA, 23601" -> {c: "Norfolk", s: "VA", z} */
+var US = /^(AL|AK|AZ|AR|CA|CO|CT|DE|DC|FL|GA|HI|ID|IL|IN|IA|KS|KY|LA|ME|MD|MA|MI|MN|MS|MO|MT|NE|NV|NH|NJ|NM|NY|NC|ND|OH|OK|OR|PA|RI|SC|SD|TN|TX|UT|VT|VA|WA|WV|WI|WY|PR)$/;
+function cityState(full) {
+  var parts = s(full).toUpperCase().replace(/_X0000_/g, "").split(/\s*,\s*/).map(function (x) { return x.trim(); }).filter(Boolean);
+  if (parts.length < 2) return null;
+  var last = parts[parts.length - 1], st = "", z = "", ci = -1, m;
+  if ((m = /^([A-Z]{2})\s+(\d{5})/.exec(last))) { st = m[1]; z = m[2]; ci = parts.length - 2; }
+  else if ((m = /^(\d{5})/.exec(last)) && /^[A-Z]{2}$/.test(parts[parts.length - 2] || "")) { z = m[1]; st = parts[parts.length - 2]; ci = parts.length - 3; }
+  else if (/^[A-Z]{2}$/.test(last)) { st = last; ci = parts.length - 2; }
+  if (!US.test(st) || ci < 0) return null;
+  var c = parts[ci] || "";
+  if (/^\d/.test(c) || /\b(STE|SUITE|BOX|FLOOR|FL|UNIT)\b/.test(c) || c.length < 3) c = "";
+  return {c: c ? title(c).replace(/\bMc([a-z])/g, function (a, x) { return "Mc" + x.toUpperCase(); }) : "", s: st, z: z};
 }
 
 /* ---------------------------------------------------------- union-find */
@@ -1858,6 +1877,28 @@ function build(input, log) {
     o.name = title(nm);
     o.basis = basis;
     o.aliases = aliasList;
+    /* headquarters: Yardi's parent address 3x, CoStar's true-buyer address 2x, HUD 1.5x, county / loan
+       mailing 1x, TOPA 0.5x; a manager's office (Yardi owner != manager) is not the owner's HQ */
+    var hqv = {};
+    function hqVote(c, w) {
+      if (!c || !c.mail || !c.mail.full) return;
+      var cs = cityState(c.mail.full);
+      if (!cs || !cs.c) return;
+      if (/\b(P ?O BOX|BOX|LOCKBOX|PMB)\b/i.test(c.mail.full)) w *= 0.25;     /* a tax lockbox (Chicago PO Box 87407) is not an HQ */
+      var k = cs.c + "|" + cs.s, h = hqv[k] || (hqv[k] = {c: cs.c, s: cs.s, w: 0, y: 0, src: {}});
+      h.w += w; h.src[c.src] = 1; if (c.parent) h.y += w;
+    }
+    o.claims.forEach(function (c) {
+      if (c.parent) return;
+      var y = props[c.pi] && props[c.pi].claims.filter(function (x) { return x.parent; })[0];
+      var mk3 = mailKey(c.mail && c.mail.line1, c.mail && c.mail.zip);
+      if (y && y.mgrBldg && mk3 && mk3.bldg === y.mgrBldg) return;
+      hqVote(c, c.src === "CoStar" ? 2 : c.src === "HUD" ? 1.5 : c.src === "TOPA" ? 0.5 : 1);
+    });
+    o.props.forEach(function (pi) { props[pi].claims.forEach(function (c) { if (c.parent && !c.stale) hqVote(c, 3); }); });
+    /* Yardi gives the parent's own address: when it does, it decides */
+    var hqBest = Object.keys(hqv).map(function (k) { return hqv[k]; }).sort(function (a, b) { return b.y - a.y || b.w - a.w; })[0];
+    o.hq = hqBest ? {c: hqBest.c, s: hqBest.s, src: Object.keys(hqBest.src)} : null;
     o.mail = Object.keys(mails).map(function (k) { return {v: mails[k].v, n: mails[k].n, src: Object.keys(mails[k].src)}; }).sort(function (a, b) { return b.n - a.n; }).slice(0, 6);
     o.emails = Object.keys(emails).map(function (k) { return {v: k, n: emails[k].n, src: Object.keys(emails[k].src)}; }).sort(function (a, b) { return b.n - a.n; }).slice(0, 8);
     o.phones = Object.keys(phones).map(function (k) { return {v: k, n: phones[k].n, src: Object.keys(phones[k].src)}; }).sort(function (a, b) { return b.n - a.n; }).slice(0, 8);
@@ -1917,7 +1958,7 @@ function build(input, log) {
   });
   var outOwners = owners.map(function (o) {
     return {id: o.id, n: o.name, nb: o.basis, al: o.aliases, why: o.why, mail: o.mail, em: o.emails, ph: o.phones, ct: o.contacts,
-      ty: o.types, kd: o.kind, hud: o.hud, p: o.props};
+      ty: o.types, kd: o.kind, hud: o.hud, hq: o.hq || undefined, p: o.props};
   });
   var srcInfo = {pbs8: pbsAsof, topa: topa.index && topa.index.updated || "", loanid: input.loanidSources || {}};
   return {v: BUILD_VERSION, built: {at: new Date().toISOString(), by: input.by || "", today: today}, regions: REGIONS, sources: srcInfo,
@@ -2324,6 +2365,7 @@ function buildSearch() {
     (o.em || []).forEach(function (e) { parts.push(e.v); });
     (o.mail || []).forEach(function (m) { parts.push(m.v); });
     o.p.forEach(function (i) { var p = D.props[i]; parts.push(p.n, p.a); });
+    if (o.hq) parts.push(hqText(o.hq));
     return parts.join(" | ").toLowerCase();
   });
 }
@@ -2351,6 +2393,7 @@ function filteredOwners() {
       if (S.other === "notes" && !ov.notes.length) return;
     }
     if (S.other === "contact" && !st.contact) return;
+    if (S.hq && !hqMatch(o.hq, S.hq)) return;
     if (S.other === "gs" && !st.gs) return;
     out.push(i);
   });
@@ -2360,9 +2403,15 @@ function filteredOwners() {
     props: function (i) { var st = ownerStats(D.owners[i]); return -(st.props * 1e6 + st.units); },
     debt: function (i) { return -ownerStats(D.owners[i]).debt; },
     next: function (i) { var n = ownerStats(D.owners[i]).next; return n ? +n.d.replace(/-/g, "") : 99999999; },
+    hq: null,
     name: null
   }[S.sort];
-  if (key) out.sort(function (a, b) { return key(a) - key(b); });
+  if (S.sort === "hq") out.sort(function (a, b) {
+    var ha = D.owners[a].hq, hb = D.owners[b].hq;
+    var ka = hqSortKey(ha), kb = hqSortKey(hb);
+    return ka < kb ? -1 : ka > kb ? 1 : ownerStats(D.owners[b]).score - ownerStats(D.owners[a]).score;
+  });
+  else if (key) out.sort(function (a, b) { return key(a) - key(b); });
   else out.sort(function (a, b) { return D.owners[a].n.localeCompare(D.owners[b].n); });
   return out;
 }
@@ -2385,28 +2434,57 @@ function renderOwnerList() {
   $("oStats").innerHTML = [["Owners", fmtN(ids.length)], ["Properties", fmtN(props)], ["Units", fmtN(units)], ["Score 45+", fmtN(hot)]]
     .map(function (x) { return '<div class="ms-stat"><div class="v">' + x[1] + '</div><div class="l">' + x[0] + "</div></div>"; }).join("");
   $("oCount").innerHTML = fmtN(ids.length) + " owner" + (ids.length === 1 ? "" : "s") + (S.sort === "score" ? " · ranked by why-call-now" : "");
+  var hqCount = {};
+  if (S.sort === "hq") ids.forEach(function (i) { var k = hqText(D.owners[i].hq) || "Unknown"; hqCount[k] = (hqCount[k] || 0) + 1; });
+  var lastHq = null;
   var html = ids.slice(0, S.shown).map(function (i) {
+    var hdr = "";
+    if (S.sort === "hq") { var hk = hqText(D.owners[i].hq) || "Unknown"; if (hk !== lastHq) { lastHq = hk; hdr = '<div class="hqh">' + esc(hk) + '<span>' + fmtN(hqCount[hk]) + " owner" + (hqCount[hk] === 1 ? "" : "s") + "</span></div>"; } }
+    return hdr + ownerCard(i);
+  }).join("");
+  function ownerCard(i) {
     var o = D.owners[i], st = ownerStats(o), ov = ovRec(i);
     var regs = Object.keys(st.regions).map(function (r) { return REG_NAMES[r]; }).join(", ");
     var seen = {}, pills = st.sig.filter(function (s) { var lb = shortLabel(s); if (s.pts <= 0 || seen[lb]) return false; seen[lb] = 1; return true; }).slice(0, 3).map(function (s) { return sigPill(s, true); }).join("");
     if (st.gs) pills += '<span class="sp gs" title="' + esc(st.gs) + '">G</span>';
     var stat = ov.status && STATUS_BY[ov.status.v];
     return '<div class="mc' + (i === S.sel ? " sel" : "") + '" data-i="' + i + '"><div class="r1"><div class="ad">' + esc(o.n) + '</div><span class="score ' + scoreCls(st.score) + '" title="Why-call-now score">' + st.score + "</span></div>" +
-      '<div class="nm">' + esc(o.kd) + " · " + esc(regs) + (ov.stars[S.me && S.me.email] ? ' · <span style="color:var(--yellow)">&#9733;</span>' : "") + "</div>" +
+      '<div class="nm">' + esc(o.kd) + " · " + esc(regs) + (o.hq ? " · HQ " + esc(hqText(o.hq)) : "") + (ov.stars[S.me && S.me.email] ? ' · <span style="color:var(--yellow)">&#9733;</span>' : "") + "</div>" +
       '<div class="r2">' + fmtN(st.props) + " propert" + (st.props === 1 ? "y" : "ies") + " · " + fmtN(st.units) + " units" + (st.debt ? " · " + fmtM(st.debt) + " debt" : "") +
       (stat ? '<span class="ml-auto" style="display:inline-flex;align-items:center;gap:5px"><span class="st-dot" style="background:' + stat[2] + '"></span>' + stat[1] + "</span>" : "") + "</div>" +
       (pills ? '<div class="sig">' + pills + "</div>" : "") + "</div>";
-  }).join("");
+  }
   if (ids.length > S.shown) html += '<button class="more" id="oShowMore">Show ' + Math.min(200, ids.length - S.shown) + " more of " + fmtN(ids.length - S.shown) + "</button>";
   if (!ids.length) html = '<div class="empty">No owners match these filters.</div>';
   $("oList").innerHTML = html;
   var sm = $("oShowMore"); if (sm) sm.onclick = function () { S.shown += 200; renderOwnerList(); };
-  var active = S.q || S.sig.length || S.region || S.pmin || S.umin || S.status || S.assn || S.other || S.kinds.join() !== "Private,Non-profit,Co-op,Individual";
+  var active = S.q || S.sig.length || S.region || S.pmin || S.umin || S.status || S.assn || S.other || S.hq || S.kinds.join() !== "Private,Non-profit,Co-op,Individual";
   $("oReset").className = "clearall" + (active ? " on" : ""); $("oReset").title = active ? "Clear every filter" : "Nothing to clear";
   saveFilters();
   if (S.view === "map") renderBigMap();
 }
-function saveFilters() { lsSet("o360_f", {region: S.region, sort: S.sort, sig: S.sig, kinds: S.kinds, horizon: S.horizon}); }
+var STATE_NAMES = {DC: "Washington, DC", MD: "Maryland", VA: "Virginia", NY: "New York", CA: "California", FL: "Florida", NJ: "New Jersey", NC: "North Carolina", MA: "Massachusetts", TX: "Texas", PA: "Pennsylvania", IL: "Illinois", OH: "Ohio", GA: "Georgia", CO: "Colorado", CT: "Connecticut", SC: "South Carolina", DE: "Delaware", TN: "Tennessee", MI: "Michigan", WA: "Washington State", AZ: "Arizona", MN: "Minnesota", MO: "Missouri", WV: "West Virginia"};
+/* "local:dmv" (DC area), "local:hr" (Hampton Roads), "out" (outside DC/MD/VA), "st:XX", "city:XX|City" */
+var DMV_CITIES = /^(Washington|Bethesda|Chevy Chase|Silver Spring|Rockville|Gaithersburg|Kensington|Takoma Park|Potomac|North Bethesda|Germantown|Wheaton|College Park|Hyattsville|Greenbelt|Upper Marlboro|Largo|Bowie|Lanham|Landover|Laurel|Riverdale|Capitol Heights|Clinton|Fort Washington|Oxon Hill|Arlington|Alexandria|McLean|Tysons|Vienna|Falls Church|Fairfax|Reston|Herndon|Great Falls|Annandale|Springfield|Columbia|Burtonsville|Beltsville|Olney|Derwood|Mount Rainier|Brentwood|Cheverly|Suitland|District Heights|Temple Hills|Mitchellville|Leesburg|Chantilly|Vienna)$/;
+var HR_CITIES = /^(Norfolk|Virginia Beach|Chesapeake|Portsmouth|Newport News|Hampton|Suffolk|Yorktown|Williamsburg|Smithfield|Poquoson|Carrollton|Gloucester|Fort Monroe)$/;
+function hqArea(h) { if (!h) return ""; if (h.s === "DC" || (h.s !== "DC" && DMV_CITIES.test(h.c) && (h.s === "MD" || h.s === "VA"))) return "dmv"; if (h.s === "VA" && HR_CITIES.test(h.c)) return "hr"; return ""; }
+function hqMatch(h, f) {
+  if (!h) return f === "none";
+  if (f === "local:dmv") return hqArea(h) === "dmv";
+  if (f === "local:hr") return hqArea(h) === "hr";
+  if (f === "out") return h.s !== "DC" && h.s !== "MD" && h.s !== "VA";
+  if (f.indexOf("st:") === 0) return h.s === f.slice(3);
+  if (f.indexOf("city:") === 0) return h.s + "|" + h.c === f.slice(5);
+  return true;
+}
+/* local first: DC area, then Hampton Roads, then the rest of DC/MD/VA, then other states A-Z */
+function hqSortKey(h) {
+  if (!h) return "9";
+  var a = hqArea(h), rank = a === "dmv" ? (h.s === "DC" ? "0" : "1") : a === "hr" ? "2" : (h.s === "MD" || h.s === "VA") ? "3" : "4";
+  return rank + "|" + h.s + "|" + h.c;
+}
+function hqText(h) { return h ? (h.c ? h.c + ", " : "") + h.s : ""; }
+function saveFilters() { lsSet("o360_f", {region: S.region, sort: S.sort, sig: S.sig, kinds: S.kinds, horizon: S.horizon, hq: S.hq}); }
 
 /* ======================================================= owner profile === */
 var _omap = null;
@@ -2429,6 +2507,7 @@ function renderProfile() {
   var kindPill = {Private: "blue", "Non-profit": "green", Public: "purple", "Co-op": "orange", Individual: "gray"}[o.kd] || "gray";
   var h = '<div class="wrap"><button class="btn sm mback" id="pBack">&larr; All owners</button>';
   h += '<div class="ph"><div style="min-width:0"><div class="t">' + esc(o.n) + '</div><div class="s"><span class="pill ' + kindPill + '">' + esc(o.kd) + "</span>" + regs +
+    (o.hq ? '<span class="pill gray" title="Headquarters, from ' + esc(o.hq.src.join(", ")) + '">HQ ' + esc(hqText(o.hq)) + "</span>" : "") +
     '<span>' + (o.al.length > 1 ? "Grouped from " + o.al.length + " entity names" : "1 entity") + ' · named from ' + esc(o.nb || "owner of record") + "</span>" +
     (st.gs ? '<span class="sp gs">G</span><span>' + esc(st.gs) + "</span>" : "") + "</div></div>" +
     '<div class="acts"><span class="score lg ' + scoreCls(st.score) + '" title="Why-call-now score (0-100)">' + st.score + "</span>" +
@@ -2805,7 +2884,7 @@ function copyBrief(i) {
 }
 function exportOwner(i) {
   var D = S.data, o = D.owners[i];
-  var rows = [["Owner", "Property", "Address", "City", "Market", "Units", "Year built", "Owner of record", "Owned since", "Loan balance", "Next maturity", "Lender", "HAP units", "HAP expires", "Rent/SAFMR", "Latest TOPA filing", "TOPA date", "Signals", "Sources"]];
+  var rows = [["Owner", "Owner HQ", "Property", "Address", "City", "Market", "Units", "Year built", "Owner of record", "Owned since", "Loan balance", "Next maturity", "Lender", "HAP units", "HAP expires", "Rent/SAFMR", "Latest TOPA filing", "TOPA date", "Signals", "Sources"]];
   o.p.forEach(function (k) { rows.push(propCsvRow(D.props[k], o)); });
   downloadCsv(o.n.replace(/[^\w ]+/g, "").slice(0, 60) + " - Owner 360.csv", rows);
 }
@@ -2815,7 +2894,7 @@ function propCsvRow(p, o) {
   var bal = loans.reduce(function (t, l) { return t + (l.bal || 0); }, 0), c0 = null, hu = 0;
   (p.P || []).forEach(function (h) { (h.contracts || []).forEach(function (c) { hu += c.units || 0; if (!c0 || (c.exp && c.exp < c0.exp)) c0 = c; }); });
   var x = (p.X || [])[0];
-  return [o ? o.n : "", p.n, p.a, p.c, REG_NAMES[p.r], p.u, p.yb, p.own ? p.own.n : "", p.own ? p.own.d : "", bal || "", loans[0] ? loans[0].mat : "", loans[0] ? loans[0].orig : "", hu || "", c0 ? c0.exp : "", c0 && c0.safmr ? c0.safmr : "", x ? x.kind : "", x ? x.date : "",
+  return [o ? o.n : "", o && o.hq ? hqText(o.hq) : "", p.n, p.a, p.c, REG_NAMES[p.r], p.u, p.yb, p.own ? p.own.n : "", p.own ? p.own.d : "", bal || "", loans[0] ? loans[0].mat : "", loans[0] ? loans[0].orig : "", hu || "", c0 ? c0.exp : "", c0 && c0.safmr ? c0.safmr : "", x ? x.kind : "", x ? x.date : "",
     propSignals(p, S.horizon).filter(function (s) { return s.pts > 0; }).map(function (s) { return s.l + (s.d ? " " + s.d : ""); }).join("; "), p.src.map(function (s) { return SRC_NAMES[s]; }).join(", ")];
 }
 
@@ -2990,7 +3069,7 @@ async function boot() {
   S.data.props.forEach(function (p) { PROP_BY_ID[p.id] = p; });
   buildSearch(); indexOverlay();
   var f = lsGet("o360_f", null);
-  if (f) { S.region = f.region || ""; S.sort = f.sort || "score"; S.sig = f.sig || []; S.kinds = f.kinds || S.kinds; S.horizon = f.horizon || 24; }
+  if (f) { S.region = f.region || ""; S.sort = f.sort || "score"; S.sig = f.sig || []; S.kinds = f.kinds || S.kinds; S.horizon = f.horizon || 24; S.hq = f.hq || ""; }
   wireFilters();
   $("dataLbl").textContent = "Built " + ago(S.data.built.at);
   renderOwnerList();
@@ -3044,9 +3123,28 @@ function wireFilters() {
   $("oStatus").onchange = function () { S.status = this.value; renderOwnerList(); };
   $("oAssn").onchange = function () { S.assn = this.value; renderOwnerList(); };
   $("oOther").onchange = function () { S.other = this.value; renderOwnerList(); };
+  (function () {
+    var st = {}, ci = {}, dmv = 0, hr = 0, out = 0, none = 0;
+    S.data.owners.forEach(function (o) {
+      var h = o.hq;
+      if (!h) { none++; return; }
+      st[h.s] = (st[h.s] || 0) + 1;
+      var k = h.s + "|" + h.c; ci[k] = (ci[k] || 0) + 1;
+      var a = hqArea(h); if (a === "dmv") dmv++; else if (a === "hr") hr++;
+      if (h.s !== "DC" && h.s !== "MD" && h.s !== "VA") out++;
+    });
+    var opt = function (v, l, n) { return '<option value="' + esc(v) + '">' + esc(l) + " (" + fmtN(n) + ")</option>"; };
+    var h = '<option value="">Anywhere</option>' + opt("local:dmv", "DC area", dmv) + opt("local:hr", "Hampton Roads", hr) + opt("out", "Outside DC / MD / VA", out) +
+      '<optgroup label="State">' + Object.keys(st).sort(function (a, b) { return st[b] - st[a]; }).map(function (s2) { return opt("st:" + s2, STATE_NAMES[s2] || s2, st[s2]); }).join("") + "</optgroup>" +
+      '<optgroup label="City">' + Object.keys(ci).filter(function (k) { return ci[k] >= 3; }).sort(function (a, b) { return ci[b] - ci[a]; }).slice(0, 60).map(function (k) { var x = k.split("|"); return opt("city:" + k, x[1] + ", " + x[0], ci[k]); }).join("") + "</optgroup>" +
+      opt("none", "Unknown", none);
+    $("oHq").innerHTML = h;
+    $("oHq").value = S.hq || "";
+  })();
+  $("oHq").onchange = function () { S.hq = this.value; S.shown = 120; renderOwnerList(); };
   $("oHorizon").onchange = function () { S.horizon = +this.value; renderOwnerList(); if (S.sel >= 0) renderProfile(); };
   $("oReset").onclick = function () {
-    S.q = ""; S.sig = []; S.region = ""; S.pmin = S.umin = null; S.status = S.assn = S.other = ""; S.kinds = ["Private", "Non-profit", "Co-op", "Individual"];
+    S.q = ""; S.sig = []; S.region = ""; S.pmin = S.umin = null; S.status = S.assn = S.other = S.hq = ""; $("oHq").value = ""; S.kinds = ["Private", "Non-profit", "Co-op", "Individual"];
     ["oq", "gq", "oPmin", "oUmin"].forEach(function (id) { $(id).value = ""; }); ["oStatus", "oAssn", "oOther"].forEach(function (id) { $(id).value = ""; });
     wireFilters(); renderOwnerList();
   };
@@ -3069,7 +3167,7 @@ function wireFilters() {
   $("pNoOwner").onclick = function (e) { e.preventDefault(); S.pNoOwner = !S.pNoOwner; this.classList.toggle("on", S.pNoOwner); S.pPage = 0; renderProps(); };
   $("pPrev").onclick = function () { S.pPage--; renderProps(); $("pTable").parentNode.scrollTop = 0; };
   $("pNext").onclick = function () { S.pPage++; renderProps(); $("pTable").parentNode.scrollTop = 0; };
-  $("pCsv").onclick = function () { var rows = [["Owner", "Property", "Address", "City", "Market", "Units", "Year built", "Owner of record", "Owned since", "Loan balance", "Next maturity", "Lender", "HAP units", "HAP expires", "Rent/SAFMR", "Latest TOPA filing", "TOPA date", "Signals", "Sources"]]; filteredProps().forEach(function (p) { rows.push(propCsvRow(p, p.o >= 0 ? S.data.owners[p.o] : null)); }); downloadCsv("Owner 360 properties.csv", rows); };
+  $("pCsv").onclick = function () { var rows = [["Owner", "Owner HQ", "Property", "Address", "City", "Market", "Units", "Year built", "Owner of record", "Owned since", "Loan balance", "Next maturity", "Lender", "HAP units", "HAP expires", "Rent/SAFMR", "Latest TOPA filing", "TOPA date", "Signals", "Sources"]]; filteredProps().forEach(function (p) { rows.push(propCsvRow(p, p.o >= 0 ? S.data.owners[p.o] : null)); }); downloadCsv("Owner 360 properties.csv", rows); };
 }
 function wire() {
   document.querySelectorAll(".tab").forEach(function (t) { t.onclick = function () { setView(t.dataset.view); }; });
