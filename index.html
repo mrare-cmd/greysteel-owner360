@@ -160,6 +160,135 @@ main{position:fixed;top:var(--header);left:0;right:0;bottom:0;overflow:hidden}
 .pi .m{font-size:12px;color:var(--text2)}
 .pbar{grid-column:1/-1;height:4px;border-radius:2px;background:var(--border2);overflow:hidden}
 .pbar i{display:block;height:100%;background:var(--blue);border-radius:2px}
+/* New to the Pipeline: light, with a then-vs-now comparison */
+#vPipe{overflow:hidden;background:var(--bg)}
+.pp{position:absolute;inset:0;display:grid;grid-template-columns:minmax(0,1fr) 400px;grid-template-rows:auto auto auto minmax(0,1fr) auto;
+  grid-template-areas:"hd hd" "vs vs" "kp kp" "map side" "tl side";gap:12px;padding:16px 20px}
+.pp-vs{grid-area:vs;display:flex;align-items:center;gap:20px;flex-wrap:wrap;padding:12px 16px;border-radius:12px;border:1px solid #d2e3fc;
+  background:linear-gradient(100deg,#e8f0fe 0%,#f1f6fe 45%,#e6f4ea 100%);animation:ppRise .45s both}
+.pp-vs .vs-d .k{font-size:10.5px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:var(--text2)}
+.pp-vs .vs-d b{display:block;font-family:'Google Sans',sans-serif;font-size:18px;font-weight:500;color:var(--text);line-height:1.25}
+.pp-vs .vs-d em{font-style:normal;font-size:12px;color:var(--text2);font-variant-numeric:tabular-nums}
+.vs-ar{flex:0 1 200px;min-width:90px;text-align:center;font-size:11.5px;color:var(--text2)}
+.vs-ln{position:relative;height:3px;border-radius:2px;background:rgba(26,115,232,.16);margin:0 7px 6px 0}
+.vs-ln i{position:absolute;left:0;top:0;bottom:0;width:100%;border-radius:2px;background:linear-gradient(90deg,#1a73e8,#188038)}
+.vs-ln::after{content:"";position:absolute;right:-7px;top:-4.5px;border-style:solid;border-width:6px 0 6px 8px;border-color:transparent transparent transparent #188038}
+.vs-ch{display:flex;gap:6px;flex-wrap:wrap}
+.vs-ch .pl{font-size:12.5px;font-weight:500;padding:3px 10px;border-radius:12px;background:rgba(255,255,255,.8);color:var(--text2);font-variant-numeric:tabular-nums}
+.vs-ch .pl.up{color:#137333}
+.vs-ch .pl.dn{color:#c5221f}
+.vs-x{margin-left:auto;height:30px;padding:0 12px;border-radius:15px;border:1px solid var(--border);background:var(--white);font-size:12.5px;color:var(--text)}
+.vs-x:hover{background:#f1f3f4}
+.vs-note{flex-basis:100%;font-size:11.5px;color:var(--text2);margin-top:-8px}
+.pp-vs.off{background:var(--white);border-color:var(--border);font-size:12.5px;color:var(--text2);padding:10px 16px}
+.pp-vs.off b{color:var(--text);font-weight:500}
+.pp-vs.off a{margin-left:auto;color:var(--blue);cursor:pointer}
+.pp-kpi.in{animation:ppRise .45s both}
+.pp-kpi{transition:box-shadow .2s,border-color .2s}
+.pp-kpi:hover{border-color:#c6dafc;box-shadow:0 2px 10px rgba(26,115,232,.1)}
+.pb{animation:ppRise .35s both}
+.pm{position:relative}
+.pm.s-new::after{content:"";position:absolute;inset:-2px;border-radius:50%;border:2px solid #188038;animation:pmPing 1.5s ease-out both;pointer-events:none}
+.pb .dl .pm::after,.pm.lg::after{display:none}
+@keyframes pmPing{from{transform:scale(1);opacity:.85}to{transform:scale(3);opacity:0}}
+@keyframes ppRise{from{opacity:0;transform:translateY(6px)}}
+.pp-hd{grid-area:hd;display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.pp-t{font-family:'Google Sans',sans-serif;font-size:22px;color:var(--text);line-height:1.25}
+.pp-s{font-size:12.5px;color:var(--text2);margin-top:2px}
+.pp-cmp{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--text2)}
+.pp-cmp .seg button{white-space:nowrap}
+.pp-rp{height:32px;padding:0 12px;border-radius:16px;border:1px solid var(--border);background:var(--white);color:var(--text);font-size:12.5px;display:inline-flex;align-items:center;gap:6px}
+.pp-rp:hover{background:#f1f3f4}
+.pp-rp svg{width:12px;height:12px}
+.pp-kpis{grid-area:kp;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.pp-kpi{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:11px 14px 10px}
+.pp-kpi .l{font-size:11.5px;color:var(--text2)}
+.pp-kpi .v{font-family:'Google Sans',sans-serif;font-size:24px;color:var(--text);font-variant-numeric:tabular-nums;margin-top:2px;line-height:1.2}
+.pp-kpi .c{display:flex;align-items:center;gap:6px;margin-top:4px;font-size:11.5px;color:var(--text2);font-variant-numeric:tabular-nums;min-height:18px}
+.pp-kpi .d{font-weight:500;padding:1px 6px;border-radius:9px;background:#f1f3f4;color:var(--text2);transition:background .3s,color .3s}
+.pp-kpi .d.up{background:#e6f4ea;color:#137333}
+.pp-kpi .d.dn{background:#fce8e6;color:#c5221f}
+.pp-kpi .tr{display:flex;flex-direction:column;gap:2px;margin-top:8px}
+.pp-kpi .tr s,.pp-kpi .tr i{display:block;height:3px;border-radius:2px;min-width:2px;transition:width .3s ease-out}
+.pp-kpi .tr s{background:#c6dafc}
+.pp-kpi .tr i{background:var(--blue)}
+.pp-mapw{grid-area:map;position:relative;border-radius:10px;overflow:hidden;border:1px solid var(--border);background:var(--white);min-height:260px}
+#pMap{position:absolute;inset:0;background:#f1f3f4}
+.pp-when{position:absolute;left:12px;top:12px;z-index:460;background:rgba(255,255,255,.96);border:1px solid var(--border);border-radius:10px;padding:8px 12px;box-shadow:var(--shadow);pointer-events:none}
+.pp-when b{display:block;font-family:'Google Sans',sans-serif;font-size:17px;font-weight:400;color:var(--text);font-variant-numeric:tabular-nums}
+.pp-when span{font-size:11.5px;color:var(--text2)}
+.pp-when .tk{position:relative;width:180px;height:3px;border-radius:2px;background:#e8eaed;margin-top:7px;overflow:hidden}
+.pp-when .tk i{position:absolute;left:0;top:0;bottom:0;background:var(--blue)}
+.pp-leg{position:absolute;left:12px;bottom:22px;z-index:460;background:rgba(255,255,255,.97);border:1px solid var(--border);border-radius:10px;padding:8px 12px;box-shadow:var(--shadow);font-size:12px;display:flex;flex-direction:column;gap:4px}
+.pp-leg div{display:flex;align-items:center;gap:8px;color:var(--text)}
+.pp-leg em{font-style:normal;color:var(--text2);margin-left:auto;padding-left:10px;font-variant-numeric:tabular-nums}
+.pmw.off{pointer-events:none}
+.pm{display:block;width:13px;height:13px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.22),0 1px 3px rgba(0,0,0,.25);cursor:pointer;
+  transition:opacity .45s,transform .45s,background-color .45s,border-color .45s}
+.pm.s-new{background:#188038}
+.pm.s-kept{background:#1a73e8}
+.pm.s-left{background:#fff;border-color:#9aa0a6;box-shadow:0 0 0 1px rgba(255,255,255,.9)}
+.pm.s-off{opacity:0;transform:scale(.2)}
+.pm.dim{opacity:.18}
+.pm.hot{transform:scale(1.35);box-shadow:0 0 0 1px rgba(0,0,0,.3),0 0 0 5px rgba(26,115,232,.22)}
+.pm.lg{display:inline-block;width:12px;height:12px;cursor:default;flex-shrink:0}
+.ppop .k{font-size:11px;font-weight:500;color:var(--text2)}
+.ppop .a{font-family:'Google Sans',sans-serif;font-size:15px;color:var(--text);margin-top:2px}
+.ppop .b{color:var(--text);font-weight:500;margin-top:2px}
+.ppop .g{color:var(--text2);margin-top:6px}
+.ppop .m{color:var(--text2);font-size:12px;margin-top:2px}
+.ppop a{display:inline-block;margin-top:8px;color:var(--blue)}
+.pp-side{grid-area:side;display:flex;flex-direction:column;min-height:0;background:var(--white);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.pp-sh{display:flex;flex-direction:column;gap:8px;padding:12px 14px 10px;border-bottom:1px solid var(--border2)}
+.pp-sh .r{display:flex;align-items:center;gap:8px}
+.pp-sh .h{font-family:'Google Sans',sans-serif;font-size:15px;color:var(--text)}
+.pp-sh .n{font-size:12px;color:var(--text2);margin-left:auto}
+.pp-sh input{flex:1;height:30px;border-radius:15px;border:1px solid var(--border);background:var(--white);color:var(--text);padding:0 12px;font-size:12.5px;outline:none}
+.pp-sh input:focus{border-color:var(--blue);box-shadow:0 0 0 2px var(--blue-light)}
+#ppList{flex:1;overflow:auto}
+.pb{padding:10px 14px;border-bottom:1px solid var(--border2);cursor:pointer;transition:background .15s}
+.pb:hover{background:#f8f9fa}
+.pb.on{background:var(--blue-light);box-shadow:inset 3px 0 0 var(--blue)}
+.pb-h{display:flex;align-items:flex-start;gap:10px}
+.pb-n{flex:1;min-width:0}
+.pb .nm{font-weight:500;color:var(--text);line-height:1.3}
+.pb .mt{font-size:12px;color:var(--text2);margin-top:1px}
+.pb .tag{flex-shrink:0;font-size:11px;padding:1px 8px;border-radius:10px;margin-top:1px;background:#f1f3f4;color:var(--text2)}
+.pb .tag.new{background:#e6f4ea;color:#137333}
+.pb .dl{display:flex;flex-direction:column;gap:3px;margin-top:7px;font-size:12px;color:var(--text2)}
+.pb .dl div{display:flex;align-items:center;gap:8px;min-width:0}
+.pb .dl .pm{width:9px;height:9px;border-width:1.5px;cursor:inherit}
+.pb .dl span.ad{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;color:var(--text)}
+.pb .dl em{font-style:normal;flex-shrink:0;width:52px;text-align:right;font-variant-numeric:tabular-nums}
+.pb .dl .segbar{width:60px;flex-shrink:0}
+.pp-foot{font-size:12px;color:var(--text2);padding:10px 14px;border-top:1px solid var(--border2)}
+.pp-foot details summary{cursor:pointer;color:var(--text)}
+.pp-foot .lf{display:flex;gap:8px;padding:5px 0 0;align-items:baseline}
+.pp-foot .lf span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text)}
+.pp-foot .lf a{cursor:pointer}
+.pp-foot .lfw{max-height:180px;overflow:auto;margin-top:4px}
+.pp-tl{grid-area:tl;background:var(--white);border:1px solid var(--border);border-radius:10px;padding:10px 14px 8px}
+.pp-tlh{display:flex;align-items:center;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--text2);margin-bottom:8px}
+.pp-tlh b{font-weight:500;color:var(--text)}
+.pp-tlh .k{display:inline-flex;align-items:center;gap:5px}
+.pp-tlh .k i{width:10px;height:10px;border-radius:2px}
+.pp-tlh .ml-auto{margin-left:auto}
+.pp-bars{display:flex;align-items:flex-end;gap:3px;height:84px}
+.pp-bars .tb{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;min-width:0}
+.pp-bars .tb i{display:block;width:100%;max-width:30px;border-radius:3px 3px 0 0;background:#dadce0;transition:height .6s cubic-bezier(.2,.8,.2,1),background-color .4s}
+.pp-bars .tb.cur i{background:#188038}
+.pp-bars .tb.prev i{background:#8ab4f8}
+.pp-bars .tb b{font-size:10.5px;color:var(--text2);font-weight:400;margin-bottom:2px;font-variant-numeric:tabular-nums}
+.pp-bars .tb span{font-size:10px;color:var(--text3);margin-top:3px;white-space:nowrap}
+@media (max-width:900px){
+  .pp{grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto 380px auto auto;grid-template-areas:"hd" "vs" "kp" "map" "tl" "side";overflow:auto;padding:12px 16px}
+  .pp{grid-template-rows:auto auto auto 380px auto auto}
+  .vs-x{margin-left:0}
+  .pp-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .pp-cmp{flex-wrap:wrap}
+  .pp-side{min-height:420px}
+}
+@media (prefers-reduced-motion:reduce){.pp *{transition-duration:.01ms!important;animation-duration:.01ms!important}}
 /* map tab */
 #vMap{overflow:hidden}
 .mv{position:absolute;inset:0;display:flex}
@@ -211,7 +340,7 @@ main{position:fixed;top:var(--header);left:0;right:0;bottom:0;overflow:hidden}
 .marea{display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--blue-light);border-bottom:1px solid #c6dafc;font-size:12.5px;color:var(--blue)}
 .marea input{width:64px;height:26px;border:1px solid #c6dafc;border-radius:6px;padding:0 6px;font-size:12.5px;outline:none}
 .marea a{margin-left:auto;cursor:pointer}
-.mtools .chk{box-shadow:var(--shadow)}
+.mtools .chk{box-shadow:var(--shadow);white-space:nowrap}
 .leaflet-popup-content-wrapper{border-radius:12px;box-shadow:var(--shadow-lg)}
 .leaflet-popup-content{margin:14px 16px;font-family:'Roboto',sans-serif;font-size:12.5px;color:var(--text);line-height:1.4}
 .pu-a{font-family:'Google Sans',sans-serif;font-size:15px;line-height:1.3}
@@ -286,6 +415,20 @@ button.nav-h:hover{background:#f1f3f4}
 table.dt{border-collapse:separate;border-spacing:0;font-size:13px;min-width:100%}
 .dt th{position:sticky;top:0;z-index:2;background:var(--white);text-align:left;font-weight:500;font-size:12px;color:var(--text2);padding:0 10px;height:38px;border-bottom:1px solid var(--border);white-space:nowrap;cursor:pointer;user-select:none}
 .dt th:hover{color:var(--text)}
+.dbx{position:relative}
+.dbx input[type=text]{width:92px}
+.dbx input.bad{color:var(--red);box-shadow:0 0 0 1px var(--red)}
+.dbx .dbtn{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;margin-left:-2px;border-radius:13px;color:var(--text2);flex-shrink:0}
+.dbx .dbtn:hover{background:var(--blue-light);color:var(--blue)}
+.dbx .dpk{position:absolute;right:0;bottom:0;width:1px;height:1px;opacity:0;pointer-events:none;border:0;padding:0}
+.boss-in{width:100%;min-height:120px;border:1px solid var(--border);border-radius:8px;padding:10px 12px;font:12.5px 'Roboto Mono',monospace;resize:vertical;outline:none}
+.boss-in:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-light)}
+.sh.all .t{font-weight:500}
+.dt th .rsz{position:absolute;top:0;right:0;width:8px;height:100%;cursor:col-resize;z-index:3;touch-action:none}
+.dt th .rsz::after{content:"";position:absolute;right:0;top:9px;bottom:9px;width:2px;border-radius:1px;background:var(--border);opacity:0;transition:opacity .15s,background .15s}
+.dt th:hover .rsz::after{opacity:1}
+.dt th .rsz:hover::after{background:var(--blue);opacity:1}
+body.col-rsz,body.col-rsz *{cursor:col-resize!important;user-select:none}
 .dt th.sorted{color:var(--blue)}
 .dt th .ar{font-size:10px;margin-left:3px}
 .dt td{padding:0 10px;height:36px;border-bottom:1px solid var(--border2);white-space:nowrap;max-width:320px;overflow:hidden;text-overflow:ellipsis;position:relative}
@@ -489,7 +632,7 @@ tr.hidden-row td{opacity:.45}
 .pcard .dt .sub{font-size:11.5px;color:var(--text2);line-height:1.35}
 .srcs{display:inline-flex;gap:3px}
 .srcs b{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:5px;font-size:10px;font-weight:700;color:#fff}
-.srcs .R{background:#5f6368}.srcs .T{background:#1a73e8}.srcs .C{background:#9334e6}.srcs .P{background:#188038}.srcs .X{background:#e8710a}
+.srcs .R{background:#5f6368}.srcs .T{background:#1a73e8}.srcs .C{background:#9334e6}.srcs .P{background:#188038}.srcs .X{background:#e8710a}.srcs .Y{background:#007b83}
 #omap{height:330px;border-top:1px solid var(--border2)}
 .notes .f{padding:0 18px}
 .nrow{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 18px}
@@ -564,7 +707,7 @@ tr.hidden-row td{opacity:.45}
     <div class="mark">O</div>
     <span class="brand-name">Greysteel</span><span class="brand-sep">|</span>
     <span class="brand-page">Owner 360</span>
-    <span id="verBadge" title="Page version">v4</span>
+    <span id="verBadge" title="Page version">v5</span>
   </div>
   <nav class="tabs">
     <button class="tab active" data-view="owners"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span class="tl">Owners</span></button>
@@ -617,7 +760,7 @@ tr.hidden-row td{opacity:.45}
       <div class="ms-count" id="oCount"></div>
       <div class="ms-list" id="oList"></div>
     </aside>
-    <div class="omain" id="omain"><div class="oempty"><div><div class="big">Pick an owner</div>Every owner in the LoanID markets, with PBS8, LoanID and TOPA joined.<br>The list is ranked by why-call-now: maturing debt, expiring HAP contracts, TOPA filings, distress and hold period.</div></div></div>
+    <div class="omain" id="omain"><div class="oempty"><div><div class="big">Pick an owner</div>Every owner in the LoanID markets, with PBS8, LoanID (Reonomy, Trepp, CoStar, Yardi) and TOPA joined.<br>The list is ranked by why-call-now: maturing debt, expiring HAP contracts, TOPA filings, distress and hold period.</div></div></div>
   </div></section>
 
   <!-- ======================= CALENDAR ======================= -->
@@ -750,6 +893,13 @@ function zip5(v) { var m = /(\d{5})(?:\.0+)?(?:-?\d{4})?\s*$/.exec(s(v)); return
 function title(t) {
   t = s(t).replace(/[\s,;]+$/, "");
   if (!t) return "";
+  /* Yardi writes "Lenkin Company, The" and "Zupnik, Stanley R." */
+  var th = /^(.*\S),\s*the$/i.exec(t);
+  if (th) t = "The " + th[1];
+  var lf = /^([A-Za-z'-]+(?: [A-Za-z'-]+)?),\s*([A-Za-z][A-Za-z.' -]{0,30})$/.exec(t);
+  if (lf && !COMPANY_WORDS.test(t.toUpperCase()) && !/\b(LLC|LP|INC|LTD|CORP|TRUST)\b/i.test(t)) t = lf[2].trim() + " " + lf[1];
+  /* "AHD", "BGRE", "LCOR": a one-word name of five letters or fewer is an acronym */
+  if (/^[A-Za-z]{2,5}$/.test(t)) return t.toUpperCase();
   if (!(/[a-z]/.test(t) && /[A-Z]/.test(t)))                 /* ALL CAPS or all lower: title-case it */
     t = t.toLowerCase().replace(/\b([a-z])/g, function (c) { return c.toUpperCase(); });
   return t
@@ -776,6 +926,8 @@ var SUFFIX = /\s+(L ?L ?C|L ?L ?P|P ?L ?L ?C|L ?P|L ?C|INC|INCORPORATED|CORP|COR
 function nameKey(n) {
   var t = s(n).toUpperCase();
   if (!t) return "";
+  var lf = /^([A-Z'-]+(?: [A-Z'-]+)?),\s*([A-Z][A-Z.' -]{0,30})$/.exec(t);
+  if (lf && !/\b(LLC|LP|INC|LTD|CORP|TRUST|THE|COMPANY|CO|ASSOCIATES|PARTNERS|GROUP)\b/.test(t)) t = lf[2].trim() + " " + lf[1];
   t = t.replace(/&/g, " AND ").replace(/\bLIMIITED\b/g, "LIMITED").replace(/[.,'"`()]/g, "").replace(/[\/\\_-]+/g, " ")
        .replace(/\s+/g, " ").trim();
   t = t.replace(/^(THE|LLC)\s+/, "");        /* Reonomy flips "LLC Corcoran House" */
@@ -798,14 +950,16 @@ function companyLike(n) { return COMPANY_WORDS.test(s(n).toUpperCase()); }
 function propertyLike(n) { var t = s(n).toUpperCase(); return PROPERTY_WORDS.test(t) || /^\d/.test(t) || /\b(LP|L P|LIMITED PARTNERSHIP|LTD PARTNERSHIP|ASSOC(IATES)?)$/.test(t.replace(/[.,]/g, "")); }
 function isPerson(n) {
   var t = s(n).toUpperCase();
-  if (/\b(LLC|LP|INC|CORP|TRUST|ASSOC|PARTNERS|HOUSING|APARTMENTS?|PROPERT|COMPANY|CO|GROUP|FUND|VENTURES?|HOLDINGS?|REALTY|DEVELOPMENT|MANAGEMENT|CHURCH|AUTHORITY|COMMISSION|FOUNDATION|COOPERATIVE|LTD|BANK|CAPITAL|INVEST|ESTATE|HOMES?|MANOR|TOWERS?|GARDENS?|PLAZA|VILLAGE|HOUSE|CENTER|COMMUNITY|SERVICES|ENTERPRISES|ASSOCIATION)\b/.test(t)) return false;
+  if (/\b(LLC|LP|INC|CORP|TRUST|ASSOC|ASSOCS?|ASSOCIATES?|ASSOCIATION|ASSN|PARTNERS|PARTNERSHIP|LTD PTNSHP|HOUSING|APARTMENTS?|PROPERT|COMPANY|CO|GROUP|FUND|VENTURES?|HOLDINGS?|REALTY|DEVELOPMENT|MANAGEMENT|CHURCH|AUTHORITY|COMMISSION|FOUNDATION|COOPERATIVE|LTD|BANK|CAPITAL|INVEST|ESTATE|HOMES?|MANOR|TOWERS?|GARDENS?|PLAZA|VILLAGE|HOUSE|CENTER|COMMUNITY|SERVICES|ENTERPRISES|ASSOCIATION)\b/.test(t)) return false;
   var w = t.split(/\s+/);
   return w.length >= 2 && w.length <= 4 && /^[A-Z' -]+$/.test(t);
 }
 
 /* public owners: grouped on exact identity only, never through a shared
    office (housing authorities sit in every JV and would chain sponsors) */
-var PUBLIC_RE = /\b(HOUSING AUTHORITY|REDEVELOPMENT AND HOUSING|HOUSING OPPORTUNIT(Y|IES) COMMISSION|HOUSING COMMISSION|HOUSING FINANCE AGENCY|UNITED STATES|USA|COMMONWEALTH OF|STATE OF|CITY OF|COUNTY OF|COUNTY COUNCIL|COUNTY GOVERNMENT|BOARD OF EDUCATION|DEPARTMENT OF|SECRETARY OF HOUSING|FEDERAL NATIONAL|FANNIE MAE|FREDDIE MAC|WASHINGTON METROPOLITAN AREA TRANSIT|WMATA|REVENUE AUTHORITY|ECONOMIC DEVELOPMENT AUTHORITY)\b|^(DISTRICT OF COLUMBIA|MONTGOMERY COUNTY|PRINCE GEORGES COUNTY|PRHA|NRHA|HRHA|CRHA|DCHA|HOC|CITY OF [A-Z ]+|(NORFOLK|PORTSMOUTH|CHESAPEAKE|HAMPTON|SUFFOLK|NEWPORT NEWS|VIRGINIA BEACH) CITY)$/;
+/* ground lessors and placeholder owners of record: never a sponsor hub */
+var GROUND_RE = /\b(UNIVERSITY|CHURCH|SUPREME COUNCIL|LAND ONLY|GROUND (OWNER|LESSOR|LEASE)|COOPERATIVE|CO ?OP|ASSIGNMENT CORP|HOUSING FINANCE|BAPTIST|DIOCESE|ARCHDIOCESE|TEMPLE|MINISTRIES|CONGREGATION)\b/;
+var PUBLIC_RE = /\b(HOUSING AUTHORITY|REDEVELOPMENT AND HOUSING|HOUSING OPPORTUNIT(Y|IES) COMMISSION|HOUSING COMMISSION|HOUSING FINANCE AGENCY|UNITED STATES|USA|COMMONWEALTH OF|STATE OF|CITY OF|COUNTY OF|COUNTY COUNCIL|COUNTY GOVERNMENT|BOARD OF EDUCATION|DEPARTMENT OF|SECRETARY OF HOUSING|FEDERAL NATIONAL|FANNIE MAE|FREDDIE MAC|WASHINGTON METROPOLITAN AREA TRANSI(T|TY)|WASH METRO AREA TRANSIT|M A T A|DEPUTY MAYOR|WMATA|REVENUE AUTHORITY|ECONOMIC DEVELOPMENT AUTHORITY)\b|^(DISTRICT OF COLUMBIA|MONTGOMERY COUNTY|PRINCE GEORGES COUNTY|PRHA|NRHA|HRHA|CRHA|DCHA|HOC|[A-Z]{1,2} R AND H A|CITY OF [A-Z ]+|(NORFOLK|PORTSMOUTH|CHESAPEAKE|HAMPTON|SUFFOLK|NEWPORT NEWS|VIRGINIA BEACH) CITY)$/;
 function ownerKind(names, hudTypes) {
   var all = names.join(" | ");
   if (names.some(function (n) { return PUBLIC_RE.test(n); })) return "Public";
@@ -821,7 +975,24 @@ var SUF = {STREET: "ST", STR: "ST", AVENUE: "AVE", AV: "AVE", AVN: "AVE", ROAD: 
   SQUARE: "SQ", TRAIL: "TRL", WAY: "WAY", PIKE: "PIKE", ALLEY: "ALY", CRESCENT: "CRES", EXPRESSWAY: "EXPY", POINT: "PT",
   NORTHWEST: "NW", NORTHEAST: "NE", SOUTHWEST: "SW", SOUTHEAST: "SE", NORTH: "N", SOUTH: "S", EAST: "E", WEST: "W",
   FIRST: "1ST", SECOND: "2ND", THIRD: "3RD", FOURTH: "4TH", FIFTH: "5TH", SIXTH: "6TH", SEVENTH: "7TH", EIGHTH: "8TH", NINTH: "9TH", TENTH: "10TH",
-  MOUNT: "MT", SAINT: "ST", FORT: "FT"};
+  MOUNT: "MT", SAINT: "ST", FORT: "FT", DOUGLASS: "DOUGLAS"};
+/* DC numbers odd on one side of a street, even on the other: a range of one parity
+   never absorbs a number of the other (1339-1355 E St SE is not 1350 across the street) */
+function sitesOverlap(a, b) {
+  if (a.lo > b.hi || a.hi < b.lo) return false;
+  var ra = a.hi > a.lo && a.lo % 2 === a.hi % 2, rb = b.hi > b.lo && b.lo % 2 === b.hi % 2;
+  if (ra && rb) return a.lo % 2 === b.lo % 2;
+  if (ra && b.hi === b.lo) return b.lo % 2 === a.lo % 2;
+  if (rb && a.hi === a.lo) return a.lo % 2 === b.lo % 2;
+  return true;
+}
+/* Yardi leasing addresses: "1205 1/2 7th St", "NW M Street", no quadrant */
+function yardiLine(line, lat, lng, reg) {
+  var t = s(line).replace(/\s+1\/2\b/, "").replace(/^(\d+(?:-\d+)?)\s+(NW|NE|SW|SE)\s+(.+)$/i, "$1 $3 $2");
+  if (reg === "dc" && lat && lng && !/\b(NW|NE|SW|SE|NORTHWEST|NORTHEAST|SOUTHWEST|SOUTHEAST)\b/i.test(t))
+    t += " " + (lat >= 38.8899 ? "N" : "S") + (lng <= -77.0091 ? "W" : "E");
+  return t;
+}
 var UNIT_RE = /\s+(STE|SUITE|UNIT|APT|APARTMENT|#|FL|FLR|FLOOR|RM|ROOM|BLDG|BUILDING|PMB|DEPT|OFC|OFFICE)\b.*$|\s+#\S*.*$/;
 function addrTokens(line) {
   var t = s(line).toUpperCase().replace(/[.,]/g, " ").replace(/\s+/g, " ").trim();
@@ -835,10 +1006,12 @@ function parseSite(line) {
   if (!m) return null;
   var lo = +m[1], hi = m[2] ? +m[2] : lo;
   if (m[2] && m[2].length < m[1].length) hi = +(m[1].slice(0, m[1].length - m[2].length) + m[2]);   /* "1300-10" */
-  if (hi < lo || hi - lo > 400) hi = lo;
+  var wide = null;
+  if (hi - lo > 60 && hi - lo <= 400) wide = [lo, hi];   /* a block: only same-owner parcels may use it */
+  if (hi < lo || hi - lo > 60) hi = lo;       /* "2159-2525" is a block, not a building */
   var street = m[3].replace(/^(UNIT|APT|STE)\s+\S+\s+/, "").trim();
   if (!street || /^PO BOX|^P O BOX|^BOX\b/.test(street)) return null;
-  return {lo: lo, hi: hi, street: street};
+  return {lo: lo, hi: hi, street: street, wide: wide};
 }
 /* mailing office key: building + zip, and the suite when there is one */
 function mailKey(line, zip) {
@@ -985,6 +1158,30 @@ function build(input, log) {
             lastBuyer: s(r0.first_buyer_name), lastSeller: s(r0.first_seller_name), asr: num(r0.asr_total_value), market: s(r0.trepp_submarket)}});
     });
 
+    /* ---- LoanID: Yardi Matrix (one per apartment property, 50+ units; DC only for now) ----
+       Yardi names the parent owner ("Vesta Corporation"), not the single-asset entity,
+       with a contact, phone and website, plus the manager and any special servicer. */
+    (L[reg].yardi || []).forEach(function (r) {
+      var web = s(r.owner_website).toLowerCase().replace(/^https?:\/\//, "").replace(/^www\./, "").replace(/\/.*$/, "");
+      var person = [s(r.owner_contact_first_name), s(r.owner_contact_last_name)].join(" ").trim();
+      var mgr = [s(r.manager_contact_first_name), s(r.manager_contact_last_name)].join(" ").trim();
+      var contacts = [];
+      if (person) contacts.push({n: title(person), t: "Owner contact", co: title(r.owner), ph: phone(r.owner_contact_phone_number) ? [phone(r.owner_contact_phone_number)] : [],
+                                 em: s(r.owner_contact_email) ? [s(r.owner_contact_email).toLowerCase()] : [], src: "Yardi"});
+      if (mgr && nameKey(r.manager) !== nameKey(r.owner)) contacts.push({n: title(mgr), t: "Property manager", co: title(r.manager), ph: phone(r.manager_contact_phone_number) ? [phone(r.manager_contact_phone_number)] : [], em: [], src: "Yardi"});
+      addRec({src: "Y", reg: reg, line: s(r.address), city: s(r.city), zip: zip5(r.zip), lat: num(r.latitude), lng: num(r.longitude),
+        units: int(r.units), yb: int(s(r.completion_date).slice(0, 4)), name: s(r.property_name),
+        owner: s(r.owner) ? {name: s(r.owner), parent: true, mail: {line1: s(r.owner_address), zip: zip5(r.owner_zip),
+               full: [s(r.owner_address), s(r.owner_city), s(r.owner_state), s(r.owner_zip)].filter(Boolean).join(", ")},
+               email: s(r.owner_contact_email).toLowerCase(), web: web, phone: phone(r.owner_contact_phone_number), start: "", src: "Yardi"} : null,
+        contacts: contacts,
+        d: {name: s(r.property_name), status: s(r.property_special_status), impr: s(r.impr_rating), loc: s(r.loc_rating), sub: s(r.submarket),
+            owner: s(r.owner), web: web, mgr: s(r.manager), mgrWeb: s(r.manager_website), ss: s(r.special_servicer),
+            mgrBldg: (mailKey(s(r.manager_address), r.manager_zip) || {}).bldg || "", mgrSame: nameKey(r.owner) === nameKey(r.manager),
+            ssContact: [s(r.special_servicer_contact_first_name), s(r.special_servicer_contact_last_name)].join(" ").trim(),
+            ssPhone: phone(r.special_servicer_contact_phone_number), sqft: num(r.sqft)}});
+    });
+
     /* ---- LoanID: CoStar sale comps (one per sale) ---- */
     (L[reg].costar || []).forEach(function (r) {
       var line = s(r.property_address);
@@ -1079,17 +1276,33 @@ function build(input, log) {
   log("TOPA filings considered: " + nX);
 
   /* ============================== 1. merge records into properties === */
+  /* Every source but Yardi merges on street + overlapping house numbers.
+     Yardi (one row per apartment complex, leasing address) is assigned after,
+     one row per property, best evidence first - see the reviewer notes in
+     CLAUDE.md for why each guard exists. */
   var P = new DSU(), streets = {};
   recs.forEach(function (r) {
+    if (r.src === "Y") { r.line = yardiLine(r.line, r.lat, r.lng, r.reg); r.site = parseSite(r.line); return; }
     var site = parseSite(r.line);
     r.site = site;
     if (!site) return;
     var cityKey = r.reg === "hampton" ? s(r.city).toUpperCase() : "";
     var k = r.reg + "|" + site.street + (cityKey ? "|" + cityKey : "");
+    r.skey = k;
     var list = streets[k] || (streets[k] = []);
     for (var j = 0; j < list.length; j++) {
       var o = list[j], q = recs[o];
-      if (site.lo > q.site.hi || site.hi < q.site.lo) continue;
+      var sameOwner = r.owner && q.owner && r.owner.name && q.owner.name && nameKey(r.owner.name) === nameKey(q.owner.name) && nameKey(r.owner.name);
+      /* only owners named like a complex ("Woodberry Apartments", "Douglas Knoll Cooperative"),
+         not an investor's string of separate rowhouses ("Norfolk Multifamily I LLC") */
+      if (sameOwner && r.src === "R" && q.src === "R" && !/^\d/.test(sameOwner) && /\b(APARTMENTS?|APTS?|MANOR|TERRACE|GARDENS?|VILLAGE|COURTS?|TOWERS?|HOUSE|COMMONS|ESTATES|RESIDENCES|COOPERATIVE|CO OP|HOMES)\b/.test(sameOwner) &&
+          Math.abs(site.lo - q.site.lo) <= 300 && dist(r, q) > 0 && dist(r, q) <= 0.1) { P.union("r" + o, "r" + r.i); continue; }
+      if (!sitesOverlap(site, q.site)) {
+        /* a wide range (3401-3629 22nd St SE) still holds parcels of the SAME owner of record */
+        var wr = site.wide || q.site.wide, other = site.wide ? q.site : site;
+        var ok = wr && other.lo >= wr[0] && other.lo <= wr[1] && r.owner && q.owner && r.owner.name && q.owner.name && nameKey(r.owner.name) === nameKey(q.owner.name);
+        if (!ok) continue;
+      }
       if (r.zip && q.zip && r.zip !== q.zip && dist(r, q) > 0.25) continue;
       /* a range only absorbs a single number on it when the two are near each other (or one has no coordinates) */
       if (dist(r, q) > 0.6) continue;
@@ -1097,16 +1310,121 @@ function build(input, log) {
     }
     list.push(r.i);
   });
+
+  recs.forEach(function (x) {
+    if (x.src !== "X" || !x.site || !x.site.wide) return;
+    var k = x.skey, w = x.site.wide, hits = (streets[k] || []).map(function (i) { return recs[i]; })
+      .filter(function (q) { return q.src === "R" && q.site && q.site.lo >= w[0] && q.site.lo <= w[1] && q.owner && q.owner.name; });
+    if (!hits.length) return;
+    var owners = {}; hits.forEach(function (q) { owners[nameKey(q.owner.name)] = 1; });
+    if (Object.keys(owners).length === 1) hits.forEach(function (q) { P.union("r" + q.i, "r" + x.i); });
+  });
+
+  /* ---- Yardi assignment ----
+     candidates per Yardi row, scored (lower wins):
+       0  name    the Yardi name equals / contains a Trepp, CoStar, HUD or property name (spaces ignored), within 400 m
+       1  address same street, overlapping number (parity rule), within 250 m
+       1.5 address onto a TOPA-only filing (no other source there)
+       2  pin     <= 50 m with a shared name word or units within 25%, or 50-120 m with units within 5%; never onto a co-op
+     pairs are taken best-first across all rows, one Yardi row per property and one property per row. */
+  var GENERIC = /^(THE|AT|OF|ON|AND|APARTMENTS?|APTS?|RESIDENCES?|ST|STREET|AVE|AVENUE|RD|ROAD|PL|PLACE|CT|COURT|TER|TERRACE|NW|NE|SW|SE|DC|LLC|LP|INC|HOUSE|TOWERS?|SQUARE|PARK|PHASE|II|III|I|IV|NORTH|SOUTH|EAST|WEST|N|S|E|W|DR|DRIVE|BLVD|WAY|LANE|LN|CIR|PKWY|STE|UNIT)$/;
+  function nrmName(n) { return s(n).toUpperCase().replace(/&/g, "AND").replace(/\b(THE|APARTMENTS?|APTS?|RESIDENCES?)\b/g, "").replace(/[^A-Z0-9]/g, ""); }
+  function words(str) { return s(str).toUpperCase().replace(/[^A-Z0-9 ]/g, " ").split(/\s+/).filter(function (w) { return w.length >= 4 && !/^\d+$/.test(w) && !GENERIC.test(w); }); }
+  var G = {};                                   /* root -> what Yardi can match against */
+  recs.forEach(function (r) {
+    if (r.src === "Y") return;
+    var k = P.find("r" + r.i), g = G[k] || (G[k] = {recs: [], names: {}, words: {}, ownerNames: {}, units: 0, rUnits: 0, coop: false, onlyX: true, hasName: false});
+    g.recs.push(r);
+    if (!g.c && r.lat && r.lng && inBox(r.reg, r.lat, r.lng)) g.c = r;
+    if (r.src !== "X") g.onlyX = false;
+    var nm = r.src === "T" ? [r.name].concat((r.d.loans || []).map(function (l) { return l.name; })) : [r.name];
+    nm.forEach(function (n) { var z = nrmName(n); if (z.length >= 5 && !/^\d/.test(s(n))) { g.names[z] = 1; g.hasName = true; } });
+    words([r.name, r.line, r.owner && r.owner.name].join(" ")).forEach(function (w) { g.words[w] = 1; });
+    if (r.src === "R") { g.rUnits += r.units || 0; if (/cooperative/i.test(r.d.sub || "") || /COOPERATIVE|\bCO ?OP\b|CORP INC$/i.test(r.owner && r.owner.name || "")) g.coop = true; }
+    else if (r.src === "T" && (r.d.loans || []).some(function (l) { return (l.np || 0) > 1; })) {}   /* pooled loan: units cover several buildings */
+    else if (r.src !== "X" && r.units > g.units) g.units = r.units;
+    if (r.src === "R" && r.owner && r.owner.name) { var on = nameKey(r.owner.name).replace(/[^A-Z0-9]/g, ""); if (on.length >= 5) g.ownerNames[on] = 1; }
+  });
+  Object.keys(G).forEach(function (k) { var g = G[k]; if (!g.units) g.units = g.rUnits; });
+  function gDist(y, g) {
+    var best = null;
+    g.recs.forEach(function (q) { if (q.lat && q.lng && inBox(q.reg, q.lat, q.lng)) { var d = dist(y, q) * 1609; if (best === null || d < best) best = d; } });
+    return best;                               /* null: no usable coordinates */
+  }
+  var pairs = [];
+  recs.forEach(function (y) {
+    if (y.src !== "Y") return;
+    var yn = nrmName(y.name), ywords = words(y.name);
+    var yOk = y.lat && y.lng && inBox(y.reg, y.lat, y.lng);
+    Object.keys(G).forEach(function (k) {
+      var g = G[k];
+      if (g.recs[0].reg !== y.reg) return;
+      if (yOk && g.c && Math.abs(g.c.lat - y.lat) > 0.012) return;     /* ~1.3 km: cheap pre-filter */
+      var d = yOk ? gDist(y, g) : null;
+      if (d !== null && d > 400) return;
+      var score = null;
+      var yKey = y.site && y.reg + "|" + y.site.street + (y.reg === "hampton" ? "|" + s(y.city).toUpperCase() : "");
+      /* the exact house number beats a name (Washington Phase 3 at 1205 7th St, not Phase 2 next door) */
+      if (!g.onlyX && y.site && (d === null || d <= 250) && g.recs.some(function (q) { return q.site && q.skey === yKey && q.site.lo === y.site.lo && q.site.hi === q.site.lo; })) score = 0;
+      if (score === null && !g.onlyX && yn.length >= 5) {
+        var uy = y.units, ug = g.units, within = function (f) { return !uy || !ug || Math.abs(uy - ug) <= f * Math.max(uy, ug); };
+        var eq = Object.keys(g.names).some(function (n) { return n === yn; });
+        var cont = Object.keys(g.names).some(function (n) { return (n.length >= 6 && yn.indexOf(n) >= 0) || (yn.length >= 6 && n.indexOf(yn) >= 0); });
+        if ((eq && within(0.5)) || (cont && within(0.2) && (d === null || d <= 250))) score = 0.5;
+      }
+      if (score === null && y.site && (d === null || d <= 250) && g.recs.some(function (q) { return q.site && q.skey === yKey && sitesOverlap(y.site, q.site); }))
+        score = g.onlyX ? 1.5 : 1;
+      if (score === null && !g.onlyX && !g.coop && d !== null) {
+        var u1 = y.units, u2 = g.units, shareWord = ywords.some(function (w) { return g.words[w]; }) ||
+          Object.keys(g.ownerNames).some(function (o) { return yn.indexOf(o) >= 0 || (yn.length >= 5 && o.indexOf(yn) >= 0); });
+        if (d <= 50 && (shareWord || (u1 && u2 && Math.abs(u1 - u2) <= 0.25 * Math.max(u1, u2)))) score = 2;
+        else if (d <= 120 && shareWord && u1 && u2 && Math.abs(u1 - u2) <= 0.05 * Math.max(u1, u2)) score = 2;
+      }
+      if (score !== null) pairs.push({y: y, k: k, score: score, d: d === null ? 999 : d});
+    });
+  });
+  pairs.sort(function (a, b) { return a.score - b.score || a.d - b.d; });
+  var takenY = {}, takenG = {};
+  pairs.forEach(function (pr) {
+    if (takenY[pr.y.i] || takenG[pr.k]) return;
+    takenY[pr.y.i] = 1; takenG[pr.k] = 1;
+    P.union(pr.k, "r" + pr.y.i);
+    pr.y.d.how = pr.score === 0.5 ? "name" : pr.score === 2 ? "pin" : "address";
+    if (pr.score === 2) pr.y.d.pin = Math.round(pr.d);
+    var g = G[pr.k];
+    if (!y_units_ok(pr.y, g)) absorbSiblings(pr.y, g, pr.k);
+  });
+  function y_units_ok(y, g) { return !y.units || !g.units || g.units * 1.5 >= y.units; }
+  function absorbSiblings(y, g, root) {
+    var owners = {};
+    g.recs.forEach(function (r) { if (r.src === "R" && r.owner && r.owner.name) owners[nameKey(r.owner.name)] = 1; });
+    if (!Object.keys(owners).length) return;
+    var have = g.units, cands = [];
+    Object.keys(G).forEach(function (k2) {
+      if (k2 === root || takenG[k2]) return;
+      var h = G[k2];
+      if (h.onlyX || !h.recs.every(function (r) { return r.src === "R" || r.src === "X"; })) return;   /* plain parcels only */
+      if (!h.recs.some(function (r) { return r.src === "R" && r.owner && owners[nameKey(r.owner.name)]; })) return;
+      var dd = gDist(y, h);
+      if (dd !== null && recs.some(function (o2) { if (o2.src !== "Y" || o2 === y || !o2.lat) return false; var dn = gDist(o2, h); return dn !== null && dn < dd; })) return;
+      if (dd !== null && dd <= 200) cands.push({k: k2, h: h, d: dd});
+    });
+    cands.sort(function (a, b) { return a.d - b.d; });
+    cands.forEach(function (c) {
+      if (have >= y.units * 0.95 || have + c.h.units > y.units * 1.1) return;
+      P.union(root, c.k); takenG[c.k] = 1; have += c.h.units;
+    });
+  }
   /* TOPA rows with no matched record and no units info are noise for an owner view: drop them later */
   var groups = {};
-  recs.forEach(function (r) { var k = r.site ? P.find("r" + r.i) : "r" + r.i; (groups[k] = groups[k] || []).push(r); });
+  recs.forEach(function (r) { var k = P.find("r" + r.i); (groups[k] = groups[k] || []).push(r); });
 
   var props = [];
   Object.keys(groups).forEach(function (k) {
     var rs = groups[k];
     var has = {}; rs.forEach(function (r) { has[r.src] = (has[r.src] || 0) + 1; });
     /* a property needs at least one non-TOPA source, or a 5+ TOPA filing */
-    if (!has.R && !has.T && !has.C && !has.P) {
+    if (!has.R && !has.T && !has.C && !has.P && !has.Y) {
       if (!rs.some(function (r) { return r.d.slug === "ofs5" || r.d.slug === "not" || r.d.slug === "dopa" || (r.d.units || 0) >= 5; })) return;
     }
     props.push(mergeProp(rs, today));
@@ -1139,24 +1457,43 @@ function build(input, log) {
     });
   });
   function ownOffice(nk, bldg) { var pm = pubMail[nk]; return pm && pm.a[bldg] * 2 >= pm.n; }
+  /* an owner of record that two different Yardi parents claim is ambiguous: no Yardi hub for it */
+  var yParents = {};
+  props.forEach(function (p) {
+    var y = p.claims.filter(function (c) { return c.parent && !c.stale; })[0];
+    if (y && p.cur && p.cur !== y && p.cur.k) (yParents[p.cur.k] = yParents[p.cur.k] || {})[y.k] = 1;
+  });
+  var trueCoTarget = {};
   props.forEach(function (p) {
     p.claims.forEach(function (c) {
       var nk = c.k;
       if (!nk) return;
       O.find("n:" + nk);
       if (c.pid) keyAdd("hud:" + c.pid, nk);
+      if (isPerson(c.name)) { var pw = nk.split(" ").filter(function (w) { return w.length > 1; }); if (pw.length >= 2) keyAdd("pn:" + pw[0] + " " + pw[pw.length - 1], nk); }
       var tk = nameKey(c.trueCo);
       /* CoStar's true buyer is the parent - except a public body, which is a
          JV partner on half the affordable deals in town, not the parent */
-      if (tk && tk !== nk && (!PUBLIC_RE.test(tk) || PUBLIC_RE.test(nk))) link("n:" + nk, "n:" + tk, "costar", c.trueCo);
-      var isPub = PUBLIC_RE.test(nk);
+      if (tk && tk !== nk && (!PUBLIC_RE.test(tk) || PUBLIC_RE.test(nk))) { link("n:" + nk, "n:" + tk, "costar", c.trueCo); trueCoTarget[tk] = 1; trueCoTarget[nk] = 1; }
+      var isPub = PUBLIC_RE.test(nk), noHub = isPub || GROUND_RE.test(nk);
       if (!detach[nk] && !detach[ownerKey(nk)]) {
-        if (c.co && !isPub) keyAdd("co:" + c.co, nk);
-        var mk = mailKey(c.mail && c.mail.line1, c.mail && c.mail.zip);
-        if (mk && (!isPub || ownOffice(nk, mk.bldg))) { keyAdd("mb:" + mk.bldg, nk); if (mk.suite) keyAdd("ms:" + mk.bldg + "#" + mk.suite, nk); }
+        if (c.co && !noHub) keyAdd("co:" + c.co, nk);
+        /* Yardi owner addresses are a parent's HQ, often a multi-tenant tower: not an office hub.
+           A tax bill sent to the Yardi-listed manager's office says who manages, not who owns. */
+        var ycl = p.claims.filter(function (x) { return x.parent; })[0];
+        var mk = c.parent ? null : mailKey(c.mail && c.mail.line1, c.mail && c.mail.zip);
+        if (mk && c === p.cur && ycl && ycl.mgrBldg && ycl.mgrBldg === mk.bldg) mk = null;
+        if (mk && (isPub ? ownOffice(nk, mk.bldg) : !noHub)) { keyAdd("mb:" + mk.bldg, nk); if (mk.suite) keyAdd("ms:" + mk.bldg + "#" + mk.suite, nk); }
         var dom = emailDomain(c.email);
-        if (dom && !isPub) keyAdd("dom:" + dom, nk);
-        if (c === p.cur && !isPub) facIds(p).forEach(function (id) { keyAdd("fac:" + id, nk); });
+        if (dom && !noHub) keyAdd("dom:" + dom, nk);
+        if (c === p.cur && !noHub) facIds(p).forEach(function (id) { keyAdd("fac:" + id, nk); });
+        if (c.web && !noHub && !FREE_MAIL.test(c.web)) keyAdd("dom:" + c.web, nk);
+        /* Yardi names the parent: the parent itself, and the property's owner of record unless
+           Yardi's owner looks stale or the owner of record is claimed by two parents */
+        if (!noHub && ycl && ycl.k && !ycl.stale) {
+          if (c === ycl) keyAdd("yo:" + ycl.k, nk);
+          else if (c === p.cur && Object.keys(yParents[nk] || {}).length <= 1) keyAdd("yo:" + ycl.k, nk);
+        }
       }
     });
   });
@@ -1189,15 +1526,28 @@ function build(input, log) {
     }
     if (kind === "dom" && names.length > 60) return;
     var label = kind === "co" ? "Reonomy groups them as one company" : kind === "hud" ? "Same HUD owner participant ID " + val
+              : kind === "yo" ? "Yardi Matrix names " + title(val) + " as the owner"
               : kind === "dom" ? "Same email domain @" + val : kind === "fac" ? "In the same multi-property credit facility (Trepp " + val + ")"
               : "Same mailing office " + prettyMail(val);
     /* Reonomy's company grouping is built from the same kind of evidence
        (shared officers and offices), so it gets the hub rules too */
-    (kind === "hud" ? strongKeys : weakKeys).push({kind: kind === "ms" ? "mb" : kind, label: label, names: names});
+    if (kind === "pn") label = "Same person: " + title(val);
+    (kind === "hud" || kind === "pn" ? strongKeys : weakKeys).push({kind: kind === "ms" ? "mb" : kind, label: label, names: names, val: val});
   });
-  strongKeys.forEach(function (k) { for (var i = 1; i < k.names.length; i++) link("n:" + k.names[0], "n:" + k.names[i], k.kind, k.label); });
+  function middle(n) { var w = n.split(" ").filter(function (x) { return x.length === 1; }); return w.join(""); }
+  strongKeys.forEach(function (k) {
+    if (k.kind !== "pn") { for (var i = 1; i < k.names.length; i++) link("n:" + k.names[0], "n:" + k.names[i], k.kind, k.label); return; }
+    /* "Ruth E Evans" = "Ruth Evans", but "Elaine G Miller" is not "Elaine E Miller" */
+    var inits = {}; k.names.forEach(function (n) { var m = middle(n); if (m) inits[m] = 1; });
+    var distinct = Object.keys(inits);
+    k.names.forEach(function (a, i) { k.names.slice(i + 1).forEach(function (b) {
+      var ma = middle(a), mb = middle(b);
+      if (ma === mb || ((!ma || !mb) && distinct.length <= 1)) link("n:" + a, "n:" + b, k.kind, k.label);
+    }); });
+  });
   var size = {}, pub = {};                     /* root -> number of names / holds a public owner */
   Object.keys(O.p).forEach(function (x) { var r = O.find(x); size[r] = (size[r] || 0) + 1; if (PUBLIC_RE.test(x.slice(2))) pub[r] = 1; });
+  function members(root) { var out = []; Object.keys(O.p).forEach(function (x) { if (O.find(x) === root) out.push(x.slice(2)); }); return out; }
   function join(a, b, k, nameA, nameB) {
     var ra = O.find(a), rb = O.find(b);
     if (ra === rb) return;
@@ -1205,7 +1555,8 @@ function build(input, log) {
     link(nameA, nameB, k.kind, k.label);
     size[O.find(a)] = sz;
   }
-  weakKeys.sort(function (a, b) { return b.names.length - a.names.length; });
+  /* Yardi parent hubs run last, after the office / domain / company evidence has formed the groups */
+  weakKeys.sort(function (a, b) { return (a.kind === "yo") - (b.kind === "yo") || b.names.length - a.names.length; });
   weakKeys.forEach(function (k) {
     var byRoot = {};
     k.names.forEach(function (n) { var r = O.find("n:" + n); (byRoot[r] = byRoot[r] || []).push(n); });
@@ -1215,15 +1566,54 @@ function build(input, log) {
     });
     /* the local group: everything that has no tie anywhere else */
     var anchor = null;
+    if (k.kind === "yo") {                     /* the parent always leads its own hub, wherever it already sits */
+      var pr = O.find("n:" + k.val);
+      var pg = local.concat(outside).filter(function (g) { return g.r === pr; })[0];
+      if (pg) {
+        local = local.filter(function (g) { return g !== pg; }); outside = outside.filter(function (g) { return g !== pg; });
+        anchor = "n:" + pg.names[0];
+        local.forEach(function (g) { join(anchor, "n:" + g.names[0], k, anchor, "n:" + g.names[0]); });
+        var aSize = pg.size + local.reduce(function (t2, g) { return t2 + g.names.length; }, 0);
+        outside.forEach(function (g) {
+          var inHub = {}; k.names.forEach(function (n) { inHub[n] = 1; });
+          var own = members(g.r).some(function (n) { return !inHub[n] && (trueCoTarget[n] || (companyLike(n) && !propertyLike(n) && !isPerson(n))); });
+          var share = g.names.length / g.size;
+          var single = g.size === 1 && !trueCoTarget[g.names[0]] && !(companyLike(g.names[0]) && !propertyLike(g.names[0]));
+          if (single || (!own && share >= 0.5) || (g.names.length >= 2 && g.names.length >= 0.25 * g.size)) { join(anchor, "n:" + g.names[0], k, anchor, "n:" + g.names[0]); aSize += g.size; }
+        });
+        return;
+      }
+      return;                                  /* the parent itself is a public body / ground lessor: no hub */
+    }
     local.forEach(function (g) { if (!anchor) anchor = "n:" + g.names[0]; else join(anchor, "n:" + g.names[0], k, anchor, "n:" + g.names[0]); });
     var localSize = local.reduce(function (t, g) { return t + g.names.length; }, 0);
     outside.sort(function (a, b) { return b.names.length - a.names.length || b.size - a.size; });
     outside.forEach(function (g) {
       /* overlap has to be real relative to the smaller side, not one JV LLC */
       var ok = localSize <= 2 || g.size <= 2 || g.names.length >= Math.max(2, Math.ceil(0.25 * Math.min(g.size, localSize)));
+
       if (!anchor) { anchor = "n:" + g.names[0]; localSize = g.size; return; }   /* every name here already has a group: the biggest overlap leads */
       if (ok) { join(anchor, "n:" + g.names[0], k, anchor, "n:" + g.names[0]); localSize += g.size; }
     });
+  });
+
+  /* Yardi owner addresses are not office hubs (a parent's HQ can be a multi-tenant tower),
+     but a parent whose office address is where ONE existing group gets its mail, and which
+     shares a name word with that group, is that group's parent (Fort Lincoln Realty at
+     3298 Fort Lincoln Dr NE). */
+  var mbNames = {};
+  Object.keys(keyNames).forEach(function (key) { if (key.indexOf("mb:") === 0) mbNames[key.slice(3)] = Object.keys(keyNames[key]); });
+  var YW = function (n) { return s(n).toUpperCase().split(/[^A-Z0-9]+/).filter(function (w) { return w.length >= 4 && !/^(REALTY|PROPERTIES|PROPERTY|GROUP|COMPANY|COMPANIES|MANAGEMENT|PARTNERS|HOLDINGS|RESIDENTIAL|DEVELOPMENT|APARTMENTS|ASSOCIATES|CAPITAL|INVESTMENTS|LIMITED|PARTNERSHIP|WASHINGTON|SENIOR|VILLAGE|HOUSE|PLACE|TOWERS|COURT|GARDENS|STREET|AVENUE)$/.test(w); }); };
+  var yOffices = {};
+  props.forEach(function (p) { p.claims.forEach(function (c) { if (c.parent && c.k && !c.stale && !PUBLIC_RE.test(c.k) && !GROUND_RE.test(c.k)) { var mk = mailKey(c.mail && c.mail.line1, c.mail && c.mail.zip); if (mk) (yOffices[mk.bldg] = yOffices[mk.bldg] || {})[c.k] = 1; } }); });
+  Object.keys(yOffices).forEach(function (b) {
+    var parents = Object.keys(yOffices[b]), names = mbNames[b];
+    if (parents.length !== 1 || !names || !names.length) return;
+    var roots = {}; names.forEach(function (n) { roots[O.find("n:" + n)] = 1; });
+    if (Object.keys(roots).length !== 1) return;
+    var pw = YW(parents[0]);
+    var hit = members(Object.keys(roots)[0]).some(function (n) { var w = YW(n); return w.some(function (x) { return pw.indexOf(x) >= 0; }); });
+    if (hit) link("n:" + parents[0], "n:" + names[0], "mb", "Yardi's owner " + title(parents[0]) + " is at the group's mailing office " + prettyMail(b));
   });
 
   /* ---- owner records ---- */
@@ -1265,12 +1655,13 @@ function build(input, log) {
 
   owners.forEach(function (o, oi) {
     o.idx = oi;
-    var nameStats = {}, trueCos = {}, contactCos = {}, mails = {}, contacts = {}, emails = {}, phones = {}, types = {}, hud = {}, srcs = {};
+    var nameStats = {}, trueCos = {}, yardiCos = {}, contactCos = {}, mails = {}, contacts = {}, emails = {}, phones = {}, types = {}, hud = {}, srcs = {};
     o.claims.forEach(function (c) {
       var st = nameStats[c.k] || (nameStats[c.k] = {n: c.name, k: c.k, src: {}, props: {}});
       st.src[c.src] = 1; st.props[c.pi] = 1;
       if (c.name.length > st.n.length && c.name.toUpperCase() !== c.name) st.n = c.name;
       if (c.trueCo) trueCos[c.trueCo] = (trueCos[c.trueCo] || 0) + 1;
+      if (c.parent && !c.stale) yardiCos[c.name] = (yardiCos[c.name] || 0) + (c.weak ? 0.33 : 1);
       if (c.mail && c.mail.full) { var mk = c.mail.full.toUpperCase().replace(/\s+/g, " "); (mails[mk] = mails[mk] || {v: c.mail.full, n: 0, src: {}}).n++; mails[mk].src[c.src] = 1; }
       if (c.email) { (emails[c.email] = emails[c.email] || {v: c.email, src: {}, n: 0}).n++; emails[c.email].src[c.src] = 1; }
       if (c.phone) { (phones[c.phone] = phones[c.phone] || {v: c.phone, src: {}, n: 0}).n++; phones[c.phone].src[c.src] = 1; }
@@ -1306,6 +1697,7 @@ function build(input, log) {
       var parts = n.split(/\s*\|\s*/).filter(Boolean);
       parts.forEach(function (x, i) { if (!propertyLike(x) || companyLike(x)) credit(x, trueCos[n] * (i === 0 ? 6 : 2) / Math.max(1, parts.length - 0.5), "CoStar true buyer"); });
     });
+    Object.keys(yardiCos).forEach(function (n) { credit(n, yardiCos[n] * 6, "Yardi Matrix owner"); });
     aliasList.forEach(function (a) {
       if (companyLike(a.n) && !propertyLike(a.n)) credit(a.n, (PUBLIC_RE.test(a.k) ? 8 : 2) + Math.min(a.np, 6), "company name on record");
       else if (!isSpe(a.n) && !propertyLike(a.n)) credit(a.n, 0.6 * a.np, "most-used owner name");
@@ -1354,7 +1746,7 @@ function build(input, log) {
     return {id: p.id, n: p.n, a: p.a, c: p.c, z: p.z, r: p.r, u: p.u, ue: p.ue || undefined, yb: p.yb, ll: p.ll, src: p.src, o: p._o ? p._o.idx : -1,
       own: p.cur ? {n: title(p.cur.name), s: p.cur.src, d: p.cur.start || p.cur.seen || ""}
          : p.viaFac ? {n: "Not named - placed by its credit facility", s: "Trepp", d: ""} : null,
-      other: p.other, R: p.R, T: p.T, C: p.C, P: p.P, X: p.X};
+      other: p.other, R: p.R, T: p.T, C: p.C, Y: p.Y, P: p.P, X: p.X};
   });
   var outOwners = owners.map(function (o) {
     return {id: o.id, n: o.name, nb: o.basis, al: o.aliases, why: o.why, mail: o.mail, em: o.emails, ph: o.phones, ct: o.contacts,
@@ -1389,10 +1781,10 @@ function dist(a, b) {                        /* miles; 0 when either has no (usa
 }
 
 /* one physical property from all the source rows on it */
-var SRC_RANK = {R: 5, P: 4, T: 3, C: 2, X: 1};
+var SRC_RANK = {R: 5, P: 4, Y: 3.5, T: 3, C: 2, X: 1};
 function mergeProp(rs, today) {
   rs.sort(function (a, b) { return SRC_RANK[b.src] - SRC_RANK[a.src]; });
-  var p = {R: [], T: [], C: [], P: [], X: [], src: [], claims: [], _contacts: [], _contactCos: []};
+  var p = {R: [], T: [], C: [], Y: [], P: [], X: [], src: [], claims: [], _contacts: [], _contactCos: []};
   var first = function (f) { for (var i = 0; i < rs.length; i++) if (rs[i][f]) return rs[i][f]; return null; };
   var named = rs.filter(function (r) { return r.name && r.src !== "X"; });
   p.n = title((rs.filter(function (r) { return r.src === "P" && r.name; })[0] || rs.filter(function (r) { return r.src === "T" && r.name; })[0] || named[0] || {}).name || "");
@@ -1404,7 +1796,7 @@ function mergeProp(rs, today) {
   var ll = rs.filter(function (r) { return r.lat && r.lng && inBox(r.reg, r.lat, r.lng); })[0];
   p.ll = ll ? [Math.round(ll.lat * 1e5) / 1e5, Math.round(ll.lng * 1e5) / 1e5] : null;
   /* units: trust HUD and Trepp first, then Reonomy, then the newest sale */
-  var uOrder = ["P", "T", "R", "C", "X"];
+  var uOrder = ["P", "Y", "T", "R", "C", "X"];
   p.u = null;
   for (var ui = 0; ui < uOrder.length && !p.u; ui++) rs.forEach(function (r) { if (r.src === uOrder[ui] && r.units && (!p.u || r.units > p.u)) p.u = r.units; });
   if (rs.filter(function (r) { return r.src === "R"; }).length > 1) {      /* several parcels: add them up if no better count */
@@ -1450,6 +1842,29 @@ function mergeProp(rs, today) {
     var pStart = pick.start || "";
     var reoSale = pick.srcCode === "R" ? (p.R[0] && p.R[0].sale) || "" : pStart;
     if (!reoSale || cos.start > addDays(reoSale, 60)) pick = cos;
+  }
+  /* Yardi's owner is stale when a newer sale says otherwise (CoStar's true buyer is
+     someone else, or a TOPA sale filing in the last two years); and when Yardi's owner
+     is also its manager while CoStar names another true buyer, it is a weak name */
+  var ycl = p.claims.filter(function (c) { return c.parent; })[0];
+  if (ycl) {
+    var tb = p.C[0] && nameKey(p.C[0].buyer);
+    var tbParts = p.C[0] ? s(p.C[0].buyer).split(/\s*\|\s*/).map(nameKey) : [];
+    if (tb && tbParts.indexOf(ycl.k) < 0) ycl.stale = true;
+    var cut = addDays(today, -730);
+    if (p.X.some(function (x) { return /^(ofs5|not|dopa|rofr)$/.test(x.slug) && x.date >= cut; })) ycl.stale = true;
+    var yd = p.Y[0] || {};
+    ycl.weak = !!(yd.mgrSame && tb && tbParts.indexOf(ycl.k) < 0);
+    ycl.mgrBldg = yd.mgrSame ? "" : yd.mgrBldg;
+    /* a ground lessor or placeholder of record (university, church, "Land Only") is not the sponsor */
+    /* a TOPA sale filing in the last two years whose buyer is Yardi's owner means the county
+       record is the stale one (FPA bought 3801 Connecticut from Elme in 2026): Yardi owns it */
+    var ywords = s(ycl.name).toUpperCase().replace(/[^A-Z0-9 ]/g, " ").split(/\s+/).filter(function (w) { return w.length >= 3 && !/^(LLC|INC|THE|AND|LP|CORP|COMPANY|GROUP|REALTY|PROPERTIES|PARTNERS|RESIDENTIAL|MULTIFAMILY|MANAGEMENT)$/.test(w); });
+    var bought = p.X.some(function (x) { return /^(ofs5|dopa|rofr|not)$/.test(x.slug) && x.date >= cut && x.buyer &&
+      ywords.some(function (w) { return new RegExp("\\b" + w + "\\b").test(s(x.buyer).toUpperCase()); }); });
+    if (bought) { ycl.stale = false; ycl.fresh = true; pick = ycl; }
+    /* ... nor is a public body that owns the land under a private building (Claridge Towers) */
+    if (pick && !ycl.stale && (GROUND_RE.test(pick.k) || (PUBLIC_RE.test(pick.k) && !PUBLIC_RE.test(ycl.k)))) pick = ycl;
   }
   p.cur = pick;
   p.other = [];
@@ -1545,7 +1960,7 @@ var S = {
 };
 var REG_NAMES = {hampton: "Hampton Roads", dc: "DC", montgomery: "Montgomery", princegeorges: "Prince George's"};
 var REG_SHORT = {hampton: "Hampton Rds", dc: "DC", montgomery: "MoCo", princegeorges: "PG"};
-var SRC_NAMES = {R: "Reonomy", T: "Trepp", C: "CoStar", P: "PBS8 (HUD)", X: "TOPA (DHCD)"};
+var SRC_NAMES = {R: "Reonomy", T: "Trepp", C: "CoStar", Y: "Yardi Matrix", P: "PBS8 (HUD)", X: "TOPA (DHCD)"};
 var KINDS = ["Private", "Non-profit", "Public", "Co-op", "Individual"];
 var STATUSES = [["new", "New lead", "#1a73e8"], ["researching", "Researching", "#9334e6"], ["contacted", "Contacted", "#f9ab00"], ["dialogue", "In dialogue", "#fa7b17"],
   ["pitching", "Pitching", "#d93025"], ["client", "Client", "#188038"], ["pass", "Pass", "#80868b"], ["dnc", "Do not call", "#202124"]];
@@ -1626,6 +2041,13 @@ function propSignals(p, horizon) {
       if (re.n < 60) add({k: "reac", cat: "distress", l: "Failing REAC score " + re.s, d: re.d, pts: 15, x: "Inspected " + fmtDate(re.d)});
       else if (re.n < 70) add({k: "reac", cat: "distress", l: "Low REAC score " + re.s, d: re.d, pts: 6, x: "Inspected " + fmtDate(re.d)});
     }
+  });
+  (p.Y || []).forEach(function (y) {
+    var st = y.status || "";
+    if (y.ss && !out.some(function (s) { return s.k === "ss"; })) add({k: "ss", cat: "distress", l: "Special servicer named (Yardi)", d: "", pts: 25, x: y.ss + (y.ssContact ? " · " + y.ssContact : "") + (y.ssPhone ? " · " + y.ssPhone : "")});
+    if (/acceleration/i.test(st)) add({k: "ystat", cat: "distress", l: "Notice of Acceleration (Yardi)", d: "", pts: 25, x: st});
+    else if (/arrears/i.test(st)) add({k: "ystat", cat: "distress", l: "CMBS loan in arrears (Yardi)", d: "", pts: 22, x: st});
+    else if (/watch ?list/i.test(st)) add({k: "ystat", cat: "distress", l: "On watch list (Yardi)", d: "", pts: 12, x: st});
   });
   var since = p.own && p.own.d;
   if (since) {
@@ -1785,7 +2207,7 @@ function shortLabel(s) {
   var w = s.d && s.d >= TODAY_ISO ? " " + fmtMon(s.d).replace(/ (\d{2})(\d{2})$/, " '$2") : "";
   if (s.k === "mat" && /tranche/.test(s.l)) return "Facility tranche" + (s.d && s.d >= TODAY_ISO ? " " + fmtMon(s.d).replace(/ (\d{2})(\d{2})$/, " '$2") : "");
   return ({mat: "Maturity", rmat: "Maturity", open: "Prepay opens", hap: "HAP exp.", mtm: "Below-mkt HAP", ofs: "Offer of sale", pastmat: "Past maturity", ss: "Special servicing",
-    wl: "Watchlist", dq: "Delinquent", dscr: "Low DSCR", pfc: "Pre-foreclosure", reac: "Low REAC", hold: s.l, nof: "Foreclosure notice", redev: "Redevelopment", ten: "Tenants", not: "Transfer"}[s.k] || s.l) + (s.k === "hold" ? "" : w);
+    wl: "Watchlist", ystat: "Yardi distress", dq: "Delinquent", dscr: "Low DSCR", pfc: "Pre-foreclosure", reac: "Low REAC", hold: s.l, nof: "Foreclosure notice", redev: "Redevelopment", ten: "Tenants", not: "Transfer"}[s.k] || s.l) + (s.k === "hold" ? "" : w);
 }
 function renderOwnerList() {
   var D = S.data, ids = filteredOwners();
@@ -1894,7 +2316,7 @@ function renderProfile() {
   h += '<div class="card notes"><div class="card-h"><div><div class="card-t">Outreach</div><div class="card-s">Shared with the team · saved to the private repo</div></div></div>' + notesHtml(i, ov) + "</div></div>";
 
   /* grouping evidence */
-  h += '<div class="card mt"><div class="card-h"><div><div class="card-t">Why these names are one owner</div><div class="card-s">Grouped on Reonomy companies, CoStar true buyers, HUD owner IDs, shared mailing offices and corporate email domains. Mark a name that does not belong; it is regrouped at the next rebuild.</div></div></div>' +
+  h += '<div class="card mt"><div class="card-h"><div><div class="card-t">Why these names are one owner</div><div class="card-s">Grouped on Reonomy companies, CoStar true buyers, Yardi parent owners, HUD owner IDs, shared mailing offices and corporate email domains. Mark a name that does not belong; it is regrouped at the next rebuild.</div></div></div>' +
     (o.why && o.why.length ? '<div class="ev">' + o.why.map(function (w) { return '<div class="evr"><span class="h">' + esc(w.v) + '</span> <span class="muted small">· ' + w.names + " names</span></div>"; }).join("") + "</div>" : "") +
     '<table class="al"><thead><tr><th>Entity name</th><th>Sources</th><th class="n">Properties</th><th></th></tr></thead><tbody>' +
     o.al.slice(0, renderProfile.allAl ? 9999 : 12).map(function (a) {
@@ -1926,7 +2348,7 @@ function renderProfile() {
 }
 function uniqN(a) { var s = {}; a.forEach(function (x) { s[x] = 1; }); return Object.keys(s).length; }
 function kpi(l, v, d) { return '<div class="card kpi"><div class="k-l">' + l + '</div><div class="k-v sm">' + v + '</div><div class="k-d">' + esc(d) + "</div></div>"; }
-function srcChips(p) { return '<span class="srcs">' + ["R", "T", "C", "P", "X"].filter(function (s) { return p.src.indexOf(s) >= 0; }).map(function (s) { return '<b class="' + s + '" title="' + SRC_NAMES[s] + '">' + (s === "X" ? "T" : s === "P" ? "H" : s === "T" ? "L" : s) + "</b>"; }).join("") + "</span>"; }
+function srcChips(p) { return '<span class="srcs">' + ["R", "T", "C", "Y", "P", "X"].filter(function (s) { return p.src.indexOf(s) >= 0; }).map(function (s) { return '<b class="' + s + '" title="' + SRC_NAMES[s] + '">' + (s === "X" ? "T" : s === "P" ? "H" : s === "T" ? "L" : s) + "</b>"; }).join("") + "</span>"; }
 function propRow(p) {
   var sig = propSignals(p, S.horizon).filter(function (s) { return s.pts > 0; });
   var loans = [];
@@ -2124,6 +2546,12 @@ function openProp(id) {
     p.C.map(function (c) { return "<tr><td>" + esc(fmtDate(c.date)) + "</td><td>" + esc(c.buyer || c.buyerRec || "-") + '<div class="muted small">from ' + esc(c.seller || "-") + (c.lb ? " · listed by " + esc(c.lb) : "") + (c.cap ? " · " + c.cap + "% cap" : "") + '</div></td><td class="num">' + fmtM(c.price) + '</td><td class="num">' + fmtM(c.ppu) + "</td></tr>"; }).join("") + "</tbody></table>";
   if ((p.X || []).length) h += '<div class="dr-sec">TOPA filings (DHCD)</div><table class="dtab"><thead><tr><th>Date</th><th>Filing</th><th class="num">Price</th></tr></thead><tbody>' +
     p.X.slice(0, 25).map(function (x) { return "<tr><td>" + esc(fmtDate(x.date)) + "</td><td>" + esc(x.kind) + '<div class="muted small">' + esc([x.type, x.units ? x.units + " units" : "", x.buyer ? "Buyer " + x.buyer : "", x.seller ? "Seller " + x.seller : "", x.foia ? "FOIA " + x.foia : ""].filter(Boolean).join(" · ")) + '</div></td><td class="num">' + fmtM(x.price) + "</td></tr>"; }).join("") + "</tbody></table>";
+  (p.Y || []).forEach(function (y) {
+    h += '<div class="dr-sec">Yardi Matrix</div><div class="statbox">' + row("Property", esc(y.name || "-")) + row("Owner", esc(y.owner || "-") + (y.web ? ' <span class="muted small">' + esc(y.web) + "</span>" : "")) +
+      row("Manager", esc(y.mgr || "-")) + row("Ratings", esc(["improvement " + (y.impr || "-"), "location " + (y.loc || "-")].join(" · "))) +
+      (y.status ? row("Status", esc(y.status)) : "") + (y.ss ? row("Special servicer", '<span style="color:var(--red)">' + esc(y.ss) + "</span>" + (y.ssContact || y.ssPhone ? '<br><span class="small">' + esc([y.ssContact, y.ssPhone].filter(Boolean).join(" · ")) + "</span>" : "")) : "") +
+      (y.sub ? row("Submarket", esc(y.sub)) : "") + (y.pin !== undefined ? row("Matched", "by map pin, " + y.pin + " m away") : "") + (y._line ? row("Yardi address", esc(y._line)) : "") + "</div>";
+  });
   (p.R || []).forEach(function (r, k) {
     h += '<div class="dr-sec">Parcel' + (p.R.length > 1 ? " " + (k + 1) : "") + " (Reonomy)</div><div class=\"statbox\">" + row("APN", esc(r.apn || "-")) + row("Assessed", fmtM(r.asr) || "-") + row("Building SF", fmtN(r.gba) || "-") +
       row("Last sale", r.sale ? esc(fmtDate(r.sale)) + (r.price ? " · " + fmtM(r.price) : "") : "-") + (r._line ? row("Address", esc(r._line)) : "") + "</div>";
@@ -2134,7 +2562,7 @@ function openProp(id) {
   (p.X || []).forEach(function (x) { if (x.sf && links.join().indexOf(x.sf) < 0) links.push('<a class="btn sm" target="_blank" rel="noopener" href="' + esc(x.sf) + '">Salesforce</a>'); if (x.box && links.join().indexOf(x.box) < 0) links.push('<a class="btn sm" target="_blank" rel="noopener" href="' + esc(x.box) + '">FOIA in Box</a>'); });
   if (p.P && p.P.length) links.push('<a class="btn sm" target="_blank" rel="noopener" href="https://mrare-cmd.github.io/HAP-Database/">PBS8</a>');
   if (p.X && p.X.length) links.push('<a class="btn sm" target="_blank" rel="noopener" href="https://mrare-cmd.github.io/greysteel-topa/">TOPA Tracker</a>');
-  if (p.R.length || p.T.length || p.C.length) links.push('<a class="btn sm" target="_blank" rel="noopener" href="https://mrare-cmd.github.io/greysteel-hampton-roads/">LoanID</a>');
+  if (p.R.length || p.T.length || p.C.length || (p.Y || []).length) links.push('<a class="btn sm" target="_blank" rel="noopener" href="https://mrare-cmd.github.io/greysteel-hampton-roads/">LoanID</a>');
   h += '<div class="dr-sec">Open in</div><div class="lnks">' + links.join("") + "</div>";
   $("drB").innerHTML = h;
   var a = $("drOwn"); if (a) a.onclick = function (e) { e.preventDefault(); closeDrawer(); openOwner(p.o); };
@@ -2329,7 +2757,7 @@ function dataModal() {
     '<div class="mb howto"><div class="srcgrid">' + reg +
     '<div class="k">PBS8 (HUD)</div><div>HAP contracts as of ' + esc(fmtDate(src.pbs8)) + '</div><div class="k">TOPA Tracker</div><div>DHCD filings, updated ' + esc(ago(src.topa)) + "</div></div>" +
     '<ol style="margin-top:14px"><li><b>Properties</b> are merged across sources on street plus overlapping house numbers, inside a market.</li>' +
-    "<li><b>Owners</b> are grouped on Reonomy's company, CoStar's true buyer, HUD's owner participant ID, a shared mailing office and a corporate email domain. A single joint-venture LLC cannot fuse two established sponsors, and public agencies only group at their own office.</li>" +
+    "<li><b>Owners</b> are grouped on Reonomy's company, CoStar's true buyer, Yardi's parent owner, HUD's owner participant ID, a shared mailing office and a corporate email domain. A single joint-venture LLC cannot fuse two established sponsors, and public agencies only group at their own office.</li>" +
     "<li><b>Why-call-now</b> is computed live from dates: loan maturities and prepayment windows (Trepp, county mortgages), HAP expirations and below-market rents (PBS8), offers of sale, foreclosure and redevelopment filings (TOPA), distress and hold period. Larger properties weigh more.</li></ol>" +
     '<div class="note">Rebuild pulls the newest PBS8, LoanID and TOPA data through the sign-in Worker (~75 MB), rebuilds in your browser and saves it for everyone. Notes and statuses are never touched. Use it after a LoanID upload, a TOPA import, or after marking "Not this owner".</div>' +
     '<div id="rbBox" hidden><div class="prog"><i id="rbBar"></i></div><div class="small muted" id="rbMsg"></div></div></div>' +
@@ -2346,7 +2774,7 @@ async function rebuild() {
     var lm = await apiGet("/owner360/manifest?fresh=1"), tm = await apiGet("/topa/manifest?fresh=1");
     var base = lm.files["owners.json"] || null;
     var regions = Object.keys(O360Build.REGIONS), lfiles = [];
-    regions.forEach(function (r) { ["reonomy", "trepp", "costar", "salesforce"].forEach(function (f) { var p = r + "/data_" + f + ".json"; if (lm.loanid[p]) lfiles.push(p); }); });
+    regions.forEach(function (r) { ["reonomy", "trepp", "costar", "yardi", "salesforce"].forEach(function (f) { var p = r + "/data_" + f + ".json"; if (lm.loanid[p]) lfiles.push(p); }); });
     var topaIdx = tm.files["index.json"];
     total = 3 + lfiles.length + 2 + 20;
     var get = function (path, label) { return apiGet(path).then(function (j) { tick("Loaded " + label); return j; }); };
@@ -2467,7 +2895,7 @@ function wireFilters() {
     downloadCsv("Owner 360 calendar.csv", rows);
   };
   /* properties */
-  $("pSrc").innerHTML = ["R", "T", "C", "P", "X"].map(function (s) { return '<span class="chip" data-k="' + s + '">' + SRC_NAMES[s] + "</span>"; }).join("");
+  $("pSrc").innerHTML = ["R", "T", "C", "Y", "P", "X"].map(function (s) { return '<span class="chip" data-k="' + s + '">' + SRC_NAMES[s] + "</span>"; }).join("");
   $("pSrc").querySelectorAll(".chip").forEach(function (c) { c.onclick = function () { var k = c.dataset.k, ix = S.pSrc.indexOf(k); if (ix >= 0) S.pSrc.splice(ix, 1); else S.pSrc.push(k); c.classList.toggle("on"); S.pPage = 0; renderProps(); }; });
   $("pq").oninput = debounce(function () { S.pQ = $("pq").value; S.pPage = 0; renderProps(); }, 150);
   $("pNoOwner").onclick = function (e) { e.preventDefault(); S.pNoOwner = !S.pNoOwner; this.classList.toggle("on", S.pNoOwner); S.pPage = 0; renderProps(); };
