@@ -709,7 +709,7 @@ tr.hidden-row td{opacity:.45}
     <div class="mark">O</div>
     <span class="brand-name">Greysteel</span><span class="brand-sep">|</span>
     <span class="brand-page">Owner 360</span>
-    <span id="verBadge" title="Page version">v6</span>
+    <span id="verBadge" title="Page version">v7</span>
   </div>
   <nav class="tabs">
     <button class="tab active" data-view="owners"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span class="tl">Owners</span></button>
@@ -756,7 +756,7 @@ tr.hidden-row td{opacity:.45}
           <div class="ms-f"><label>Status</label><select id="oStatus"><option value="">Any</option><option value="-">No status yet</option></select></div>
           <div class="ms-f"><label>Assigned</label><select id="oAssn"><option value="">Anyone</option><option value="me">Me</option><option value="-">Unassigned</option></select></div>
           <div class="ms-f"><label>Signals within</label><select id="oHorizon"><option value="12">12 months</option><option value="24" selected>24 months</option><option value="36">36 months</option></select></div>
-          <div class="ms-f"><label>Headquarters</label><select id="oHq"><option value="">Anywhere</option></select></div>
+          <div class="ms-f wide"><label>HQ city</label><input id="oHq" type="search" list="oHqList" placeholder="Type a city, e.g. Bethesda or Bethesda, MD" autocomplete="off"><datalist id="oHqList"></datalist></div>
           <div class="ms-f"><label>Other</label><select id="oOther"><option value="">-</option><option value="star">Starred by me</option><option value="contact">Has phone or email</option><option value="gs">Greysteel history</option><option value="notes">Has notes</option></select></div>
         </div>
       </div>
@@ -2469,13 +2469,14 @@ var DMV_CITIES = /^(Washington|Bethesda|Chevy Chase|Silver Spring|Rockville|Gait
 var HR_CITIES = /^(Norfolk|Virginia Beach|Chesapeake|Portsmouth|Newport News|Hampton|Suffolk|Yorktown|Williamsburg|Smithfield|Poquoson|Carrollton|Gloucester|Fort Monroe)$/;
 function hqArea(h) { if (!h) return ""; if (h.s === "DC" || (h.s !== "DC" && DMV_CITIES.test(h.c) && (h.s === "MD" || h.s === "VA"))) return "dmv"; if (h.s === "VA" && HR_CITIES.test(h.c)) return "hr"; return ""; }
 function hqMatch(h, f) {
-  if (!h) return f === "none";
-  if (f === "local:dmv") return hqArea(h) === "dmv";
-  if (f === "local:hr") return hqArea(h) === "hr";
-  if (f === "out") return h.s !== "DC" && h.s !== "MD" && h.s !== "VA";
-  if (f.indexOf("st:") === 0) return h.s === f.slice(3);
-  if (f.indexOf("city:") === 0) return h.s + "|" + h.c === f.slice(5);
-  return true;
+  var q = String(f || "").toLowerCase().replace(/\s+/g, " ").trim();
+  if (!q) return true;
+  if (!h) return false;
+  var city = (h.c || "").toLowerCase(), st = h.s.toLowerCase();
+  var m = /^(.*?),\s*([a-z]{2})$/.exec(q);
+  if (m) return city.indexOf(m[1].trim()) === 0 && st === m[2];
+  if (/^[a-z]{2}$/.test(q) && st === q) return true;
+  return city.indexOf(q) === 0 || city.indexOf(" " + q) >= 0;
 }
 /* local first: DC area, then Hampton Roads, then the rest of DC/MD/VA, then other states A-Z */
 function hqSortKey(h) {
@@ -3069,7 +3070,7 @@ async function boot() {
   S.data.props.forEach(function (p) { PROP_BY_ID[p.id] = p; });
   buildSearch(); indexOverlay();
   var f = lsGet("o360_f", null);
-  if (f) { S.region = f.region || ""; S.sort = f.sort || "score"; S.sig = f.sig || []; S.kinds = f.kinds || S.kinds; S.horizon = f.horizon || 24; S.hq = f.hq || ""; }
+  if (f) { S.region = f.region || ""; S.sort = f.sort || "score"; S.sig = f.sig || []; S.kinds = f.kinds || S.kinds; S.horizon = f.horizon || 24; S.hq = /:/.test(f.hq || "") ? "" : (f.hq || ""); }
   wireFilters();
   $("dataLbl").textContent = "Built " + ago(S.data.built.at);
   renderOwnerList();
@@ -3124,24 +3125,13 @@ function wireFilters() {
   $("oAssn").onchange = function () { S.assn = this.value; renderOwnerList(); };
   $("oOther").onchange = function () { S.other = this.value; renderOwnerList(); };
   (function () {
-    var st = {}, ci = {}, dmv = 0, hr = 0, out = 0, none = 0;
-    S.data.owners.forEach(function (o) {
-      var h = o.hq;
-      if (!h) { none++; return; }
-      st[h.s] = (st[h.s] || 0) + 1;
-      var k = h.s + "|" + h.c; ci[k] = (ci[k] || 0) + 1;
-      var a = hqArea(h); if (a === "dmv") dmv++; else if (a === "hr") hr++;
-      if (h.s !== "DC" && h.s !== "MD" && h.s !== "VA") out++;
-    });
-    var opt = function (v, l, n) { return '<option value="' + esc(v) + '">' + esc(l) + " (" + fmtN(n) + ")</option>"; };
-    var h = '<option value="">Anywhere</option>' + opt("local:dmv", "DC area", dmv) + opt("local:hr", "Hampton Roads", hr) + opt("out", "Outside DC / MD / VA", out) +
-      '<optgroup label="State">' + Object.keys(st).sort(function (a, b) { return st[b] - st[a]; }).map(function (s2) { return opt("st:" + s2, STATE_NAMES[s2] || s2, st[s2]); }).join("") + "</optgroup>" +
-      '<optgroup label="City">' + Object.keys(ci).filter(function (k) { return ci[k] >= 3; }).sort(function (a, b) { return ci[b] - ci[a]; }).slice(0, 60).map(function (k) { var x = k.split("|"); return opt("city:" + k, x[1] + ", " + x[0], ci[k]); }).join("") + "</optgroup>" +
-      opt("none", "Unknown", none);
-    $("oHq").innerHTML = h;
+    var ci = {};
+    S.data.owners.forEach(function (o) { var h = o.hq; if (h && h.c) { var k = h.c + ", " + h.s; ci[k] = (ci[k] || 0) + 1; } });
+    $("oHqList").innerHTML = Object.keys(ci).sort(function (a, b) { return ci[b] - ci[a] || a.localeCompare(b); })
+      .map(function (k) { return '<option value="' + esc(k) + '">' + fmtN(ci[k]) + " owner" + (ci[k] === 1 ? "" : "s") + "</option>"; }).join("");
     $("oHq").value = S.hq || "";
   })();
-  $("oHq").onchange = function () { S.hq = this.value; S.shown = 120; renderOwnerList(); };
+  $("oHq").oninput = debounce(function () { S.hq = $("oHq").value; S.shown = 120; renderOwnerList(); }, 150);
   $("oHorizon").onchange = function () { S.horizon = +this.value; renderOwnerList(); if (S.sel >= 0) renderProfile(); };
   $("oReset").onclick = function () {
     S.q = ""; S.sig = []; S.region = ""; S.pmin = S.umin = null; S.status = S.assn = S.other = S.hq = ""; $("oHq").value = ""; S.kinds = ["Private", "Non-profit", "Co-op", "Individual"];
