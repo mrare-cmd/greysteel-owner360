@@ -500,6 +500,12 @@ tr.hidden-row td{opacity:.45}
 .dt td .lnk.has{opacity:.9;color:var(--blue)}
 #lnkPop{position:fixed;z-index:7000;width:360px;background:var(--white);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow-lg);padding:12px;display:none}
 #lnkPop.open{display:block}
+#ctxMenu{position:fixed;z-index:7100;min-width:220px;max-width:320px;background:var(--white);border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow-lg);padding:4px 0;display:none}
+#ctxMenu.open{display:block}
+#ctxMenu .ch{padding:6px 14px 6px;font-size:11.5px;color:var(--text2);border-bottom:1px solid var(--border2);margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#ctxMenu button,#ctxMenu a{display:flex;align-items:center;gap:10px;width:100%;height:34px;padding:0 14px;font-size:13px;color:var(--text);text-align:left;text-decoration:none}
+#ctxMenu button:hover,#ctxMenu a:hover{background:#f1f3f4}
+#ctxMenu svg{width:15px;height:15px;color:var(--text2);flex-shrink:0}
 #lnkPop .lt{font-size:12px;color:var(--text2);margin-bottom:6px}
 #lnkPop input{width:100%;height:32px;border:1px solid var(--border);border-radius:6px;padding:0 8px;outline:none;font-size:12.5px}
 #lnkPop input:focus{border-color:var(--blue);box-shadow:0 0 0 2px var(--blue-light)}
@@ -515,6 +521,9 @@ tr.hidden-row td{opacity:.45}
 .swrow button.on{border-color:var(--text)}
 .statbox{border:1px solid var(--border2);border-radius:10px;padding:12px 14px;background:var(--bg)}
 .statbox .row{display:flex;justify-content:space-between;font-size:12.5px;margin:3px 0}
+.maprow{display:flex;gap:8px;margin-top:8px}
+.maprow input{flex:1;min-width:0;height:32px;border:1px solid var(--border);border-radius:8px;padding:0 10px;font-size:12.5px;outline:none;background:var(--white)}
+.maprow input:focus{border-color:var(--blue);box-shadow:0 0 0 2px var(--blue-light)}
 .citem{border:1px solid var(--border2);border-radius:10px;padding:10px 12px;margin-bottom:8px;font-size:12.5px}
 .citem .ct{font-weight:500;margin-bottom:2px}
 .dr-f{padding:12px 18px;border-top:1px solid var(--border2);display:flex;gap:8px;justify-content:flex-end}
@@ -570,6 +579,19 @@ tr.hidden-row td{opacity:.45}
 .chip .c{font-size:11px;color:var(--text3);font-weight:400}
 .chip.on .c{color:var(--blue)}
 .mc .sc{margin-left:auto}
+/* share button: blue outline at rest, green with a drawn check once copied (same as LoanID) */
+.lid-btn{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:7px;height:30px;padding:0 12px;border-radius:15px;font-size:12.5px;border:1px solid var(--border);background:var(--white);color:var(--blue);font-weight:600;cursor:pointer;overflow:hidden;transition:background .28s,border-color .28s,color .28s,box-shadow .2s,transform .12s;white-space:nowrap}
+.lid-btn:hover{background:var(--blue-light);border-color:#c6dafc}
+.lid-btn:active{transform:scale(.98)}
+.lid-btn .lb-idle,.lid-btn .lb-done{display:inline-flex;align-items:center;gap:7px;transition:transform .32s cubic-bezier(.2,.8,.3,1.2),opacity .2s}
+.lid-btn .lb-done{position:absolute;inset:0;justify-content:center;opacity:0;transform:translateY(110%)}
+.lid-btn .lb-done svg path{stroke-dasharray:24;stroke-dashoffset:24}
+.lid-btn.copied{background:var(--green);border-color:var(--green);color:#fff;box-shadow:0 0 0 4px rgba(24,128,56,.18)}
+.lid-btn.copied .lb-idle{opacity:0;transform:translateY(-110%)}
+.lid-btn.copied .lb-done{opacity:1;transform:translateY(0)}
+.lid-btn.copied .lb-done svg path{animation:lbDraw .38s .08s ease-out forwards}
+@keyframes lbDraw{to{stroke-dashoffset:0}}
+@media (prefers-reduced-motion:reduce){.lid-btn,.lid-btn .lb-idle,.lid-btn .lb-done{transition:none}.lid-btn.copied .lb-done svg path{animation:none;stroke-dashoffset:0}}
 .hqh{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:8px;padding:7px 14px;background:var(--bg);border-bottom:1px solid var(--border2);font-family:'Google Sans',sans-serif;font-size:13px;font-weight:500;color:var(--text)}
 .hqh span{margin-left:auto;font-family:'Roboto',sans-serif;font-size:11.5px;font-weight:400;color:var(--text3)}
 .score{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:24px;padding:0 7px;border-radius:12px;font-family:'Google Sans',sans-serif;font-size:13px;font-weight:500;background:#f1f3f4;color:var(--text2);flex-shrink:0;font-variant-numeric:tabular-nums}
@@ -634,7 +656,7 @@ tr.hidden-row td{opacity:.45}
 .pcard .dt .sub{font-size:11.5px;color:var(--text2);line-height:1.35}
 .srcs{display:inline-flex;gap:3px}
 .srcs b{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:5px;font-size:10px;font-weight:700;color:#fff}
-.srcs .R{background:#5f6368}.srcs .T{background:#1a73e8}.srcs .C{background:#9334e6}.srcs .P{background:#188038}.srcs .X{background:#e8710a}.srcs .Y{background:#007b83}
+.srcs .R{background:#5f6368}.srcs .T{background:#1a73e8}.srcs .C{background:#9334e6}.srcs .P{background:#188038}.srcs .X{background:#e8710a}.srcs .Y{background:#007b83}.srcs .D{background:#a50e0e}
 #omap{height:330px;border-top:1px solid var(--border2)}
 .notes .f{padding:0 18px}
 .nrow{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 18px}
@@ -709,7 +731,7 @@ tr.hidden-row td{opacity:.45}
     <div class="mark">O</div>
     <span class="brand-name">Greysteel</span><span class="brand-sep">|</span>
     <span class="brand-page">Owner 360</span>
-    <span id="verBadge" title="Page version">v7</span>
+    <span id="verBadge" title="Page version">v8</span>
   </div>
   <nav class="tabs">
     <button class="tab active" data-view="owners"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span class="tl">Owners</span></button>
@@ -763,7 +785,7 @@ tr.hidden-row td{opacity:.45}
       <div class="ms-count" id="oCount"></div>
       <div class="ms-list" id="oList"></div>
     </aside>
-    <div class="omain" id="omain"><div class="oempty"><div><div class="big">Pick an owner</div>Every owner in the LoanID markets, with PBS8, LoanID (Reonomy, Trepp, CoStar, Yardi) and TOPA joined.<br>The list is ranked by why-call-now: maturing debt, expiring HAP contracts, TOPA filings, distress and hold period.</div></div></div>
+    <div class="omain" id="omain"><div class="oempty"><div><div class="big">Pick an owner</div>Every owner in the LoanID markets, with PBS8, LoanID (Reonomy, Trepp, CoStar, Yardi, DC Recorder) and TOPA joined.<br>The list is ranked by why-call-now: maturing debt, expiring HAP contracts, TOPA filings, distress and hold period.</div></div></div>
   </div></section>
 
   <!-- ======================= CALENDAR ======================= -->
@@ -851,7 +873,7 @@ var DAY = 864e5;
 (function (root) {
 "use strict";
 
-var BUILD_VERSION = 1;
+var BUILD_VERSION = 2;
 
 /* ------------------------------------------------------------ regions */
 var REGIONS = {      /* box = [south, west, north, east], generous: drops geocodes that landed in another state */
@@ -1019,7 +1041,7 @@ function yardiLine(line, lat, lng, reg) {
 }
 var UNIT_RE = /\s+(STE|SUITE|UNIT|APT|APARTMENT|#|FL|FLR|FLOOR|RM|ROOM|BLDG|BUILDING|PMB|DEPT|OFC|OFFICE)\b.*$|\s+#\S*.*$/;
 function addrTokens(line) {
-  var t = s(line).toUpperCase().replace(/[.,]/g, " ").replace(/\s+/g, " ").trim();
+  var t = s(line).toUpperCase().replace(/\b([NS])\.\s?([EW])\.?(?=\s|,|$)/g, "$1$2").replace(/[.,]/g, " ").replace(/\s+/g, " ").trim();
   return t.split(" ").map(function (w) { return SUF[w] || w; }).join(" ");
 }
 /* "1300-1310 Fairmont St NW" -> {lo:1300, hi:1310, street:"FAIRMONT ST NW"} */
@@ -1163,7 +1185,7 @@ function build(input, log) {
       addRec({src: "R", reg: reg, line: s(r.address_line_1), city: s(r.address_city), zip: zip5(r.address_postal_code),
         lat: num(r.latitude), lng: num(r.longitude), units: ru, unitsEst: est,
         yb: int(r.year_built), name: "",
-        owner: {name: s(r.reported_owner_name), mail: {line1: s(r.reported_mailing_address_line_1) + (s(r.reported_mailing_std_unit_nbr) && !/(STE|SUITE|#|UNIT|FL)/i.test(s(r.reported_mailing_address_line_1)) ? " STE " + s(r.reported_mailing_std_unit_nbr) : ""), zip: zip5(r.reported_mailing_address_postal_code),
+        owner: {name: s(r.reported_owner_name), mail: {line1: s(r.reported_mailing_address_line_1) + (s(r.reported_mailing_std_unit_nbr) && !/\b(STE|SUITE|#|UNIT|FL)\b/i.test(s(r.reported_mailing_address_line_1)) ? " STE " + s(r.reported_mailing_std_unit_nbr) : ""), zip: zip5(r.reported_mailing_address_postal_code),
                 full: s(r.reported_mailing_address_full)}, co: co ? co[1].toLowerCase() : "", start: day(r.sale_recorded_date), src: "Reonomy"},
         contacts: contacts, contactCo: s(r.contact_company_name),
         d: {link: s(r.link), owner: s(r.owner_profile_link), apn: s(r.apn), sale: day(r.sale_recorded_date), price: num(r.sale_amount),
@@ -1231,6 +1253,8 @@ function build(input, log) {
     });
 
     /* ---- LoanID: CoStar sale comps (one per sale) ---- */
+    var compNames = {};
+    (L[reg].costar || []).forEach(function (r) { var k = s(r.comp_id) + "|" + s(r.buyer_recorded_company).toUpperCase(); if (s(r.comp_id) && s(r.buyer_recorded_company)) (compNames[k] = compNames[k] || {})[s(r.property_address).toUpperCase()] = 1; });
     (L[reg].costar || []).forEach(function (r) {
       var line = s(r.property_address);
       addRec({src: "C", reg: reg, line: line, city: s(r.portfolio_city) === "Multiple" ? "" : s(r.portfolio_city), zip: zip5(r.portfolio_zip),
@@ -1239,6 +1263,7 @@ function build(input, log) {
         owner: {name: s(r.buyer_recorded_company) || s(r.buyer_true_company), trueCo: s(r.buyer_true_company),
                 mail: {line1: s(r.buyer_true_address), zip: zip5(r.buyer_true_zip_code), full: [s(r.buyer_true_address), s(r.buyer_true_city), s(r.buyer_true_state), s(r.buyer_true_zip_code)].filter(Boolean).join(", ")},
                 start: day(r.sale_date), src: "CoStar",
+                shared: Object.keys(compNames[s(r.comp_id) + "|" + s(r.buyer_recorded_company).toUpperCase()] || {}).length > 1,
                 person: s(r.buyer_true_contact_name), phone: phone(r.buyer_true_phone)},
         seller: s(r.seller_true_company),
         d: {comp: s(r.comp_id), date: day(r.sale_date), price: num(r.sale_price), ppu: num(r.price_per_unit), cap: num(r.actual_cap_rate),
@@ -1246,7 +1271,8 @@ function build(input, log) {
             lb: s(r.listing_broker_company), lba: [s(r.listing_broker_agent_first_name), s(r.listing_broker_agent_last_name)].join(" ").trim(),
             bb: [s(r.buyers_broker_agent_first_name), s(r.buyers_broker_agent_last_name)].join(" ").trim(),
             lender: s(r.first_trust_deed_lender), loan: num(r.first_trust_deed_balance), aff: s(r.affordable_type),
-            portfolio: s(r.portfolio_name || r.multi_sale_name), cls: s(r.building_class)}});
+            portfolio: s(r.portfolio_name || r.multi_sale_name), cls: s(r.building_class)},
+        lots: uniq([s(r.parcel_number_1_min), s(r.parcel_number_2_max)].map(function (x) { return x.toUpperCase().replace(/\s+/g, ""); }).filter(function (x) { return /^[A-Z0-9]+-\d{4}$/.test(x); }))});
     });
   });
 
@@ -1294,6 +1320,57 @@ function build(input, log) {
   }
   log("PBS8 properties in the LoanID markets: " + nP);
 
+  /* ---- LoanID: DC Recorder of Deeds, appointments of substitute trustee (LoanID v54) ----
+     dc/data_rod.json, one row per filing, already limited to multifamily lots by DC use code.
+     A substitute trustee is appointed to run a foreclosure sale, so each filing is distress.
+     One record per multifamily lot on the filing; `rodKey` is the square/suffix/lot. */
+  var nD = 0;
+  Object.keys(L).forEach(function (reg) {
+    if (!REGIONS[reg]) return;
+    var squeeze = function (n) { return nameKey(n).replace(/[^A-Z0-9]/g, ""); };
+    var nameWords = function (n) { return nameKey(n).split(" ").filter(function (w) { return w.length >= 4 && !/^(STREET|AVENUE|PLACE|ROAD|NORTHWEST|NORTHEAST|SOUTHWEST|SOUTHEAST|PROPERTIES|HOLDINGS|PARTNERS|ASSOCIATES|APARTMENTS|GROUP|TRUST|UNITED|STATES|AMERICA|DISTRICT|COLUMBIA)$/.test(w); }); };
+    /* the recorder indexes people LAST FIRST ("RINGER MARVIN TERRELL") */
+    var flipPerson = function (n) { var w = s(n).split(/\s+/); return isPerson(n) && n.indexOf(",") < 0 && w.length >= 2 && w.length <= 3 ? w.slice(1).concat(w[0]).join(" ") : s(n); };
+    (L[reg].rod || []).forEach(function (f) {
+      var borrowers = (f.borrowers || []).map(s).filter(Boolean), lenders = (f.lenders || []).map(s).filter(Boolean), blanket = (f.parcels || []).length >= 6;
+      /* LoanID calls a party the borrower only when it matches the tax roll, so on ground leases, recent
+         sales and squeezed tax names ("O S S LLC") the borrower LLC is listed with the lenders. With no
+         borrower named: a party that is the tax owner is the borrower; failing that, when the filing has
+         a recognisable lender, the parties that are not lenders are the borrowers */
+      if (!borrowers.length && lenders.length > 1) {
+        var taxKeys = (f.parcels || []).map(function (x) { return squeeze(x && x.owner); }).filter(Boolean);
+        var isLender = function (n) { return /\b(BANK|MORTGAGE|LENDING|SAVINGS|SERVICING|CREDIT|FSB|FINANCIAL|TRUST|REIT|FUND|LOAN|NATIONAL ASSOCIATION|N\.?A\.?)\b/i.test(n); };
+        var own = lenders.filter(function (n) { return taxKeys.indexOf(squeeze(n)) >= 0; });
+        if (!own.length && lenders.some(isLender)) own = lenders.filter(function (n) { return !isLender(n); });
+        if (own.length && own.length < lenders.length) { borrowers = own; lenders = lenders.filter(function (n) { return own.indexOf(n) < 0; }); }
+      }
+      (f.parcels || []).filter(function (x) { return x && x.multifamily; }).forEach(function (x) {
+        var line = s(x.address).replace(/\s+WASHINGTON\s+DC\s+\d{5}(-\d{4})?\s*$/i, "").replace(/\s*#\s*\S+$/, "").trim();   /* the tax roll adds the unit ("# 501") */
+        var deed = (f.related || []).filter(function (r) { return r && r.type === "TRUST"; })[0];
+        var tax = s(x.owner), same = borrowers.filter(function (b) { return squeeze(b) && squeeze(b) === squeeze(tax); })[0];
+        var tw = nameWords(tax), shares = borrowers.some(function (b) { var bw = nameWords(b); return tw.some(function (w) { return bw.indexOf(w) >= 0; }); });
+        /* a blanket filing (a school's financing over 32 lots) names lots its borrower does not own:
+           keep a lot there only when the tax roll's owner is one of the borrowers */
+        if (blanket && !same && !shares) return;
+        /* owner = the tax roll's owner (what LoanID shows), in the borrower's spelling when they are the
+           same entity ("263716TH ST NW LLC" = "2637 16th ST NW LLC"); a borrower alone only if it is not a lender or trust */
+        /* "OSS, L.L.C." -> "OSS LLC" (a comma would read as LAST, FIRST) */
+        if (same) same = same.replace(/,\s*([A-Za-z.]+)\s*$/, function (m, x) { var y = x.replace(/\./g, ""); return /^(LLC|LP|LLP|PLLC|INC|LTD|CORP)$/i.test(y) ? " " + y.toUpperCase() : m; });
+        var nm = same || tax || flipPerson(borrowers[0] || "");
+        if (!tax && nm && (INVESTOR_RE.test(nameKey(nm)) || /\b(TRUST \d|\d{4} [A-Z]+\d|MORTGAGE|LOAN)\b/.test(nameKey(nm)))) nm = "";
+        nD++;
+        addRec({src: "D", reg: reg, line: line, city: "Washington", zip: zip5(x.address), lat: num(x.lat), lng: num(x.lon),
+          units: int(x.units), yb: int(x.year_built), name: "", rodKey: s(x.key),
+          /* the lots of one complex on one filing (same square, same tax owner) are one property */
+          rodGroup: s(f.doc) + "|" + s(x.key).split("-")[0] + "|" + squeeze(tax),
+          owner: nm ? {name: nm, start: "", src: "DC Recorder"} : null,
+          d: {doc: s(f.doc), date: day(f.recorded), trustees: (f.trustees || []).map(s).filter(Boolean).slice(0, 6), lenders: lenders.slice(0, 4),
+              borrowers: borrowers.slice(0, 4), deed: deed ? s(deed.doc) : "", link: s(f.link), key: s(x.key), use: s(x.use), taxOwner: s(x.owner)}});
+      });
+    });
+  });
+  log("DC Recorder substitute-trustee lots: " + nD);
+
   /* ---- TOPA (DC): every multifamily-relevant DHCD filing is an event ---- */
   var TOPA_KINDS = {
     ofs5: "5+ Offer of Sale", not: "Notice of Transfer", dopa: "DOPA Notice", rofr: "Right of First Refusal", ofs24: "2-4 Offer of Sale",
@@ -1329,18 +1406,54 @@ function build(input, log) {
      one row per property, best evidence first - see the reviewer notes in
      CLAUDE.md for why each guard exists. */
   var P = new DSU(), streets = {};
+  /* Reonomy's apn "5729-W000-0006" and the recorder's key "5729W-0006" are the same lot */
+  function apnKey(a) {
+    var m = /^\s*(PAR|\d{4})-([A-Z0-9]{4})-(\d{4})\s*$/.exec(s(a).toUpperCase());
+    if (!m) return "";
+    return m[1] === "PAR" ? "PAR" + m[2] + "-" + m[3] : m[1] + (/^[A-Z]/.test(m[2]) ? m[2].replace(/0+$/, "") : "") + "-" + m[3];
+  }
+  var byLot = {}, byRod = {}, byRodGroup = {};
   recs.forEach(function (r) {
-    if (r.src === "Y") { r.line = yardiLine(r.line, r.lat, r.lng, r.reg); r.site = parseSite(r.line); return; }
+    if (r.reg !== "dc") return;
+    if (r.src === "R") { var k = apnKey(r.d.apn); if (k) (byLot[k] = byLot[k] || []).push(r.i); }
+    if (r.src === "C") (r.lots || []).forEach(function (k2) { (byLot[k2] = byLot[k2] || []).push(r.i); });      /* CoStar's parcel numbers are the same square-lot */
+  });
+  recs.forEach(function (r) {
+    if (r.src === "D") {
+      if (byRod[r.rodKey] !== undefined) P.union("r" + byRod[r.rodKey], "r" + r.i); else byRod[r.rodKey] = r.i;   /* every filing on one lot */
+      if (byRodGroup[r.rodGroup] !== undefined) P.union("r" + byRodGroup[r.rodGroup], "r" + r.i); else byRodGroup[r.rodGroup] = r.i;
+      var lots = byLot[r.rodKey];
+      if (lots) { lots.forEach(function (o) { P.union("r" + o, "r" + r.i); }); r.site = parseSite(r.line); r.d.how = "lot"; return; }
+      r.d.how = "address";
+    }
+    if (r.src === "Y") { r.line0 = r.line; r.line = yardiLine(r.line, r.lat, r.lng, r.reg); r.site = parseSite(r.line); return; }
     var site = parseSite(r.line);
     r.site = site;
     if (!site) return;
-    var cityKey = r.reg === "hampton" ? s(r.city).toUpperCase() : "";
-    var k = r.reg + "|" + site.street + (cityKey ? "|" + cityKey : "");
+    r.cityKey = r.reg === "hampton" ? s(r.city).toUpperCase() : "";
+    var k = r.reg + "|" + site.street;
     r.skey = k;
     var list = streets[k] || (streets[k] = []);
     for (var j = 0; j < list.length; j++) {
       var o = list[j], q = recs[o];
       var sameOwner = r.owner && q.owner && r.owner.name && q.owner.name && nameKey(r.owner.name) === nameKey(q.owner.name) && nameKey(r.owner.name);
+      /* the same single house number on the same street, with something else agreeing (zip, owner, or the
+         unit count of a 20+ unit building), is the same building even when a geocode is wrong */
+      var exact = site.lo === q.site.lo && site.hi === site.lo && q.site.hi === q.site.lo;
+      var sameZip = r.zip && q.zip && r.zip === q.zip;
+      var unitsEq = r.units && q.units && Math.min(r.units, q.units) >= 20 && Math.abs(r.units - q.units) <= 0.05 * Math.max(r.units, q.units);
+      /* the same complex name ("Poquoson Place Apartments" / "Poquoson Pl") */
+      var na = cplxName(r.name), nb = cplxName(q.name);
+      var sameName = na.length >= 6 && nb.length >= 6 && (na === nb || na.indexOf(nb) === 0 || nb.indexOf(na) === 0);
+      /* dist() is 0 both for "no coordinates" and for identical pins: hasLL tells them apart */
+      var dd = dist(r, q), hasLL = !!(r.lat && r.lng && q.lat && q.lng && inBox(r.reg, r.lat, r.lng) && inBox(q.reg, q.lat, q.lng));
+      /* a wrong geocode is forgiven only with the zip or the complex name agreeing; a range against its
+         own first number (4016-4022 vs 4016 S Capitol St SE) also needs the owner or the unit count */
+      var sure = (exact && (sameZip || sameName)) || (site.lo === q.site.lo && sitesOverlap(site, q.site) && sameZip && (sameOwner || unitsEq));
+      /* Hampton Roads is seven cities that reuse street names: two records are the same street only in
+         the same city or zip, or within 0.3 mi (CoStar comps there carry no city; sources disagree on
+         Newport News vs Hampton for one address) */
+      if (r.reg === "hampton" && !(r.cityKey && r.cityKey === q.cityKey) && !sameZip && !(hasLL && dd <= 0.3) && !(exact && sameName) && !(exact && (unitsEq || sameOwner) && (!hasLL || dd <= 1))) continue;
       /* only owners named like a complex ("Woodberry Apartments", "Douglas Knoll Cooperative"),
          not an investor's string of separate rowhouses ("Norfolk Multifamily I LLC") */
       if (sameOwner && r.src === "R" && q.src === "R" && !/^\d/.test(sameOwner) && /\b(APARTMENTS?|APTS?|MANOR|TERRACE|GARDENS?|VILLAGE|COURTS?|TOWERS?|HOUSE|COMMONS|ESTATES|RESIDENCES|COOPERATIVE|CO OP|HOMES)\b/.test(sameOwner) &&
@@ -1351,9 +1464,9 @@ function build(input, log) {
         var ok = wr && other.lo >= wr[0] && other.lo <= wr[1] && r.owner && q.owner && r.owner.name && q.owner.name && nameKey(r.owner.name) === nameKey(q.owner.name);
         if (!ok) continue;
       }
-      if (r.zip && q.zip && r.zip !== q.zip && dist(r, q) > 0.25) continue;
+      if (r.zip && q.zip && r.zip !== q.zip && dd > 0.25) continue;
       /* a range only absorbs a single number on it when the two are near each other (or one has no coordinates) */
-      if (dist(r, q) > 0.6) continue;
+      if (dd > 0.6 && !sure) continue;
       P.union("r" + o, "r" + r.i);
     }
     list.push(r.i);
@@ -1383,6 +1496,7 @@ function build(input, log) {
     if (r.src === "Y") return;
     var k = P.find("r" + r.i), g = G[k] || (G[k] = {recs: [], names: {}, words: {}, ownerNames: {}, units: 0, rUnits: 0, coop: false, onlyX: true, hasName: false});
     g.recs.push(r);
+    if (r.site && r.site.hi === r.site.lo && r.skey) { (g.exact = g.exact || {})[r.skey + "|" + r.site.lo] = 1; if (r.zip) (g.zips = g.zips || {})[r.zip] = 1; }
     if (!g.c && r.lat && r.lng && inBox(r.reg, r.lat, r.lng)) g.c = r;
     if (r.src !== "X") g.onlyX = false;
     var nm = r.src === "T" ? [r.name].concat((r.d.loans || []).map(function (l) { return l.name; })) : [r.name];
@@ -1407,13 +1521,16 @@ function build(input, log) {
     Object.keys(G).forEach(function (k) {
       var g = G[k];
       if (g.recs[0].reg !== y.reg) return;
-      if (yOk && g.c && Math.abs(g.c.lat - y.lat) > 0.012) return;     /* ~1.3 km: cheap pre-filter */
+      var yKey = y.site && y.reg + "|" + y.site.street;
+      var exHit = !!(yKey && g.exact && g.exact[yKey + "|" + y.site.lo]);
+      /* the same address in the same zip with a like unit count stays a candidate however far the pins are apart */
+      var exSure = exHit && y.zip && g.zips && g.zips[y.zip] && y.units && g.units && Math.abs(y.units - g.units) <= 0.25 * Math.max(y.units, g.units);
+      if (!exSure && yOk && g.c && Math.abs(g.c.lat - y.lat) > 0.012) return;     /* ~1.3 km: cheap pre-filter */
       var d = yOk ? gDist(y, g) : null;
-      if (d !== null && d > 400) return;
+      if (!exSure && d !== null && d > 400) return;
       var score = null;
-      var yKey = y.site && y.reg + "|" + y.site.street + (y.reg === "hampton" ? "|" + s(y.city).toUpperCase() : "");
       /* the exact house number beats a name (Washington Phase 3 at 1205 7th St, not Phase 2 next door) */
-      if (!g.onlyX && y.site && (d === null || d <= 250) && g.recs.some(function (q) { return q.site && q.skey === yKey && q.site.lo === y.site.lo && q.site.hi === q.site.lo; })) score = 0;
+      if (!g.onlyX && exHit && (d === null ? y.reg !== "hampton" || !!(y.zip && g.zips && g.zips[y.zip]) : d <= 250 || exSure)) score = 0;
       if (score === null && !g.onlyX && yn.length >= 5) {
         var uy = y.units, ug = g.units, within = function (f) { return !uy || !ug || Math.abs(uy - ug) <= f * Math.max(uy, ug); };
         var eq = Object.keys(g.names).some(function (n) { return n === yn; });
@@ -1531,11 +1648,16 @@ function build(input, log) {
     var rs = groups[k];
     var has = {}; rs.forEach(function (r) { has[r.src] = (has[r.src] || 0) + 1; });
     /* a property needs at least one non-TOPA source, or a 5+ TOPA filing */
-    if (!has.R && !has.T && !has.C && !has.P && !has.Y) {
+    if (!has.R && !has.T && !has.C && !has.P && !has.Y && !has.D) {
       if (!rs.some(function (r) { return r.d.slug === "ofs5" || r.d.slug === "not" || r.d.slug === "dopa" || (r.d.units || 0) >= 5; })) return;
     }
     props.push(mergeProp(rs, today));
   });
+  /* ids must be unique (the page and the connector look properties up by id); the order of props is
+     left alone because owner grouping breaks ties by it */
+  var idSeen = {};
+  props.slice().sort(function (a, b) { return a.id < b.id ? -1 : a.id > b.id ? 1 : b.src.length - a.src.length || (b.u || 0) - (a.u || 0) || (a.a < b.a ? -1 : a.a > b.a ? 1 : 0); })
+       .forEach(function (p) { var n = idSeen[p.id] = (idSeen[p.id] || 0) + 1; if (n > 1) p.id += "x" + n; });
   log("properties: " + props.length);
 
   /* ============================== 2. group owners ===================== */
@@ -1596,6 +1718,23 @@ function build(input, log) {
       /* CoStar's true buyer is the parent - except a public body, which is a
          JV partner on half the affordable deals in town, not the parent */
       if (tk && tk !== nk && (!PUBLIC_RE.test(tk) || PUBLIC_RE.test(nk))) { link("n:" + nk, "n:" + tk, "costar", c.trueCo); trueCoTarget[tk] = 1; trueCoTarget[nk] = 1; }
+      /* CoStar files a portfolio sale's recorded buyer under one of its properties (Kushner's "Richmond
+         Hanover LLC" on Chesapeake Bay, deeded to Richmond Chesapeake LLC): when the county deed is that
+         same sale (same price, recorded within -30/+120 days) or Trepp's last sale is that same day, the
+         owner of record is the true buyer's entity */
+      var cosC = p.claims.filter(function (x) { return x.srcCode === "C" && x.trueCo; })[0];
+      var lead = p.claims.filter(function (x) { return x.srcCode === c.srcCode; })[0];
+      if (cosC && c === lead && (c.srcCode === "R" || c.srcCode === "T") && cosC.start) {
+        var tk2 = nameKey(cosC.trueCo), sameSale = false;
+        if (c.srcCode === "R") sameSale = !!(p.R[0] && p.C[0] && p.R[0].price && p.R[0].price === p.C[0].price && p.R[0].sale && p.R[0].sale >= addDays(cosC.start, -30) && p.R[0].sale <= addDays(cosC.start, 120));
+        else sameSale = !!(p.T[0] && p.T[0].lastSale && p.T[0].lastSale === cosC.start);
+        /* not the seller's name left on the loan, and not a brokerage or law firm CoStar put in the buyer field */
+        var sellerK = nameKey(p.C[0] && p.C[0].seller);
+        if (sameSale && tk2 && tk2 !== nk && nk !== sellerK && !/\b(RE MAX|REMAX|KELLER WILLIAMS|CENTURY 21|COLDWELL BANKER|LONG AND FOSTER|BERKSHIRE HATHAWAY|SOTHEBY|EXP REALTY|HOWARD HANNA|ROSE AND WOMBLE|LAWYERS?|ATTORNEYS?|LAW FIRM|LAW OFFICES?|LAW GROUP)\b/.test(tk2) &&
+            !PUBLIC_RE.test(tk2) && !PUBLIC_RE.test(nk) && !GROUND_RE.test(nk) && !INVESTOR_RE.test(nk)) {
+          link("n:" + nk, "n:" + tk2, "costar", cosC.trueCo + " (same sale)"); trueCoTarget[tk2] = 1; trueCoTarget[nk] = 1;
+        }
+      }
       var isPub = PUBLIC_RE.test(nk), noHub = isPub || GROUND_RE.test(nk) || INVESTOR_RE.test(nk) || COOP_RE.test(nk) || coopKey[nk];
       if (!detach[nk] && !detach[ownerKey(nk)]) {
         if (c.co && !noHub) keyAdd("co:" + c.co, nk);
@@ -1857,7 +1996,10 @@ function build(input, log) {
     });
     var bestC = Object.keys(cand).map(function (k) { return cand[k]; }).sort(function (a, b) { return b.w - a.w || a.n.length - b.n.length; })[0];
     var nm = bestC ? bestC.n : "", basis = bestC ? bestC.basis : "";
-    if (o.props.length >= 3 && (isSpe(nm) || (propertyLike(nm) && bestC.w < 3))) {
+    var speNames = {};
+    o.props.forEach(function (pi) { var c0 = props[pi].cur; if (c0 && c0.k && isSpe(c0.name)) speNames[c0.k] = 1; });
+    var twoSpe = o.props.length === 2 && Object.keys(speNames).length >= 2 && Object.keys(emails).map(emailDomain).filter(Boolean).length > 0;
+    if ((o.props.length >= 3 || twoSpe) && (isSpe(nm) || (propertyLike(nm) && bestC.w < 3))) {
       var topMail = Object.keys(mails).sort(function (a, b) { return mails[b].n - mails[a].n; })[0];
       var topDom = Object.keys(emails).map(emailDomain).filter(Boolean)[0];
       if (topDom) {
@@ -1951,10 +2093,10 @@ function build(input, log) {
 
   /* ============================== 3. output ============================ */
   var outProps = props.map(function (p) {
-    return {id: p.id, n: p.n, a: p.a, c: p.c, z: p.z, r: p.r, u: p.u, ue: p.ue || undefined, yb: p.yb, ll: p.ll, src: p.src, o: p._o ? p._o.idx : -1,
-      own: p.cur ? {n: title(p.cur.name), s: p.cur.src, d: p.cur.start || p.cur.seen || ""}
+    return {id: p.id, n: p.n, a: p.a, la: p.la && p.la.toLowerCase() !== p.a.toLowerCase() ? p.la : undefined, c: p.c, z: p.z, r: p.r, u: p.u, ue: p.ue || undefined, yb: p.yb, ll: p.ll, src: p.src, o: p._o ? p._o.idx : -1,
+      own: p.cur ? {n: title(shownOwner(p)), s: p.cur.src, d: p.cur.start || p.cur.seen || ""}
          : p.viaFac ? {n: "Not named - placed by its credit facility", s: "Trepp", d: ""} : null,
-      other: p.other, R: p.R, T: p.T, C: p.C, Y: p.Y, P: p.P, X: p.X};
+      other: p.other, R: p.R, T: p.T, C: p.C, Y: p.Y, P: p.P, D: p.D, X: p.X};
   });
   var outOwners = owners.map(function (o) {
     return {id: o.id, n: o.name, nb: o.basis, al: o.aliases, why: o.why, mail: o.mail, em: o.emails, ph: o.phones, ct: o.contacts,
@@ -1989,22 +2131,26 @@ function dist(a, b) {                        /* miles; 0 when either has no (usa
 }
 
 /* one physical property from all the source rows on it */
-var SRC_RANK = {R: 5, P: 4, Y: 3.5, T: 3, C: 2, X: 1};
+var SRC_RANK = {R: 5, P: 4, Y: 3.5, T: 3, C: 2, D: 1.5, X: 1};
 function mergeProp(rs, today) {
   rs.sort(function (a, b) { return SRC_RANK[b.src] - SRC_RANK[a.src]; });
-  var p = {R: [], T: [], C: [], Y: [], P: [], X: [], src: [], claims: [], _contacts: [], _contactCos: []};
+  var p = {R: [], T: [], C: [], Y: [], P: [], D: [], X: [], src: [], claims: [], _contacts: [], _contactCos: []};
   var first = function (f) { for (var i = 0; i < rs.length; i++) if (rs[i][f]) return rs[i][f]; return null; };
   var named = rs.filter(function (r) { return r.name && r.src !== "X"; });
   p.n = title((rs.filter(function (r) { return r.src === "P" && r.name; })[0] || rs.filter(function (r) { return r.src === "T" && r.name; })[0] || named[0] || {}).name || "");
   var main = rs.filter(function (r) { return r.src !== "X"; })[0] || rs[0];
   p.a = title(main.line);
+  /* the address LoanID knows this property by (its share links match on it): Reonomy's parcel
+     address, else Trepp's, CoStar's, Yardi's, the recorder's - not HUD's or TOPA's spelling */
+  var lid = ["R", "T", "C", "Y", "D"].map(function (sc) { return rs.filter(function (r) { return r.src === sc && r.line; })[0]; }).filter(Boolean)[0];
+  p.la = lid ? s(lid.line0 || lid.line) : "";
   p.c = title(main.city || first("city") || "");
   p.z = main.zip || first("zip") || "";
   p.r = main.reg;
   var ll = rs.filter(function (r) { return r.lat && r.lng && inBox(r.reg, r.lat, r.lng); })[0];
   p.ll = ll ? [Math.round(ll.lat * 1e5) / 1e5, Math.round(ll.lng * 1e5) / 1e5] : null;
   /* units: trust HUD and Trepp first, then Reonomy, then the newest sale */
-  var uOrder = ["P", "Y", "T", "R", "C", "X"];
+  var uOrder = ["P", "Y", "T", "R", "C", "D", "X"];
   p.u = null;
   for (var ui = 0; ui < uOrder.length && !p.u; ui++) rs.forEach(function (r) { if (r.src === uOrder[ui] && r.units && (!p.u || r.units > p.u)) p.u = r.units; });
   if (rs.filter(function (r) { return r.src === "R"; }).length > 1) {      /* several parcels: add them up if no better count */
@@ -2022,7 +2168,20 @@ function mergeProp(rs, today) {
   });
   p.C.sort(function (a, b) { return (b.date || "").localeCompare(a.date || ""); });
   p.X.sort(function (a, b) { return (b.date || "").localeCompare(a.date || ""); });
-  p.id = hash(p.r + "|" + (main.site ? main.site.street + "|" + main.site.lo : main.line));
+  /* one row per filing (a filing on two lots of one property arrives twice), newest first */
+  var seenDoc = {};
+  p.D = p.D.filter(function (f) {
+    var first = seenDoc[f.doc];
+    if (!first) { seenDoc[f.doc] = f; f.keys = [f.key]; return true; }
+    if (first.keys.indexOf(f.key) < 0) first.keys.push(f.key);
+    if (f.how === "lot") first.how = "lot";
+    return false;
+  }).sort(function (a, b) { return (b.date || "").localeCompare(a.date || ""); });
+  var lotUnits = {}, sumD = 0;
+  rs.forEach(function (r) { if (r.src === "D" && r.rodKey && r.units) lotUnits[r.rodKey] = r.units; });
+  Object.keys(lotUnits).forEach(function (k) { sumD += lotUnits[k]; });
+  if (sumD > (p.u || 0) && !rs.some(function (r) { return (r.src === "P" || r.src === "T" || r.src === "Y") && r.units; })) { p.u = sumD; p.ue = false; }
+  p.id = hash(p.r + "|" + (main.site ? main.site.street + "|" + main.site.lo : main.line || "~" + s(main.d && main.d.real) + "|" + s(p.n) + "|" + s(main.zip)));
 
   /* owner claims: every source's idea of who owns it */
   var newestSale = p.C[0] ? p.C[0].date : "";
@@ -2050,6 +2209,7 @@ function mergeProp(rs, today) {
     var pStart = pick.start || "";
     var reoSale = pick.srcCode === "R" ? (p.R[0] && p.R[0].sale) || "" : pStart;
     if (!reoSale || cos.start > addDays(reoSale, 60)) pick = cos;
+    else if (pick.srcCode === "R" && p.R[0] && p.C[0] && p.R[0].price && p.C[0].price && p.R[0].price < 0.25 * p.C[0].price && cos.start > addDays(reoSale, -365)) pick = cos;
   }
   /* Yardi's owner is stale when a newer sale says otherwise (CoStar's true buyer is
      someone else, or a TOPA sale filing in the last two years); and when Yardi's owner
@@ -2085,6 +2245,15 @@ function mergeProp(rs, today) {
   });
   return p;
 }
+/* the owner of record as shown: when CoStar's recorded buyer is one name repeated across a portfolio
+   ("Standard Forest Cove I Venture" on Lexington Park) and another source names this property's own
+   entity, show CoStar's true buyer; two true buyers read "A / B" */
+function shownOwner(p) {
+  var c = p.cur, n = c.name;
+  if (c.srcCode === "C" && c.shared && c.trueCo && p.claims.some(function (x) { return (x.srcCode === "P" || x.srcCode === "T") && x.k && x.k !== c.k; })) n = c.trueCo;
+  return s(n).replace(/\s*\|\s*/g, " / ");
+}
+function cplxName(n) { return addrTokens(s(n).replace(/&/g, " AND ")).replace(/\b(THE|APARTMENTS?|APTS?|RESIDENCES?|TOWNHOMES?|TOWNHOUSES?|PHASE|I|II|III|IV)\b/g, "").replace(/[^A-Z0-9]/g, ""); }
 function addDays(d, n) { var t = new Date(d + "T00:00:00Z"); if (isNaN(t)) return d; return new Date(+t + n * 864e5).toISOString().slice(0, 10); }
 
 var api = {build: build, nameKey: nameKey, ownerKey: ownerKey, parseSite: parseSite, mailKey: mailKey, pbs8Region: pbs8Region, REGIONS: REGIONS, BUILD_VERSION: BUILD_VERSION};
@@ -2169,7 +2338,7 @@ var S = {
 };
 var REG_NAMES = {hampton: "Hampton Roads", dc: "DC", montgomery: "Montgomery", princegeorges: "Prince George's"};
 var REG_SHORT = {hampton: "Hampton Rds", dc: "DC", montgomery: "MoCo", princegeorges: "PG"};
-var SRC_NAMES = {R: "Reonomy", T: "Trepp", C: "CoStar", Y: "Yardi Matrix", P: "PBS8 (HUD)", X: "TOPA (DHCD)"};
+var SRC_NAMES = {R: "Reonomy", T: "Trepp", C: "CoStar", Y: "Yardi Matrix", P: "PBS8 (HUD)", D: "DC Recorder", X: "TOPA (DHCD)"};
 var KINDS = ["Private", "Non-profit", "Public", "Co-op", "Individual"];
 var STATUSES = [["new", "New lead", "#1a73e8"], ["researching", "Researching", "#9334e6"], ["contacted", "Contacted", "#f9ab00"], ["dialogue", "In dialogue", "#fa7b17"],
   ["pitching", "Pitching", "#d93025"], ["client", "Client", "#188038"], ["pass", "Pass", "#80868b"], ["dnc", "Do not call", "#202124"]];
@@ -2186,24 +2355,37 @@ var SIGNAL_FILTERS = [
   {k: "topa", l: "Offer of sale", cat: "topa", test: function (s) { return s.k === "ofs"; }},
   {k: "distress", l: "Distress", cat: "distress", test: function (s) { return s.cat === "distress"; }},
   {k: "redev", l: "Redevelopment", cat: "redev", test: function (s) { return s.cat === "redev"; }},
+  {k: "rod", l: "Sub. trustee", cat: "distress", test: function (s) { return s.k === "rod"; }},
   {k: "hold", l: "Long hold 10y+", cat: "hold", test: function (s) { return s.k === "hold"; }}
 ];
 
 /* ============================================================ signals ===
    Every reason to call, per property, from dates in the data. pts feed the
    score; d is the date the event happens (or happened). */
+/* LoanID's rule for dated distress filings (v48): full weight for 6 months, 60% to a year,
+   25% to two years, then history only. Current status (delinquent, special servicing, watchlist) never fades. */
+function filingWeight(d) {
+  var m = monthsFrom(d);
+  if (m === null) return 1;
+  var yrs = -m / 12;
+  return yrs <= 0.5 ? 1 : yrs <= 1 ? 0.6 : yrs <= 2 ? 0.25 : 0;
+}
 function propSignals(p, horizon) {
   if (p._sig && p._sigH === horizon) return p._sig;
   var out = [], H = horizon || 24;
   function add(o) { o.p = p; out.push(o); }
-  var treppMats = [];
+  var treppMats = [], running = false;        /* a current loan: any future maturity, or up to 12 months past it */
   (p.T || []).forEach(function (t) {
     (t.loans || []).forEach(function (l) {
       if (l.bal === 0) return;
       var desc = [fmtM(l.bal) || (l.obal ? fmtM(l.obal) + " orig." : ""), l.src || l.deal, l.orig ? "from " + l.orig : "", l.rate ? l.rate + "%" : ""].filter(Boolean).join(" · ");
       if (l.mat) {
         var m = monthsFrom(l.mat);
-        if (m < 0 && m > -36 && (l.bal > 0 || (l.past || 0) > 0)) add({k: "pastmat", cat: "distress", l: "Loan past maturity", d: l.mat, pts: 25, x: desc});
+        if (m >= -12) running = true;
+        /* past maturity: Trepp says so, or it matured in the last 12 months. Older than that with no
+           word from the servicer is "unknown, likely refinanced" (LoanID v48) */
+        if (m < 0 && ((l.past || 0) > 0 || (m >= -12 && l.bal > 0))) add({k: "pastmat", cat: "distress", l: "Loan past maturity", d: l.mat, pts: 25, x: desc});
+        else if (m < -12 && m > -36 && l.bal > 0) add({k: "oldmat", cat: "debt", l: "Loan matured " + Math.round(-m) + " months ago", d: l.mat, pts: 8, x: "Likely refinanced since - no newer loan on record · " + desc});
         else if (m >= 0 && m <= H) {
           treppMats.push(l.mat);
           if (isFac(l)) add({k: "mat", cat: "debt", l: "Credit facility tranche matures", d: l.mat, pts: m <= 12 ? 12 : m <= 24 ? 8 : 4, fac: l.sec || "?", bal: l.bal || 0, np: l.np, src: facLabel(l), orig: l.orig, rate: l.rate,
@@ -2223,15 +2405,16 @@ function propSignals(p, horizon) {
     (r.mort || []).forEach(function (mt) {
       if (!mt.mat) return;
       var m = monthsFrom(mt.mat);
+      if (m >= -12) running = true;
       if (m < 0 || m > H) return;
       if (treppMats.some(function (d) { return Math.abs(monthsFrom(d) - m) < 3; })) return;   /* same loan as Trepp's */
       add({k: "rmat", cat: "debt", l: "Mortgage matures (county record)", d: mt.mat, pts: m <= 12 ? 24 : m <= 24 ? 16 : 8, x: [fmtM(mt.amt), mt.lender ? "from " + mt.lender : "", mt.rec ? "recorded " + fmtDate(mt.rec) : ""].filter(Boolean).join(" · ")});
     });
     if (r.pfc && r.pfc.d) {
       var pm = monthsFrom(r.pfc.d);
-      if (pm > -24) {
+      if (pm > -36) {
         var auc = r.pfc.auction && monthsFrom(r.pfc.auction) >= 0;
-        add({k: "pfc", cat: "distress", l: auc ? "Foreclosure auction scheduled" : "Pre-foreclosure: " + (r.pfc.doc || "filing"), d: auc ? r.pfc.auction : r.pfc.d, pts: auc ? 30 : 25,
+        add({k: "pfc", cat: "distress", l: auc ? "Foreclosure auction scheduled" : "Pre-foreclosure: " + (r.pfc.doc || "filing"), d: auc ? r.pfc.auction : r.pfc.d, pts: auc ? 30 : Math.round(25 * filingWeight(r.pfc.d)),
              x: [r.pfc.plaintiff ? "Plaintiff " + r.pfc.plaintiff : "", r.pfc.amt ? "Judgment " + fmtM(r.pfc.amt) : ""].filter(Boolean).join(" · ")});
       }
     }
@@ -2253,15 +2436,24 @@ function propSignals(p, horizon) {
   });
   (p.Y || []).forEach(function (y) {
     var st = y.status || "";
-    if (y.ss && !out.some(function (s) { return s.k === "ss"; })) add({k: "ss", cat: "distress", l: "Special servicer named (Yardi)", d: "", pts: 25, x: y.ss + (y.ssContact ? " · " + y.ssContact : "") + (y.ssPhone ? " · " + y.ssPhone : "")});
+    /* a Yardi-named special servicer is information only (LoanID v47): it is often just the deal's
+       designated servicer. Distress comes from the property's special status below. */
     if (/acceleration/i.test(st)) add({k: "ystat", cat: "distress", l: "Notice of Acceleration (Yardi)", d: "", pts: 25, x: st});
     else if (/arrears/i.test(st)) add({k: "ystat", cat: "distress", l: "CMBS loan in arrears (Yardi)", d: "", pts: 22, x: st});
     else if (/watch ?list/i.test(st)) add({k: "ystat", cat: "distress", l: "On watch list (Yardi)", d: "", pts: 12, x: st});
   });
+  /* DC Recorder of Deeds: a substitute trustee is appointed to run a foreclosure sale. Scores like an
+     active pre-foreclosure and fades with age; the Distress filter keeps it for 3 years (LoanID v54). */
+  var rod = (p.D || [])[0];
+  if (rod && rod.date && monthsFrom(rod.date) > -36)
+    add({k: "rod", cat: "distress", l: "Substitute trustee appointed", d: rod.date, pts: Math.round(25 * filingWeight(rod.date)),
+         x: [rod.lenders && rod.lenders.length ? "Lender " + rod.lenders.join(", ") : "", rod.trustees && rod.trustees.length ? "Trustee " + rod.trustees.join(", ") : "",
+             p.D.length > 1 ? p.D.length + " filings" : ""].filter(Boolean).join(" · ")});
+  /* hold period scores only when no loan is running (LoanID v48: the loan's maturity is the clock then) */
   var since = p.own && p.own.d;
   if (since) {
     var yrs = -monthsFrom(since) / 12;
-    if (yrs >= 10) add({k: "hold", cat: "hold", l: "Owned " + Math.floor(yrs) + " years", d: since, pts: yrs >= 15 ? 10 : 6, x: "Since " + fmtDate(since) + " (" + p.own.s + ")"});
+    if (yrs >= 10) add({k: "hold", cat: "hold", l: "Owned " + Math.floor(yrs) + " years", d: since, pts: running ? 0 : yrs >= 15 ? 10 : 6, x: "Since " + fmtDate(since) + " (" + p.own.s + ")"});
   }
   var seenOfs = false, seenTen = false, seenRedev = false;
   (p.X || []).forEach(function (x) {
@@ -2271,7 +2463,7 @@ function propSignals(p, horizon) {
     if (/^(ofs5|dopa|rofr|ofs24)$/.test(x.slug) && !seenOfs) {
       if (age <= 12 && !soldAfter) { seenOfs = true; add({k: "ofs", cat: "topa", l: x.kind + " filed", d: x.date, pts: 25, x: [x.type, x.price ? fmtM(x.price) : "", x.units ? x.units + " units" : "", x.buyer ? "Buyer " + x.buyer : ""].filter(Boolean).join(" · ")}); }
       else if (age <= 36 && !soldAfter) { seenOfs = true; add({k: "ofs", cat: "topa", l: x.kind + " filed (" + Math.round(age) + " mo ago)", d: x.date, pts: 6, x: "No closing found since - may still be for sale"}); }
-    } else if (x.slug === "nof" && age <= 24) add({k: "nof", cat: "distress", l: "Notice of Foreclosure (DHCD)", d: x.date, pts: 25, x: x.notes || ""});
+    } else if (x.slug === "nof" && age <= 36) add({k: "nof", cat: "distress", l: "Notice of Foreclosure (DHCD)", d: x.date, pts: Math.round(25 * filingWeight(x.date)), x: x.notes || ""});
     else if (/^(condo|nha|vac|raze)$/.test(x.slug) && age <= 24 && !seenRedev) { seenRedev = true; add({k: "redev", cat: "redev", l: x.kind, d: x.date, pts: 8, x: "Redevelopment signal"}); }
     else if (/^(torg|tassoc|loi|complaint|pdr|tea|te5)$/.test(x.slug) && age <= 18 && !seenTen) { seenTen = true; add({k: "ten", cat: "tenant", l: x.kind, d: x.date, pts: 5, x: x.org || x.notes || ""}); }
     else if (x.slug === "not" && age <= 12) add({k: "not", cat: "topa", l: "Notice of Transfer filed", d: x.date, pts: 0, x: "The owner may have just changed"});
@@ -2424,7 +2616,7 @@ function shortLabel(s) {
   var w = s.d && s.d >= TODAY_ISO ? " " + fmtMon(s.d).replace(/ (\d{2})(\d{2})$/, " '$2") : "";
   if (s.k === "mat" && /tranche/.test(s.l)) return "Facility tranche" + (s.d && s.d >= TODAY_ISO ? " " + fmtMon(s.d).replace(/ (\d{2})(\d{2})$/, " '$2") : "");
   return ({mat: "Maturity", rmat: "Maturity", open: "Prepay opens", hap: "HAP exp.", mtm: "Below-mkt HAP", ofs: "Offer of sale", pastmat: "Past maturity", ss: "Special servicing",
-    wl: "Watchlist", ystat: "Yardi distress", dq: "Delinquent", dscr: "Low DSCR", pfc: "Pre-foreclosure", reac: "Low REAC", hold: s.l, nof: "Foreclosure notice", redev: "Redevelopment", ten: "Tenants", not: "Transfer"}[s.k] || s.l) + (s.k === "hold" ? "" : w);
+    wl: "Watchlist", ystat: "Yardi distress", dq: "Delinquent", dscr: "Low DSCR", pfc: "Pre-foreclosure", rod: "Sub. trustee", oldmat: "Matured", reac: "Low REAC", hold: s.l, nof: "Foreclosure notice", redev: "Redevelopment", ten: "Tenants", not: "Transfer"}[s.k] || s.l) + (s.k === "hold" ? "" : w);
 }
 function renderOwnerList() {
   var D = S.data, ids = filteredOwners();
@@ -2445,7 +2637,7 @@ function renderOwnerList() {
   function ownerCard(i) {
     var o = D.owners[i], st = ownerStats(o), ov = ovRec(i);
     var regs = Object.keys(st.regions).map(function (r) { return REG_NAMES[r]; }).join(", ");
-    var seen = {}, pills = st.sig.filter(function (s) { var lb = shortLabel(s); if (s.pts <= 0 || seen[lb]) return false; seen[lb] = 1; return true; }).slice(0, 3).map(function (s) { return sigPill(s, true); }).join("");
+    var seen = {}, pills = st.sig.filter(function (s) { var lb = s.k === "hold" ? "hold" : shortLabel(s); if (s.pts <= 0 || seen[lb]) return false; seen[lb] = 1; return true; }).slice(0, 3).map(function (s) { return sigPill(s, true); }).join("");
     if (st.gs) pills += '<span class="sp gs" title="' + esc(st.gs) + '">G</span>';
     var stat = ov.status && STATUS_BY[ov.status.v];
     return '<div class="mc' + (i === S.sel ? " sel" : "") + '" data-i="' + i + '"><div class="r1"><div class="ad">' + esc(o.n) + '</div><span class="score ' + scoreCls(st.score) + '" title="Why-call-now score">' + st.score + "</span></div>" +
@@ -2485,6 +2677,20 @@ function hqSortKey(h) {
   return rank + "|" + h.s + "|" + h.c;
 }
 function hqText(h) { return h ? (h.c ? h.c + ", " : "") + h.s : ""; }
+/* the address bar always names the open owner (?o=<id>), so the link can be shared and survives sign-in */
+function ownerUrl(i, relative) {
+  var q = new URLSearchParams(location.search); q.delete("o");
+  if (i >= 0 && S.data && S.data.owners[i]) q.set("o", S.data.owners[i].id);
+  var qs = q.toString();
+  return (relative ? location.pathname : location.origin + location.pathname) + (qs ? "?" + qs : "");
+}
+var LINK_SVG = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M10 14a5 5 0 007.07 0l3.54-3.54a5 5 0 00-7.07-7.07L12 4.93M14 10a5 5 0 00-7.07 0L3.39 13.5a5 5 0 007.07 7.07L12 19.07" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"/></svg>';
+var CHECK_SVG = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+function copyLink(text, btn) {
+  var ok = function () { btn.classList.remove("copied"); void btn.offsetWidth; btn.classList.add("copied"); clearTimeout(btn._h); btn._h = setTimeout(function () { btn.classList.remove("copied"); }, 1900); };
+  var fallback = function () { prompt("Copy this link:", text); };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(ok, fallback); else fallback();
+}
 function saveFilters() { lsSet("o360_f", {region: S.region, sort: S.sort, sig: S.sig, kinds: S.kinds, horizon: S.horizon, hq: S.hq}); }
 
 /* ======================================================= owner profile === */
@@ -2495,7 +2701,7 @@ function openOwner(i, opts) {
   if (S.view !== "owners") setView("owners");
   document.querySelectorAll("#oList .mc").forEach(function (el) { el.classList.toggle("sel", +el.dataset.i === i); });
   $("ov").classList.add("pick");
-  try { history.replaceState(null, "", location.pathname + location.search + "#o=" + encodeURIComponent(S.data.owners[i].id)); } catch (e) {}
+  try { history.replaceState(null, "", ownerUrl(i, true)); } catch (e) {}
   renderProfile();
   if (!opts || !opts.keepScroll) $("omain").scrollTop = 0;
 }
@@ -2513,6 +2719,7 @@ function renderProfile() {
     (st.gs ? '<span class="sp gs">G</span><span>' + esc(st.gs) + "</span>" : "") + "</div></div>" +
     '<div class="acts"><span class="score lg ' + scoreCls(st.score) + '" title="Why-call-now score (0-100)">' + st.score + "</span>" +
     '<button class="ibtn' + (ov.stars[me] ? " on" : "") + '" id="pStar" title="Star (just for you)"><svg viewBox="0 0 24 24" fill="' + (ov.stars[me] ? "currentColor" : "none") + '" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>' +
+    '<button class="lid-btn" id="pLink" title="Copy a link that opens this owner for a colleague"><span class="lb-idle">' + LINK_SVG + 'Copy link</span><span class="lb-done">' + CHECK_SVG + 'Link copied</span></button>' +
     '<button class="btn sm" id="pBrief" title="Copy a call brief to the clipboard">Copy call brief</button><button class="btn sm" id="pCsv">Export</button></div></div>';
 
   var nextTxt = st.next ? '<div class="k-v sm">' + esc(fmtMon(st.next.d)) + '</div><div class="k-d" title="' + esc(st.next.l + " · " + (st.next.p.n || st.next.p.a)) + '">' + esc(shortLabel(st.next).replace(/ [A-Z][a-z]{2} '\d\d$/, "")) + " · " + esc(st.next.p.n || st.next.p.a) + "</div>" : '<div class="k-v sm">-</div><div class="k-d">Nothing dated ahead</div>';
@@ -2579,6 +2786,7 @@ function renderProfile() {
   $("omain").querySelectorAll("[data-p]").forEach(function (el) { el.onclick = function () { openProp(el.dataset.p); }; });
   $("pBack").onclick = function () { $("ov").classList.remove("pick"); };
   $("pStar").onclick = function () { edit([{t: "star", k: ownerKeyFor(i), on: !ov.stars[me]}]); };
+  $("pLink").onclick = function () { copyLink(ownerUrl(i), this); };
   $("pBrief").onclick = function () { copyBrief(i); };
   $("pCsv").onclick = function () { exportOwner(i); };
   $("omain").querySelectorAll("[data-detach]").forEach(function (el) {
@@ -2596,7 +2804,7 @@ function renderProfile() {
 }
 function uniqN(a) { var s = {}; a.forEach(function (x) { s[x] = 1; }); return Object.keys(s).length; }
 function kpi(l, v, d) { return '<div class="card kpi"><div class="k-l">' + l + '</div><div class="k-v sm">' + v + '</div><div class="k-d">' + esc(d) + "</div></div>"; }
-function srcChips(p) { return '<span class="srcs">' + ["R", "T", "C", "Y", "P", "X"].filter(function (s) { return p.src.indexOf(s) >= 0; }).map(function (s) { return '<b class="' + s + '" title="' + SRC_NAMES[s] + '">' + (s === "X" ? "T" : s === "P" ? "H" : s === "T" ? "L" : s) + "</b>"; }).join("") + "</span>"; }
+function srcChips(p) { return '<span class="srcs">' + ["R", "T", "C", "Y", "P", "D", "X"].filter(function (s) { return p.src.indexOf(s) >= 0; }).map(function (s) { return '<b class="' + s + '" title="' + SRC_NAMES[s] + '">' + (s === "X" ? "T" : s === "P" ? "H" : s === "T" ? "L" : s) + "</b>"; }).join("") + "</span>"; }
 function propRow(p) {
   var sig = propSignals(p, S.horizon).filter(function (s) { return s.pts > 0; });
   var loans = [];
@@ -2794,10 +3002,14 @@ function openProp(id) {
     p.C.map(function (c) { return "<tr><td>" + esc(fmtDate(c.date)) + "</td><td>" + esc(c.buyer || c.buyerRec || "-") + '<div class="muted small">from ' + esc(c.seller || "-") + (c.lb ? " · listed by " + esc(c.lb) : "") + (c.cap ? " · " + c.cap + "% cap" : "") + '</div></td><td class="num">' + fmtM(c.price) + '</td><td class="num">' + fmtM(c.ppu) + "</td></tr>"; }).join("") + "</tbody></table>";
   if ((p.X || []).length) h += '<div class="dr-sec">TOPA filings (DHCD)</div><table class="dtab"><thead><tr><th>Date</th><th>Filing</th><th class="num">Price</th></tr></thead><tbody>' +
     p.X.slice(0, 25).map(function (x) { return "<tr><td>" + esc(fmtDate(x.date)) + "</td><td>" + esc(x.kind) + '<div class="muted small">' + esc([x.type, x.units ? x.units + " units" : "", x.buyer ? "Buyer " + x.buyer : "", x.seller ? "Seller " + x.seller : "", x.foia ? "FOIA " + x.foia : ""].filter(Boolean).join(" · ")) + '</div></td><td class="num">' + fmtM(x.price) + "</td></tr>"; }).join("") + "</tbody></table>";
+  if ((p.D || []).length) h += '<div class="dr-sec">Substitute trustee filings (DC Recorder)</div><table class="dtab"><thead><tr><th>Recorded</th><th>Lender / trustee</th><th>Borrower</th></tr></thead><tbody>' +
+    p.D.map(function (f) { return '<tr><td class="nw">' + esc(fmtDate(f.date)) + '<div class="muted small">' + esc(rel(f.date)) + "</div></td><td>" + esc((f.lenders || []).join(", ") || "-") +
+      '<div class="muted small">Trustee: ' + esc((f.trustees || []).join(", ") || "-") + (f.deed ? " · deed of trust " + esc(f.deed) : "") + "</div></td><td>" + esc((f.borrowers || []).join(", ") || "-") +
+      (f.link ? '<div class="small"><a target="_blank" rel="noopener" href="' + esc(f.link) + '">Filing ' + esc(f.doc) + "</a></div>" : "") + "</td></tr>"; }).join("") + "</tbody></table>";
   (p.Y || []).forEach(function (y) {
     h += '<div class="dr-sec">Yardi Matrix</div><div class="statbox">' + row("Property", esc(y.name || "-")) + row("Owner", esc(y.owner || "-") + (y.web ? ' <span class="muted small">' + esc(y.web) + "</span>" : "")) +
       row("Manager", esc(y.mgr || "-")) + row("Ratings", esc(["improvement " + (y.impr || "-"), "location " + (y.loc || "-")].join(" · "))) +
-      (y.status ? row("Status", esc(y.status)) : "") + (y.ss ? row("Special servicer", '<span style="color:var(--red)">' + esc(y.ss) + "</span>" + (y.ssContact || y.ssPhone ? '<br><span class="small">' + esc([y.ssContact, y.ssPhone].filter(Boolean).join(" · ")) + "</span>" : "")) : "") +
+      (y.status ? row("Status", esc(y.status)) : "") + (y.ss ? row("Special servicer", esc(y.ss) + ' <span class="muted small">(information only)</span>' + (y.ssContact || y.ssPhone ? '<br><span class="small">' + esc([y.ssContact, y.ssPhone].filter(Boolean).join(" · ")) + "</span>" : "")) : "") +
       (y.sub ? row("Submarket", esc(y.sub)) : "") + (y.pin !== undefined ? row("Matched", "by map pin, " + y.pin + " m away") : "") + (y._line ? row("Yardi address", esc(y._line)) : "") + "</div>";
   });
   (p.R || []).forEach(function (r, k) {
@@ -2810,13 +3022,15 @@ function openProp(id) {
   (p.X || []).forEach(function (x) { if (x.sf && links.join().indexOf(x.sf) < 0) links.push('<a class="btn sm" target="_blank" rel="noopener" href="' + esc(x.sf) + '">Salesforce</a>'); if (x.box && links.join().indexOf(x.box) < 0) links.push('<a class="btn sm" target="_blank" rel="noopener" href="' + esc(x.box) + '">FOIA in Box</a>'); });
   if (p.P && p.P.length) links.push('<a class="btn sm" target="_blank" rel="noopener" href="https://mrare-cmd.github.io/HAP-Database/">PBS8</a>');
   if (p.X && p.X.length) links.push('<a class="btn sm" target="_blank" rel="noopener" href="https://mrare-cmd.github.io/greysteel-topa/">TOPA Tracker</a>');
-  if (p.R.length || p.T.length || p.C.length || (p.Y || []).length) links.push('<a class="btn sm" target="_blank" rel="noopener" href="https://mrare-cmd.github.io/greysteel-hampton-roads/">LoanID</a>');
+  if (p.R.length || p.T.length || p.C.length || (p.Y || []).length || (p.D || []).length) links.push('<a class="btn sm" target="_blank" rel="noopener" title="Opens this property in LoanID" href="' + esc(loanidLink(p)) + '">LoanID</a>');
   h += '<div class="dr-sec">Open in</div><div class="lnks">' + links.join("") + "</div>";
   $("drB").innerHTML = h;
   var a = $("drOwn"); if (a) a.onclick = function (e) { e.preventDefault(); closeDrawer(); openOwner(p.o); };
   $("drawer").classList.add("open");
 }
 function row(k, v) { return '<div class="row"><span class="muted">' + k + '</span><span style="text-align:right;max-width:70%">' + v + "</span></div>"; }
+/* LoanID finds a property by its address or building name within a market */
+function loanidLink(p) { var a = p.la || p.a; return "https://mrare-cmd.github.io/greysteel-hampton-roads/?m=" + p.r + (a ? "&a=" + encodeURIComponent(a) : ""); }
 function closeDrawer() { $("drawer").classList.remove("open"); }
 
 /* ------------------------------------------------------- notes / edits --- */
@@ -3004,9 +3218,10 @@ function dataModal() {
   openModal('<div class="mh"><div><div class="t">Where this comes from</div><div class="s">Built ' + esc(fmtDate(D.built.at.slice(0, 10))) + " (" + esc(ago(D.built.at)) + ")" + (D.built.by ? " by " + esc(who(D.built.by)) : "") + '</div></div><button class="dr-x" style="position:static;margin-left:auto" onclick="closeModal()">&times;</button></div>' +
     '<div class="mb howto"><div class="srcgrid">' + reg +
     '<div class="k">PBS8 (HUD)</div><div>HAP contracts as of ' + esc(fmtDate(src.pbs8)) + '</div><div class="k">TOPA Tracker</div><div>DHCD filings, updated ' + esc(ago(src.topa)) + "</div></div>" +
-    '<ol style="margin-top:14px"><li><b>Properties</b> are merged across sources on street plus overlapping house numbers, inside a market.</li>' +
+    '<ol style="margin-top:14px"><li><b>Properties</b> are merged across sources on street plus overlapping house numbers, inside a market. DC Recorder filings join on square and lot.</li>' +
     "<li><b>Owners</b> are grouped on Reonomy's company, CoStar's true buyer, Yardi's parent owner, HUD's owner participant ID, a shared mailing office and a corporate email domain. A single joint-venture LLC cannot fuse two established sponsors, and public agencies only group at their own office.</li>" +
-    "<li><b>Why-call-now</b> is computed live from dates: loan maturities and prepayment windows (Trepp, county mortgages), HAP expirations and below-market rents (PBS8), offers of sale, foreclosure and redevelopment filings (TOPA), distress and hold period. Larger properties weigh more.</li></ol>" +
+    "<li><b>Why-call-now</b> is computed live from dates: loan maturities and prepayment windows (Trepp, county mortgages), HAP expirations and below-market rents (PBS8), offers of sale, foreclosure and redevelopment filings (TOPA), substitute-trustee appointments (DC Recorder), distress and hold period. Like LoanID, dated filings fade with age and a hold period only counts when no loan is running. Larger properties weigh more.</li>" +
+    "<li><b>Claude</b> can answer from Owner 360 through the Greysteel connector (owner360_search, owner360_owner, owner360_events). This page refreshes its snapshot in the background, at most once a day.</li></ol>" +
     '<div class="note">Rebuild pulls the newest PBS8, LoanID and TOPA data through the sign-in Worker (~75 MB), rebuilds in your browser and saves it for everyone. Notes and statuses are never touched. Use it after a LoanID upload, a TOPA import, or after marking "Not this owner".</div>' +
     '<div id="rbBox" hidden><div class="prog"><i id="rbBar"></i></div><div class="small muted" id="rbMsg"></div></div></div>' +
     '<div class="mf"><span class="small muted">' + fmtN(D.owners.length) + " owner groups · " + fmtN(D.props.length) + ' properties</span><span class="ml-auto"></span><button class="btn" onclick="closeModal()">Close</button><button class="btn primary" id="rbGo">Rebuild now</button></div>');
@@ -3022,7 +3237,7 @@ async function rebuild() {
     var lm = await apiGet("/owner360/manifest?fresh=1"), tm = await apiGet("/topa/manifest?fresh=1");
     var base = lm.files["owners.json"] || null;
     var regions = Object.keys(O360Build.REGIONS), lfiles = [];
-    regions.forEach(function (r) { ["reonomy", "trepp", "costar", "yardi", "salesforce"].forEach(function (f) { var p = r + "/data_" + f + ".json"; if (lm.loanid[p]) lfiles.push(p); }); });
+    regions.forEach(function (r) { ["reonomy", "trepp", "costar", "yardi", "rod", "salesforce"].forEach(function (f) { var p = r + "/data_" + f + ".json"; if (lm.loanid[p]) lfiles.push(p); }); });
     var topaIdx = tm.files["index.json"];
     total = 3 + lfiles.length + 2 + 20;
     var get = function (path, label) { return apiGet(path).then(function (j) { tick("Loaded " + label); return j; }); };
@@ -3058,6 +3273,113 @@ async function rebuild() {
   }
 }
 
+/* ------------------------------------------------ Claude connector snapshot ---
+   The Greysteel connector for Claude (LoanID + PBS8 + Owner 360) answers Owner 360
+   questions from a snapshot this page builds with its own grouping, signals and
+   why-call-now score, so Claude says what Owner 360 shows. After the data loads the
+   page asks the Worker whether today's snapshot for this owners.json exists; if not
+   it uploads one in the background. The Worker decides whether it is current
+   (owners.json version + today + SNAP_VER) and makes every link itself. Only the
+   default 24-month signal window uploads, so one person's setting never changes
+   everyone's answers. Outreach notes are not uploaded: the Worker reads them live.
+   Bump SNAP_VER when the row shape changes. */
+var SNAP_VER = "o1";
+function snapClean(o) {   /* drop empty values so stored records stay small */
+  if (Array.isArray(o)) { var a = o.map(snapClean).filter(function (x) { return x != null && !(typeof x === "object" && !Array.isArray(x) && !Object.keys(x).length); }); return a.length ? a : null; }
+  if (o && typeof o === "object") { var r = {}; Object.keys(o).forEach(function (k) { var v = snapClean(o[k]); if (v != null && v !== "" && v !== false && !(typeof v === "object" && !Array.isArray(v) && !Object.keys(v).length)) r[k] = v; }); return r; }
+  return o === "" || o === undefined ? null : o;
+}
+function snapProp(p) {
+  var loans = [];
+  (p.T || []).forEach(function (t) { (t.loans || []).forEach(function (l) {
+    if (l.bal === 0) return;
+    loans.push({lender: l.orig, type: isFac(l) ? facLabel(l) + " tranche (" + l.np + " properties share it)" : (l.src || l.deal), balance: l.bal > 0 ? l.bal : null, rate_pct: l.rate, matures: l.mat,
+      prepay_opens: l.open, dscr: l.dscr, special_servicing: !!l.ss, watchlist: !!l.wl, delinquency: l.dq && !/^(current|performing|$)/i.test(l.dq) ? l.dq : null});
+  }); });
+  loans.sort(function (a, b) { return (a.matures || "9").localeCompare(b.matures || "9"); });
+  var morts = [];
+  (p.R || []).forEach(function (r) { (r.mort || []).forEach(function (m) { morts.push({lender: m.lender, amount: m.amt, recorded: m.rec, matures: m.mat}); }); });
+  var hap = [], pid = null;
+  (p.P || []).forEach(function (h) { pid = pid || h.pid; (h.contracts || []).forEach(function (c) { hap.push({contract: c.no, program: c.prog, units: c.units, expires: c.exp, rent_to_safmr: c.safmr}); }); });
+  var sale = (p.C || [])[0], rs = (p.R || []).filter(function (r) { return r.sale; })[0], x = (p.X || [])[0], d = (p.D || [])[0], y = (p.Y || [])[0];
+  var sig = propSignals(p, 24).filter(function (s) { return s.pts > 0; }).sort(function (a, b) { return b.pts - a.pts; }).slice(0, 5)
+    .map(function (s) { return {signal: s.l, date: s.d || null, detail: s.x || null}; });
+  return snapClean({id: p.id, name: p.n, address: p.a, loanid_address: p.la || null, city: p.c, zip: p.z, market: p.r, units: p.u, units_estimated: !!p.ue, year_built: p.yb,
+    owner_of_record: p.own ? p.own.n : null, owned_since: p.own ? p.own.d : null, also_on_record: (p.other || []).slice(0, 4).map(function (o) { return o.n; }),
+    sources: p.src.map(function (s) { return SRC_NAMES[s]; }), signals: sig,
+    loans: loans.slice(0, 6), recorded_mortgages: loans.length ? null : morts.slice(0, 3), hap_contracts: hap.slice(0, 4), pbs8_property_id: pid,
+    last_sale: sale ? {date: sale.date, price: sale.price, buyer: sale.buyer || sale.buyerRec, seller: sale.seller} : rs ? {date: rs.sale, price: rs.price} : null,
+    latest_topa_filing: x ? {filing: x.kind, date: x.date, price: x.price, filings: p.X.length} : null,
+    substitute_trustee: d ? {recorded: d.date, lenders: d.lenders, trustees: d.trustees, filings: p.D.length} : null,
+    yardi: y ? {owner: y.owner, manager: y.mgr, status: y.status} : null,
+    loanid_source: p.src.some(function (s) { return s !== "P" && s !== "X"; })});     /* the Worker turns this into the LoanID link */
+}
+function snapRow(i) {
+  var D = S.data, o = D.owners[i], st = ownerStats(o);
+  var ps = o.p.map(function (k) { return D.props[k]; }).sort(function (a, b) { return propScore(b, 24) - propScore(a, 24) || (b.u || 0) - (a.u || 0); });
+  var seen = {}, why = st.sig.filter(function (s) { if (s.pts <= 0 || s.k === "hold") return false; var k = s.k + "|" + s.p.id + "|" + (s.d || ""); if (seen[k]) return false; seen[k] = 1; return true; });
+  var holds = st.sig.filter(function (s) { return s.k === "hold"; }).sort(function (a, b) { return a.d.localeCompare(b.d); });
+  var seenL = {}, top = st.sig.filter(function (s) { var lb = s.k === "hold" ? "hold" : shortLabel(s); if (s.pts <= 0 || seenL[lb]) return false; seenL[lb] = 1; return true; }).slice(0, 4)
+    .map(function (s) { return s.k === "hold" ? "Long hold (" + holds.length + (holds.length === 1 ? " property" : " properties") + " owned 10+ years)" : shortLabel(s); });
+  var markets = {}; Object.keys(st.regions).forEach(function (r) { markets[D.regions[r] ? D.regions[r].name : r] = st.regions[r]; });
+  var next = st.next ? {date: st.next.d, event: st.next.l, property: st.next.p.n || st.next.p.a} : null;
+  var summary = snapClean({name: o.n, type: o.kd, headquarters: hqText(o.hq), markets: Object.keys(markets), properties: st.props, units: st.units, debt_on_record: Math.round(st.debt) || null,
+    hap_units: st.hap || null, score: st.score, next_event: next, signals: top, greysteel_history: st.gs || null, has_contact: st.contact});
+  var detail = snapClean({name: o.n, named_from: o.nb, type: o.kd, headquarters: o.hq ? {city: o.hq.c, state: o.hq.s, from: o.hq.src} : null, markets: markets,
+    properties_in_markets: st.props, units: st.units, debt_on_record: Math.round(st.debt) || null, hap_units: st.hap || null, assessed_value: Math.round(st.asr) || null,
+    score: st.score, score_note: "0-100 why-call-now: maturing loans, expiring HAP contracts, TOPA offers of sale, distress and hold period, weighted by property size",
+    next_event: next, greysteel_history: st.gs || null,
+    why_call_now: why.slice(0, 20).map(function (s) { return {signal: s.l, date: s.d || null, property: s.p.n || s.p.a, address: s.p.a, market: s.p.r, units: s.p.u, detail: s.x || null}; }),
+    long_holds: holds.length ? {properties: holds.length, longest: (holds[0].p.n || holds[0].p.a) + " since " + holds[0].d} : null,
+    entity_names: (o.al || []).slice(0, 40).map(function (a) { return {name: a.n, sources: a.src, properties: a.np}; }), entity_names_total: (o.al || []).length,
+    why_grouped: (o.why || []).map(function (w) { return w.v + (w.names ? " (" + w.names + " names)" : ""); }),
+    contacts: (o.ct || []).slice(0, 10).map(function (c) { return {name: c.n, title: c.t, company: c.co, phones: c.ph, emails: c.em, sources: c.src}; }),
+    office_phones: (o.ph || []).slice(0, 5).map(function (x) { return x.v; }), emails: (o.em || []).slice(0, 5).map(function (x) { return x.v; }),
+    mailing_addresses: (o.mail || []).slice(0, 4).map(function (x) { return x.v; }), hud_owner_ids: o.hud,
+    overlay_keys: (o.al || []).slice(0, 300).map(function (a) { return okey(a.k); })});      /* how the Worker finds this owner's outreach notes */
+  var lo = new Date(TODAY); lo.setMonth(lo.getMonth() - 12); var hi = new Date(TODAY); hi.setMonth(hi.getMonth() + 36);
+  var loI = lo.toISOString().slice(0, 10), hiI = hi.toISOString().slice(0, 10), events = [], seenE = {};
+  ps.forEach(function (p) { propSignals(p, 36).forEach(function (s) {
+    if (!s.d || s.d < loI || s.d > hiI || s.pts <= 0 || s.k === "hold" || s.k === "not" || s.k === "mtm" || s.k === "oldmat") return;
+    var k = s.k + "|" + p.id + "|" + s.d + "|" + s.l; if (seenE[k]) return; seenE[k] = 1;
+    events.push({d_ms: Date.parse(s.d + "T12:00:00Z"), type: calType(s), event: s.l, detail: s.x || null, property: p.n || p.a, address: p.a, market: p.r, units: p.u || null});
+  }); });
+  return {id: o.id, name: o.n, kind: o.kd, hq_city: o.hq ? o.hq.c : null, hq_state: o.hq ? o.hq.s : null, n_props: st.props, units: st.units, debt: Math.round(st.debt) || null,
+    score: st.score, next_ms: st.next ? Date.parse(st.next.d + "T12:00:00Z") : null, markets: Object.keys(st.regions).join(" "),
+    sigs: SIGNAL_FILTERS.filter(function (f) { return st.sig.some(f.test); }).map(function (f) { return f.k; }).join(" "), has_contact: st.contact ? 1 : 0,
+    summary: JSON.stringify(summary), detail: JSON.stringify(detail), props: JSON.stringify(ps.map(snapProp)), search: (SEARCH[i] || "").replace(/\s+/g, " ").slice(0, 60000), events: events};
+}
+var _snapBusy = false;
+async function snapSync() {
+  if (_snapBusy || !S.me || !S.data || S.horizon !== 24) return;
+  _snapBusy = true;
+  try {
+    var H = Object.assign({"Content-Type": "application/json"}, authH());
+    var st = await fetch(API + "/owner360/snapshot/status?v=" + SNAP_VER, {headers: H, cache: "no-store"}).then(function (r) { return r.ok ? r.json() : null; });
+    if (!st || st.current) return;
+    var seen = {}, rows = [];
+    for (var i = 0; i < S.data.owners.length; i++) {
+      var r = null; try { r = snapRow(i); } catch (e) {}
+      if (r && !seen[r.id]) { seen[r.id] = 1; rows.push(r); }
+      if (i % 150 === 149) await new Promise(function (res) { setTimeout(res, 0); });        /* stay out of the way of the page */
+    }
+    var b = await fetch(API + "/owner360/snapshot/begin", {method: "POST", headers: H, body: JSON.stringify({v: SNAP_VER, n: rows.length})}).then(function (r) { return r.json(); });
+    if (!b || !b.gen) return;   /* already current, or someone else is uploading */
+    /* small batches by size: the Worker parses each in a few ms */
+    for (var at = 0; at < rows.length;) {
+      var batch = [], bytes = 0;
+      while (at < rows.length && batch.length < 40 && (bytes < 220000 || !batch.length)) { var row = rows[at++]; bytes += row.summary.length + row.detail.length + row.props.length + row.search.length; batch.push(row); }
+      var rr = await fetch(API + "/owner360/snapshot/rows", {method: "POST", headers: H, body: JSON.stringify({gen: b.gen, rows: batch})});
+      if (!rr.ok) return;
+      await new Promise(function (res) { setTimeout(res, 60); });
+    }
+    var c = await fetch(API + "/owner360/snapshot/commit", {method: "POST", headers: H, body: JSON.stringify({gen: b.gen})}).then(function (r) { return r.json(); });
+    if (c && c.ok) console.info("[Owner 360] Claude connector snapshot updated: " + c.n + " owners");
+  } catch (e) { console.warn("[Owner 360] connector snapshot skipped:", e && e.message); }
+  finally { _snapBusy = false; }
+}
+window.o360SnapRow = snapRow;   /* for testing */
+
 /* ---------------------------------------------------------------- boot */
 async function boot() {
   var m = await apiGet("/owner360/manifest?load=1");
@@ -3075,9 +3397,10 @@ async function boot() {
   $("dataLbl").textContent = "Built " + ago(S.data.built.at);
   renderOwnerList();
   $("boot").style.display = "none";
-  var hm = /#o=([^&]+)/.exec(location.hash);
-  if (hm) { var id = decodeURIComponent(hm[1]); var ix = S.data.owners.findIndex(function (o) { return o.id === id; }); if (ix >= 0) openOwner(ix); }
+  var hm = /#o=([^&]+)/.exec(location.hash), qo = new URLSearchParams(location.search).get("o");   /* #o= is the pre-v8 form */
+  if (qo || hm) { var id = qo || decodeURIComponent(hm[1]); var ix = S.data.owners.findIndex(function (o) { return o.id === id; }); if (ix >= 0) openOwner(ix); }
   setInterval(poll, 30000);
+  setTimeout(snapSync, 6000);       /* the Claude connector's snapshot, in the background */
 }
 async function poll() {
   if (document.hidden) return;
@@ -3151,7 +3474,7 @@ function wireFilters() {
     downloadCsv("Owner 360 calendar.csv", rows);
   };
   /* properties */
-  $("pSrc").innerHTML = ["R", "T", "C", "Y", "P", "X"].map(function (s) { return '<span class="chip" data-k="' + s + '">' + SRC_NAMES[s] + "</span>"; }).join("");
+  $("pSrc").innerHTML = ["R", "T", "C", "Y", "P", "D", "X"].map(function (s) { return '<span class="chip" data-k="' + s + '">' + SRC_NAMES[s] + "</span>"; }).join("");
   $("pSrc").querySelectorAll(".chip").forEach(function (c) { c.onclick = function () { var k = c.dataset.k, ix = S.pSrc.indexOf(k); if (ix >= 0) S.pSrc.splice(ix, 1); else S.pSrc.push(k); c.classList.toggle("on"); S.pPage = 0; renderProps(); }; });
   $("pq").oninput = debounce(function () { S.pQ = $("pq").value; S.pPage = 0; renderProps(); }, 150);
   $("pNoOwner").onclick = function (e) { e.preventDefault(); S.pNoOwner = !S.pNoOwner; this.classList.toggle("on", S.pNoOwner); S.pPage = 0; renderProps(); };
@@ -3176,7 +3499,7 @@ function wire() {
   function msg(m, ok) { var el = $("agMsg"); el.textContent = m || ""; el.className = "ag-msg" + (ok ? " ok" : ""); }
   function showGate(m) { gate.classList.remove("hidden", "gone"); $("agBtn").disabled = false; msg(m || "", !m); }
   function hideGate() { gate.classList.add("hidden"); setTimeout(function () { gate.classList.add("gone"); }, 400); }
-  $("agBtn").onclick = function () { $("agBtn").disabled = true; msg("Redirecting to Microsoft…", true); location.href = API + "/login?return=" + encodeURIComponent(location.origin + location.pathname); };
+  $("agBtn").onclick = function () { $("agBtn").disabled = true; msg("Redirecting to Microsoft…", true); location.href = API + "/login?return=" + encodeURIComponent(location.origin + location.pathname + location.search); };   /* keeps a shared ?o= link */
   $("signOutBtn").onclick = function () { tokenSet(null); location.href = location.origin + location.pathname; };
   var chip = $("userChip"), menu = $("userMenu");
   chip.onclick = function (e) { e.stopPropagation(); menu.classList.toggle("open"); };
