@@ -695,9 +695,55 @@ tr.hidden-row td{opacity:.45}
 .dtab td{padding:6px 8px 6px 0;border-bottom:1px solid var(--border2);vertical-align:top}
 .dtab td.num{text-align:right;font-variant-numeric:tabular-nums}
 .lnks{display:flex;flex-wrap:wrap;gap:8px}
-/* map tab */
+/* map tab: the map, and on the right the largest owners */
 #vMap{overflow:hidden}
+#vMap.active{display:flex}
+.mmain{position:relative;flex:1;min-width:0}
 #bigmap{position:absolute;inset:0}
+.mown{width:384px;flex-shrink:0;display:flex;flex-direction:column;background:var(--white);border-left:1px solid var(--border);min-height:0}
+.ms-h{padding:14px 16px 12px;border-bottom:1px solid var(--border2)}
+.ms-h .ttl{font-family:'Google Sans',sans-serif;font-size:16px;line-height:1.3}
+.ms-h .seg{margin-top:10px}
+.ms-h .seg button{padding:0 10px}
+.ms-find{margin-top:10px;width:100%;height:32px;border:1px solid var(--border);border-radius:16px;padding:0 12px;font-size:12.5px;outline:none}
+.ms-find:focus{border-color:var(--blue)}
+.mo-list{flex:1;overflow:auto;min-height:0}
+.mo{display:grid;grid-template-columns:24px minmax(0,1fr) auto;gap:1px 8px;padding:10px 16px;border-bottom:1px solid var(--border2);cursor:pointer}
+.mo:hover{background:var(--bg)}
+.mo .rk{color:var(--text3);font-size:12px;padding-top:2px;font-variant-numeric:tabular-nums}
+.mo .nm{font-size:13.5px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mo .un{font-size:13.5px;font-weight:500;font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+.mo .un small{font-weight:400;color:var(--text2);font-size:11.5px}
+.mo .sub{grid-column:2/4;font-size:11.5px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rbar{grid-column:2/4;display:flex;height:6px;border-radius:3px;overflow:hidden;background:var(--border2);margin:6px 0 4px}
+.rbar i{display:block;height:100%}
+.rkey{grid-column:2/4;display:flex;flex-wrap:wrap;gap:2px 12px;font-size:11.5px;color:var(--text2)}
+.rkey b{font-weight:500;color:var(--text);font-variant-numeric:tabular-nums}
+.rkey i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px}
+.ms-back{display:inline-flex;align-items:center;gap:4px;font-size:12.5px;color:var(--blue);cursor:pointer;margin-bottom:8px}
+.ms-kpi{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}
+.ms-kpi>div{border:1px solid var(--border2);border-radius:10px;padding:8px 10px}
+.ms-kpi .k{font-size:11px;color:var(--text2)}
+.ms-kpi .v{font-family:'Google Sans',sans-serif;font-size:17px;font-variant-numeric:tabular-nums}
+.ms-sec{padding:12px 16px 4px;font-size:10.5px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--text3)}
+.ms-reg{width:calc(100% - 32px);margin:0 16px 4px;border-collapse:collapse;font-size:12.5px}
+.ms-reg td{padding:5px 0;border-bottom:1px solid var(--border2)}
+.ms-reg td.num{text-align:right;font-variant-numeric:tabular-nums;padding-left:12px;white-space:nowrap}
+.ms-reg .bar{height:6px;border-radius:3px;min-width:2px}
+.ms-hq{margin:0 16px 4px;border:1px solid var(--border2);border-radius:10px;padding:10px 12px;font-size:12.5px;display:flex;gap:10px;align-items:flex-start}
+.ms-hq svg{flex-shrink:0;width:20px;height:20px;margin-top:1px}
+.ms-hq .btn{margin-top:8px}
+.mp{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:1px 8px;padding:8px 16px;border-bottom:1px solid var(--border2);cursor:pointer;font-size:12.5px}
+.mp:hover{background:var(--bg)}
+.mp .nm{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mp .un{font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+.mp .sub{grid-column:1/3;color:var(--text2);font-size:11.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mp.noll{cursor:default;opacity:.65}
+.ms-foot{padding:10px 16px;border-top:1px solid var(--border2);display:flex;gap:8px;flex-wrap:wrap}
+.hqstar{background:none;border:none}
+.hqstar svg{width:34px;height:34px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.45))}
+@media (max-width:1100px){.mown{width:320px}}
+@media (max-width:760px){#vMap.active{flex-direction:column}.mown{width:100%;height:48%;border-left:none;border-top:1px solid var(--border)}.mpanel{max-width:calc(100% - 70px)}}
 .mpanel{position:absolute;top:12px;left:54px;z-index:500;background:rgba(255,255,255,.98);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);padding:10px 12px;font-size:12.5px;max-width:520px}
 .mpanel .ttl{font-family:'Google Sans',sans-serif;font-size:15px}
 /* rebuild modal */
@@ -731,7 +777,7 @@ tr.hidden-row td{opacity:.45}
     <div class="mark">O</div>
     <span class="brand-name">Greysteel</span><span class="brand-sep">|</span>
     <span class="brand-page">Owner 360</span>
-    <span id="verBadge" title="Page version">v8</span>
+    <span id="verBadge" title="Page version">v9</span>
   </div>
   <nav class="tabs">
     <button class="tab active" data-view="owners"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span class="tl">Owners</span></button>
@@ -804,9 +850,12 @@ tr.hidden-row td{opacity:.45}
 
   <!-- ======================= MAP ======================= -->
   <section class="view" id="vMap">
-    <div id="bigmap"></div>
-    <div class="mpanel"><div class="ttl" id="mpT">Properties</div><div class="small muted" id="mpS">Uses the Owners filters</div></div>
-    <div class="mlegend" id="mLegend"></div>
+    <div class="mmain">
+      <div id="bigmap"></div>
+      <div class="mpanel"><div class="ttl" id="mpT">Properties</div><div class="small muted" id="mpS">Uses the Owners filters</div></div>
+      <div class="mlegend" id="mLegend"></div>
+    </div>
+    <aside class="mown" id="mSide"></aside>
   </section>
 
   <!-- ======================= PROPERTIES ======================= -->
@@ -1113,6 +1162,15 @@ function sameOrg(a, b) {
 /* "1111 14th St NW 200, Washington, Dc 20005" / "300 W FREEMASON ST, NORFOLK, VA, 23510" /
    "10349 Warwick Blvd, _x0000_ _x0000_, Newport News, VA, 23601" -> {c: "Norfolk", s: "VA", z} */
 var US = /^(AL|AK|AZ|AR|CA|CO|CT|DE|DC|FL|GA|HI|ID|IL|IN|IA|KS|KY|LA|ME|MD|MA|MI|MN|MS|MO|MT|NE|NV|NH|NJ|NM|NY|NC|ND|OH|OK|OR|PA|RI|SC|SD|TN|TX|UT|VT|VA|WA|WV|WI|WY|PR)$/;
+/* "1100 Wilson Blvd Ste 900, Arlington, VA, 22209" -> "1100 WILSON BLVD|ARLINGTON|VA": the key HQ map
+   points are cached under (owner360/hq_geo.json and the previous build). "" for PO boxes. */
+function hqKey(full) {
+  var parts = s(full).split(",").map(function (x) { return x.trim(); }).filter(Boolean), cs = cityState(full);
+  if (!cs || !cs.c || parts.length < 2) return "";
+  var st = addrTokens(parts[0]).replace(UNIT_RE, "").replace(/\s+(STE|SUITE|FL|FLOOR|UNIT|APT|RM|ROOM|#)\s*[A-Z0-9-]*$/, "").trim();
+  if (!/^\d/.test(st) || /\b(P ?O BOX|BOX|LOCKBOX|PMB)\b/.test(st)) return "";
+  return st + "|" + cs.c.toUpperCase() + "|" + cs.s;
+}
 function cityState(full) {
   var parts = s(full).toUpperCase().replace(/_X0000_/g, "").split(/\s*,\s*/).map(function (x) { return x.trim(); }).filter(Boolean);
   if (parts.length < 2) return null;
@@ -1142,7 +1200,21 @@ DSU.prototype.union = function (a, b) { a = this.find(a); b = this.find(b); if (
      topa:   {sheets: {<slug>: sheet}, overlay: overlay.json, comps: comps.json, index: index.json},
      overlay: owner360 overlay.json (for "not the same owner" corrections),
      today:  "YYYY-MM-DD", by: "<email>" }                              */
+var HQGEO = {}, HQCITY = {};
 function build(input, log) {
+  /* HQ map points: the cache build.js keeps (--geocode adds to it), plus whatever the previous build knew */
+  HQGEO = {};
+  ((input.prev && input.prev.owners) || []).forEach(function (po) { if (po.hq && po.hq.a && po.hq.ll) { var k0 = hqKey(po.hq.a); if (k0) HQGEO[k0] = po.hq.ll; } });
+  Object.keys(input.hqGeo || {}).forEach(function (k0) { if (input.hqGeo[k0]) HQGEO[k0] = input.hqGeo[k0]; });
+  /* an HQ with only a PO box or an unplaceable street still gets a star, at the middle of the other HQs
+     in that city (hq.ap = approximate) */
+  var cityPts = {};
+  HQCITY = {};
+  Object.keys(HQGEO).forEach(function (k0) { var ck = k0.split("|").slice(1).join("|"); (cityPts[ck] = cityPts[ck] || []).push(HQGEO[k0]); });
+  Object.keys(cityPts).forEach(function (ck) {
+    var la = cityPts[ck].map(function (x) { return x[0]; }).sort(function (a, b) { return a - b; }), lo = cityPts[ck].map(function (x) { return x[1]; }).sort(function (a, b) { return a - b; });
+    HQCITY[ck] = [la[la.length >> 1], lo[lo.length >> 1]];
+  });
   log = log || function () {};
   var today = input.today || new Date().toISOString().slice(0, 10);
   var ov = input.overlay || {};
@@ -1331,6 +1403,10 @@ function build(input, log) {
     var nameWords = function (n) { return nameKey(n).split(" ").filter(function (w) { return w.length >= 4 && !/^(STREET|AVENUE|PLACE|ROAD|NORTHWEST|NORTHEAST|SOUTHWEST|SOUTHEAST|PROPERTIES|HOLDINGS|PARTNERS|ASSOCIATES|APARTMENTS|GROUP|TRUST|UNITED|STATES|AMERICA|DISTRICT|COLUMBIA)$/.test(w); }); };
     /* the recorder indexes people LAST FIRST ("RINGER MARVIN TERRELL") */
     var flipPerson = function (n) { var w = s(n).split(/\s+/); return isPerson(n) && n.indexOf(",") < 0 && w.length >= 2 && w.length <= 3 ? w.slice(1).concat(w[0]).join(" ") : s(n); };
+    /* LoanID v58: what became of each lot's foreclosure, read from the land records (data_rod_lots.json):
+       active / sold / deed_in_lieu / paid_off / cancelled / not_foreclosure, a scheduled sale date, a summary */
+    var rodLot = {};
+    ((L[reg].rod_lots && L[reg].rod_lots.lots) || []).forEach(function (l) { if (l && l.key) rodLot[s(l.key)] = l; });
     (L[reg].rod || []).forEach(function (f) {
       var borrowers = (f.borrowers || []).map(s).filter(Boolean), lenders = (f.lenders || []).map(s).filter(Boolean), blanket = (f.parcels || []).length >= 6;
       /* LoanID calls a party the borrower only when it matches the tax roll, so on ground leases, recent
@@ -1365,7 +1441,8 @@ function build(input, log) {
           rodGroup: s(f.doc) + "|" + s(x.key).split("-")[0] + "|" + squeeze(tax),
           owner: nm ? {name: nm, start: "", src: "DC Recorder"} : null,
           d: {doc: s(f.doc), date: day(f.recorded), trustees: (f.trustees || []).map(s).filter(Boolean).slice(0, 6), lenders: lenders.slice(0, 4),
-              borrowers: borrowers.slice(0, 4), deed: deed ? s(deed.doc) : "", link: s(f.link), key: s(x.key), use: s(x.use), taxOwner: s(x.owner)}});
+              borrowers: borrowers.slice(0, 4), deed: deed ? s(deed.doc) : "", link: s(f.link), key: s(x.key), use: s(x.use), taxOwner: s(x.owner),
+              st: s((rodLot[s(x.key)] || {}).status), sale: day((rodLot[s(x.key)] || {}).sale_date), sum: s(((rodLot[s(x.key)] || {}).summary || {}).text)}});
       });
     });
   });
@@ -2043,8 +2120,12 @@ function build(input, log) {
       var cs = cityState(c.mail.full);
       if (!cs || !cs.c) return;
       if (/\b(P ?O BOX|BOX|LOCKBOX|PMB)\b/i.test(c.mail.full)) w *= 0.25;     /* a tax lockbox (Chicago PO Box 87407) is not an HQ */
-      var k = cs.c + "|" + cs.s, h = hqv[k] || (hqv[k] = {c: cs.c, s: cs.s, w: 0, y: 0, src: {}});
+      var k = cs.c + "|" + cs.s, h = hqv[k] || (hqv[k] = {c: cs.c, s: cs.s, w: 0, y: 0, src: {}, addr: {}});
       h.w += w; h.src[c.src] = 1; if (c.parent) h.y += w;
+      /* the street address behind the vote (the star on the map); suites differ between sources, so
+         votes pool on the building */
+      var ak = hqKey(c.mail.full);
+      if (ak) { var ad = h.addr[ak] || (h.addr[ak] = {w: 0, y: 0, full: c.mail.full}); ad.w += w; if (c.parent) { ad.y += w; ad.full = c.mail.full; } }
     }
     o.claims.forEach(function (c) {
       if (c.parent) return;
@@ -2057,6 +2138,11 @@ function build(input, log) {
     /* Yardi gives the parent's own address: when it does, it decides */
     var hqBest = Object.keys(hqv).map(function (k) { return hqv[k]; }).sort(function (a, b) { return b.y - a.y || b.w - a.w; })[0];
     o.hq = hqBest ? {c: hqBest.c, s: hqBest.s, src: Object.keys(hqBest.src)} : null;
+    if (o.hq) {
+      var hqA = Object.keys(hqBest.addr).map(function (k) { return {k: k, v: hqBest.addr[k]}; }).sort(function (a, b) { return b.v.y - a.v.y || b.v.w - a.v.w || (a.k < b.k ? -1 : 1); })[0];
+      if (hqA) { o.hq.a = hqA.v.full; var g9 = HQGEO[hqA.k]; if (g9) o.hq.ll = g9; }
+      if (!o.hq.ll) { var c9 = HQCITY[o.hq.c.toUpperCase() + "|" + o.hq.s]; if (c9) { o.hq.ll = c9; o.hq.ap = 1; } }
+    }
     o.mail = Object.keys(mails).map(function (k) { return {v: mails[k].v, n: mails[k].n, src: Object.keys(mails[k].src)}; }).sort(function (a, b) { return b.n - a.n; }).slice(0, 6);
     o.emails = Object.keys(emails).map(function (k) { return {v: k, n: emails[k].n, src: Object.keys(emails[k].src)}; }).sort(function (a, b) { return b.n - a.n; }).slice(0, 8);
     o.phones = Object.keys(phones).map(function (k) { return {v: k, n: phones[k].n, src: Object.keys(phones[k].src)}; }).sort(function (a, b) { return b.n - a.n; }).slice(0, 8);
@@ -2214,6 +2300,10 @@ function mergeProp(rs, today) {
     if (!first) { seenDoc[f.doc] = f; f.keys = [f.key]; return true; }
     if (first.keys.indexOf(f.key) < 0) first.keys.push(f.key);
     if (f.how === "lot") first.how = "lot";
+    /* two lots of one property on one filing: a still-open foreclosure on either is what counts */
+    var done = /^(paid_off|cancelled|not_foreclosure)$/;
+    if ((!first.st || done.test(first.st)) && f.st && !done.test(f.st)) { first.st = f.st; first.sale = f.sale; first.sum = f.sum || first.sum; }
+    else if (!first.sale && f.sale) first.sale = f.sale;
     return false;
   }).sort(function (a, b) { return (b.date || "").localeCompare(a.date || ""); });
   var lotUnits = {}, sumD = 0;
@@ -2295,7 +2385,7 @@ function shownOwner(p) {
 function cplxName(n) { return addrTokens(s(n).replace(/&/g, " AND ")).replace(/\b(THE|APARTMENTS?|APTS?|RESIDENCES?|TOWNHOMES?|TOWNHOUSES?|PHASE|I|II|III|IV)\b/g, "").replace(/[^A-Z0-9]/g, ""); }
 function addDays(d, n) { var t = new Date(d + "T00:00:00Z"); if (isNaN(t)) return d; return new Date(+t + n * 864e5).toISOString().slice(0, 10); }
 
-var api = {build: build, nameKey: nameKey, ownerKey: ownerKey, parseSite: parseSite, mailKey: mailKey, pbs8Region: pbs8Region, REGIONS: REGIONS, BUILD_VERSION: BUILD_VERSION};
+var api = {build: build, hqKey: hqKey, nameKey: nameKey, ownerKey: ownerKey, parseSite: parseSite, mailKey: mailKey, pbs8Region: pbs8Region, REGIONS: REGIONS, BUILD_VERSION: BUILD_VERSION};
 if (typeof module !== "undefined" && module.exports) module.exports = api;
 else root.O360Build = api;
 })(typeof self !== "undefined" ? self : this);
@@ -2386,6 +2476,8 @@ var CAT = {
   debt: {l: "Debt", c: "#1a73e8"}, hap: {l: "HAP", c: "#9334e6"}, topa: {l: "TOPA", c: "#188038"}, distress: {l: "Distress", c: "#d93025"},
   redev: {l: "Redevelopment", c: "#e8710a"}, tenant: {l: "Tenants", c: "#007b83"}, hold: {l: "Long hold", c: "#80868b"}
 };
+var ROD_RESOLVED = {paid_off: "loan later paid off", cancelled: "foreclosure cancelled", not_foreclosure: "not a foreclosure"};
+var ROD_STATUS = {active: "Active foreclosure", sold: "Sold at foreclosure", deed_in_lieu: "Deed in lieu of foreclosure", paid_off: "Loan paid off", cancelled: "Foreclosure cancelled", not_foreclosure: "Not a foreclosure"};
 var SIGNAL_FILTERS = [
   {k: "mat", l: "Loan maturing", cat: "debt", test: function (s) { return s.k === "mat" || s.k === "rmat"; }},
   {k: "open", l: "Prepay opening", cat: "debt", test: function (s) { return s.k === "open"; }},
@@ -2483,11 +2575,16 @@ function propSignals(p, horizon) {
   });
   /* DC Recorder of Deeds: a substitute trustee is appointed to run a foreclosure sale. Scores like an
      active pre-foreclosure and fades with age; the Distress filter keeps it for 3 years (LoanID v54). */
-  var rod = (p.D || [])[0];
-  if (rod && rod.date && monthsFrom(rod.date) > -36)
-    add({k: "rod", cat: "distress", l: "Substitute trustee appointed", d: rod.date, pts: Math.round(25 * filingWeight(rod.date)),
-         x: [rod.lenders && rod.lenders.length ? "Lender " + rod.lenders.join(", ") : "", rod.trustees && rod.trustees.length ? "Trustee " + rod.trustees.join(", ") : "",
-             p.D.length > 1 ? p.D.length + " filings" : ""].filter(Boolean).join(" · ")});
+  /* LoanID v58-60: the land records say what became of it. Paid off, cancelled and "not a foreclosure"
+     (a payoff or refinance that swaps the trustee) are shown but not scored; a sale date still ahead
+     scores like a scheduled auction. */
+  var rodLive = (p.D || []).filter(function (f) { return !ROD_RESOLVED[f.st]; }), rod = rodLive[0];
+  var rodSale = rodLive.map(function (f) { return f.sale; }).filter(function (d) { return d && d >= TODAY_ISO; }).sort()[0];
+  var rodX = rod ? [rod.lenders && rod.lenders.length ? "Lender " + rod.lenders.join(", ") : "", rod.trustees && rod.trustees.length ? "Trustee " + rod.trustees.join(", ") : "",
+             rodLive.length > 1 ? rodLive.length + " filings" : ""].filter(Boolean).join(" · ") : "";
+  if (rodSale) add({k: "rod", cat: "distress", l: "Foreclosure sale scheduled", d: rodSale, pts: 30, x: rodX});
+  else if (rod && rod.date && monthsFrom(rod.date) > -36)
+    add({k: "rod", cat: "distress", l: rod.st === "sold" ? "Sold at foreclosure" : rod.st === "deed_in_lieu" ? "Deed in lieu of foreclosure" : "Substitute trustee appointed", d: rod.date, pts: Math.round(25 * filingWeight(rod.date)), x: rodX});
   /* hold period scores only when no loan is running (LoanID v48: the loan's maturity is the clock then) */
   var since = p.own && p.own.d;
   if (since) {
@@ -2759,7 +2856,7 @@ function renderProfile() {
     '<div class="acts"><span class="score lg ' + scoreCls(st.score) + '" title="Why-call-now score (0-100)">' + st.score + "</span>" +
     '<button class="ibtn' + (ov.stars[me] ? " on" : "") + '" id="pStar" title="Star (just for you)"><svg viewBox="0 0 24 24" fill="' + (ov.stars[me] ? "currentColor" : "none") + '" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>' +
     '<button class="lid-btn" id="pLink" title="Copy a link that opens this owner for a colleague"><span class="lb-idle">' + LINK_SVG + 'Copy link</span><span class="lb-done">' + CHECK_SVG + 'Link copied</span></button>' +
-    '<button class="btn sm" id="pBrief" title="Copy a call brief to the clipboard">Copy call brief</button><button class="btn sm" id="pCsv">Export</button></div></div>';
+    '<button class="btn sm" id="pMap" title="Show the properties and headquarters of this owner on the map">Map</button><button class="btn sm" id="pBrief" title="Copy a call brief to the clipboard">Copy call brief</button><button class="btn sm" id="pCsv">Export</button></div></div>';
 
   var nextTxt = st.next ? '<div class="k-v sm">' + esc(fmtMon(st.next.d)) + '</div><div class="k-d" title="' + esc(st.next.l + " · " + (st.next.p.n || st.next.p.a)) + '">' + esc(shortLabel(st.next).replace(/ [A-Z][a-z]{2} '\d\d$/, "")) + " · " + esc(st.next.p.n || st.next.p.a) + "</div>" : '<div class="k-v sm">-</div><div class="k-d">Nothing dated ahead</div>';
   h += '<div class="grid g-kpi6">' +
@@ -2827,6 +2924,7 @@ function renderProfile() {
   $("pStar").onclick = function () { edit([{t: "star", k: ownerKeyFor(i), on: !ov.stars[me]}]); };
   $("pLink").onclick = function () { copyLink(ownerUrl(i), this); };
   $("pBrief").onclick = function () { copyBrief(i); };
+  $("pMap").onclick = function () { MS.owner = i; MS.hq = false; setView("map"); };
   $("pCsv").onclick = function () { exportOwner(i); };
   $("omain").querySelectorAll("[data-detach]").forEach(function (el) {
     el.onclick = function (e) {
@@ -2963,6 +3061,24 @@ function drawOwnerMap(ps) {
   if (b.length === 1) _omap.setView(b[0], 15); else _omap.fitBounds(b, {padding: [24, 24], maxZoom: 15});
 }
 var _bmap = null, _blayer = null;
+/* ---- Map tab: every filtered owner's properties, or one owner's with a star on the HQ ---- */
+var REG_COL = {hampton: "#4285f4", dc: "#ea8600", montgomery: "#12b5cb", princegeorges: "#a142f4"};
+var MS = {owner: -1, shown: 40, q: "", hq: false, marks: {}};
+var STAR_SVG = '<svg viewBox="0 0 24 24"><polygon points="12 1.6 15.2 8.2 22.5 9.2 17.2 14.3 18.5 21.5 12 18 5.5 21.5 6.8 14.3 1.5 9.2 8.8 8.2" fill="#fbbc04" stroke="#202124" stroke-width="1.3" stroke-linejoin="round"/></svg>';
+function ownerRegions(o) {
+  if (o._rg) return o._rg;
+  var rg = {}, D = S.data;
+  o.p.forEach(function (k) { var p = D.props[k], r = rg[p.r] || (rg[p.r] = {p: 0, u: 0}); r.p++; r.u += p.u || 0; });
+  return o._rg = rg;
+}
+/* the HQ is drawn with the properties when it sits in or near the four markets; a New York or Los
+   Angeles HQ is offered as a separate zoom so the map does not shrink to the whole country */
+function hqNear(h) {
+  var D = S.data;
+  return !!(h && h.ll) && Object.keys(D.regions).some(function (r) { var b = D.regions[r].box; return b && h.ll[0] >= b[0] - 0.6 && h.ll[0] <= b[2] + 0.6 && h.ll[1] >= b[1] - 0.6 && h.ll[1] <= b[3] + 0.6; });
+}
+function hqLine(h) { return h && h.a ? h.a.replace(/\s*,\s*/g, ", ").replace(/, (\d{5})/, " $1") : hqText(h); }
+function mapPickOwner(i) { MS.owner = i; MS.hq = false; renderBigMap(); }
 function renderBigMap() {
   if (!window.L) return;
   if (!_bmap) {
@@ -2970,29 +3086,135 @@ function renderBigMap() {
     tiles(_bmap); wirePopup(_bmap);
     _bmap.setView([38.6, -76.9], 8);
   }
+  _bmap.invalidateSize({animate: false});          /* the tab may have just been shown, or the window resized */
   if (_blayer) _blayer.remove();
   _blayer = L.layerGroup().addTo(_bmap);
   var D = S.data, ids = S.list || [], n = 0, b = [], pts = [];
-  ids.forEach(function (i) {
+  var sel = MS.owner >= 0 ? D.owners[MS.owner] : null;
+  if (!sel) MS.owner = -1;
+  (sel ? [MS.owner] : ids).forEach(function (i) {
     D.owners[i].p.forEach(function (k) {
       var p = D.props[k];
-      if (!p.ll || (S.region && p.r !== S.region)) return;
+      if (!p.ll || (!sel && S.region && p.r !== S.region)) return;      /* one owner: every market */
       pts.push(p); n++; b.push(p.ll);
     });
   });
   /* grey (no signal) first so the coloured dots sit on top */
   pts.sort(function (a, b) { return (topCat(a) ? 1 : 0) - (topCat(b) ? 1 : 0) || (b.u || 0) - (a.u || 0); });
-  pts.forEach(function (p) { dotFor(p, true).bindPopup(popupHtml(p, true)).addTo(_blayer); });
-  $("mpT").textContent = fmtN(n) + " properties · " + fmtN(ids.length) + " owners";
-  $("mpS").textContent = "Same filters as the Owners tab" + (S.sig.length ? " · " + S.sig.length + " signal filter" + (S.sig.length > 1 ? "s" : "") : "");
-  $("mLegend").innerHTML = '<div class="lt">Strongest signal</div>' + Object.keys(CAT).map(function (c) { return '<div class="lr"><span class="mdot" style="background:' + CAT[c].c + '"></span>' + CAT[c].l + "</div>"; }).join("") + '<div class="lr"><span class="mdot" style="background:#9aa0a6"></span>No signal</div><div class="lr small muted">Dot size = units</div>';
-  if (b.length && (!renderBigMap._fit || renderBigMap._fit !== (S.region || "*"))) {
-    var box = S.region && D.regions[S.region].box;
-    if (box) _bmap.fitBounds([[box[0], box[1]], [box[2], box[3]]], {padding: [20, 20]});
-    else _bmap.fitBounds(b, {padding: [30, 30]});
-    renderBigMap._fit = S.region || "*";
+  MS.marks = {};
+  pts.forEach(function (p) { MS.marks[p.id] = dotFor(p, true).bindPopup(popupHtml(p, !sel)).addTo(_blayer); });
+  var hq = sel && sel.hq && sel.hq.ll ? sel.hq : null;
+  if (hq) {
+    L.marker(hq.ll, {icon: L.divIcon({className: "hqstar", html: STAR_SVG, iconSize: [34, 34], iconAnchor: [17, 17]}), zIndexOffset: 1000, title: "Headquarters"})
+      .bindPopup('<div class="pu-a">' + esc(sel.n) + '</div><div class="pu-n">Headquarters' + (hq.ap ? " (" + esc(hqText(hq)) + ", no street address on record)" : "") + '</div><div class="pu-n">' + esc(hq.ap ? "" : hqLine(hq)) + "</div>").addTo(_blayer);
   }
+  if (sel) {
+    var u = 0; sel.p.forEach(function (k) { u += D.props[k].u || 0; });
+    $("mpT").textContent = sel.n;
+    $("mpS").textContent = fmtN(sel.p.length) + " propert" + (sel.p.length === 1 ? "y" : "ies") + " · " + fmtN(u) + " units" + (n < sel.p.length ? " · " + (sel.p.length - n) + " not on the map (no coordinates)" : "") + (hq ? " · star = headquarters" : "");
+  } else {
+    $("mpT").textContent = fmtN(n) + " properties · " + fmtN(ids.length) + " owners";
+    $("mpS").textContent = "Same filters as the Owners tab" + (S.sig.length ? " · " + S.sig.length + " signal filter" + (S.sig.length > 1 ? "s" : "") : "") + " · click an owner on the right to see only theirs";
+  }
+  $("mLegend").innerHTML = '<div class="lt">Strongest signal</div>' + Object.keys(CAT).map(function (c) { return '<div class="lr"><span class="mdot" style="background:' + CAT[c].c + '"></span>' + CAT[c].l + "</div>"; }).join("") + '<div class="lr"><span class="mdot" style="background:#9aa0a6"></span>No signal</div><div class="lr small muted" style="margin-top:4px">Dot size = units</div>' +
+    (sel ? '<div class="lr" style="margin-top:4px"><span style="display:inline-flex;width:14px;height:14px">' + STAR_SVG + "</span>Headquarters</div>" : "");
+  var fitKey = sel ? "o" + sel.id + (MS.hq ? "+hq" : "") : (S.region || "*");
+  if (renderBigMap._fit !== fitKey) {
+    var fb = b.slice();
+    if (hq && (MS.hq || hqNear(hq))) fb.push(hq.ll);
+    if (sel) { if (fb.length === 1) _bmap.setView(fb[0], 14, {animate: false}); else if (fb.length) _bmap.fitBounds(fb, {padding: [40, 40], maxZoom: 15, animate: false}); }
+    else if (b.length) {
+      var box = S.region && D.regions[S.region].box;
+      if (box) _bmap.fitBounds([[box[0], box[1]], [box[2], box[3]]], {padding: [20, 20], animate: false});
+      else _bmap.fitBounds(b, {padding: [30, 30], animate: false});
+    }
+    renderBigMap._fit = fitKey;
+  }
+  renderMapSide();
   setTimeout(function () { _bmap.invalidateSize(); }, 50);
+}
+function regKey(rg, only) {
+  var D = S.data, rs = Object.keys(D.regions).filter(function (r) { return rg[r]; }), tot = 0;
+  rs.forEach(function (r) { tot += rg[r].u; });
+  return '<div class="rbar">' + rs.map(function (r) { return '<i style="width:' + (tot ? 100 * rg[r].u / tot : 0).toFixed(1) + "%;background:" + REG_COL[r] + (only && only !== r ? ";opacity:.3" : "") + '"></i>'; }).join("") + "</div>" +
+    '<div class="rkey">' + rs.map(function (r) { return '<span><i style="background:' + REG_COL[r] + '"></i>' + REG_SHORT[r] + " <b>" + fmtN(rg[r].u) + "</b></span>"; }).join("") + "</div>";
+}
+function renderMapSide() {
+  var D = S.data, el = $("mSide"), sel = MS.owner >= 0 ? D.owners[MS.owner] : null, h = "";
+  if (!sel) {
+    /* ---- the largest owners, by units (in the chosen market when one is picked) ---- */
+    var q = MS.q.trim().toLowerCase();
+    var rows = (S.list || []).map(function (i) { var o = D.owners[i], rg = ownerRegions(o), tot = 0; Object.keys(rg).forEach(function (r) { tot += rg[r].u; }); return {i: i, o: o, rg: rg, tot: tot, u: S.region ? (rg[S.region] ? rg[S.region].u : 0) : tot}; })
+      .filter(function (x) { return x.u > 0 || !S.region; });
+    rows.sort(function (a, b) { return b.u - a.u || b.tot - a.tot || a.o.n.localeCompare(b.o.n); });
+    rows.forEach(function (x, k) { x.rank = k + 1; });
+    var allU = rows.reduce(function (s0, x) { return s0 + x.u; }, 0), nAll = rows.length;
+    if (q) rows = rows.filter(function (x) { return x.o.n.toLowerCase().indexOf(q) >= 0 || hqText(x.o.hq).toLowerCase().indexOf(q) >= 0; });
+    h += '<div class="ms-h"><div class="ttl">Largest owners</div><div class="small muted">' + fmtN(nAll) + " owners · " + fmtN(allU) + " units" + (S.region ? " in " + REG_NAMES[S.region] : " across all four markets") + ' · ranked by units</div>' +
+      '<div class="seg" id="msRegion"></div><input class="ms-find" id="msFind" placeholder="Find an owner or HQ city" value="' + esc(MS.q) + '"></div><div class="mo-list" id="msList">';
+    rows.slice(0, MS.shown).forEach(function (x) {
+      h += '<div class="mo" data-i="' + x.i + '"><div class="rk">' + x.rank + '</div><div class="nm" title="' + esc(x.o.n) + '">' + esc(x.o.n) + '</div><div class="un">' + fmtN(x.u) + (S.region && x.tot > x.u ? " <small>of " + fmtN(x.tot) + "</small>" : " <small>units</small>") + "</div>" +
+        '<div class="sub">' + esc(x.o.kd) + " · " + fmtN(x.o.p.length) + " propert" + (x.o.p.length === 1 ? "y" : "ies") + (x.o.hq ? " · HQ " + esc(hqText(x.o.hq)) : "") + "</div>" + regKey(x.rg, S.region) + "</div>";
+    });
+    if (rows.length > MS.shown) h += '<button class="more" id="msMore">Show ' + Math.min(100, rows.length - MS.shown) + " more of " + fmtN(rows.length - MS.shown) + "</button>";
+    if (!rows.length) h += '<div class="empty">No owners match.</div>';
+    h += "</div>";
+    el.innerHTML = h;
+    var regs = [["", "All"]].concat(Object.keys(D.regions).map(function (r) { return [r, REG_SHORT[r]]; }));
+    $("msRegion").innerHTML = regs.map(function (r) { return '<button data-v="' + r[0] + '"' + (r[0] === S.region ? ' class="on"' : "") + ">" + r[1] + "</button>"; }).join("");
+    $("msRegion").querySelectorAll("button").forEach(function (bt) { bt.onclick = function () {
+      S.region = bt.dataset.v; S.shown = 120; MS.shown = 40;
+      $("oRegion").querySelectorAll("button").forEach(function (x) { x.classList.toggle("on", x.dataset.v === S.region); });
+      renderOwnerList();                                   /* same filter as the Owners tab; redraws the map too */
+    }; });
+    $("msFind").oninput = function () { MS.q = this.value; MS.shown = 40; var pos = this.selectionStart; renderMapSide(); var f = $("msFind"); f.focus(); f.setSelectionRange(pos, pos); };
+    el.querySelectorAll(".mo").forEach(function (r) { r.onclick = function () { mapPickOwner(+r.dataset.i); }; });
+    var mm = $("msMore"); if (mm) mm.onclick = function () { MS.shown += 100; renderMapSide(); };
+    return;
+  }
+  /* ---- one owner: units by market, the HQ, every property ---- */
+  var rg = ownerRegions(sel), st = ownerStats(sel), tot = 0, hq = sel.hq;
+  Object.keys(rg).forEach(function (r) { tot += rg[r].u; });
+  var kindPill = {Private: "blue", "Non-profit": "green", Public: "purple", "Co-op": "orange", Individual: "gray"}[sel.kd] || "gray";
+  h += '<div class="ms-h"><a class="ms-back" id="msBack">&larr; All owners</a><div class="ttl">' + esc(sel.n) + '</div><div class="small muted" style="margin-top:4px"><span class="pill ' + kindPill + '">' + esc(sel.kd) + "</span>" + (hq ? " &nbsp;HQ " + esc(hqText(hq)) : "") + "</div>" +
+    '<div class="ms-kpi"><div><div class="k">Properties</div><div class="v">' + fmtN(sel.p.length) + '</div></div><div><div class="k">Units</div><div class="v">' + fmtN(tot) + '</div></div><div><div class="k">Score</div><div class="v">' + st.score + "</div></div></div></div>";
+  h += '<div class="mo-list"><div class="ms-sec">Units by market</div><table class="ms-reg"><tbody>' +
+    Object.keys(D.regions).filter(function (r) { return rg[r]; }).sort(function (a, b) { return rg[b].u - rg[a].u; }).map(function (r) {
+      return "<tr><td>" + REG_NAMES[r] + '<div class="bar" style="width:' + (tot ? Math.max(2, 100 * rg[r].u / tot) : 2).toFixed(0) + "%;background:" + REG_COL[r] + '"></div></td><td class="num">' + fmtN(rg[r].p) + " propert" + (rg[r].p === 1 ? "y" : "ies") + '</td><td class="num"><b>' + fmtN(rg[r].u) + "</b> units</td><td class=\"num muted\">" + (tot ? Math.round(100 * rg[r].u / tot) : 0) + "%</td></tr>";
+    }).join("") + "</tbody></table>";
+  h += '<div class="ms-sec">Headquarters</div><div class="ms-hq">' + STAR_SVG + "<div>";
+  if (!hq) h += '<span class="muted">No headquarters address on record.</span>';
+  else {
+    h += "<div>" + esc(hq.a && !hq.ap ? hqLine(hq) : hqText(hq)) + "</div>";
+    if (!hq.ll) h += '<div class="small muted">Could not be placed on the map.</div>';
+    else {
+      if (hq.ap) h += '<div class="small muted">Only the city is on record, so the star marks ' + esc(hq.c) + ", not a street address.</div>";
+      if (!hqNear(hq)) h += '<div class="small muted">Outside the four markets, so it is not in the view below.</div>';
+      h += '<button class="btn sm" id="msHq">' + (MS.hq ? "Back to the properties" : hqNear(hq) ? "Zoom to the HQ" : "Show the HQ on the map") + "</button>";
+    }
+  }
+  h += "</div></div>";
+  var ps = sel.p.map(function (k) { return D.props[k]; }).sort(function (a, b) { return (b.u || 0) - (a.u || 0); });
+  h += '<div class="ms-sec">Properties, largest first</div>';
+  ps.forEach(function (p) {
+    var sg = propSignals(p, S.horizon).filter(function (s) { return s.pts > 0; }).sort(function (a, b) { return b.pts - a.pts; })[0];
+    h += '<div class="mp' + (p.ll ? "" : " noll") + '" data-p="' + esc(p.id) + '"><div class="nm" title="' + esc(p.n || p.a) + '">' + esc(p.n || p.a) + '</div><div class="un">' + (p.u ? fmtU(p) + " units" : "") + '</div><div class="sub"><i style="display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px;background:' + REG_COL[p.r] + '"></i>' +
+      esc((p.n ? p.a + " · " : "") + (p.c || REG_NAMES[p.r])) + (p.ll ? "" : " · not on the map") + (sg ? " &nbsp;" + sigPill(sg, true) : "") + "</div></div>";
+  });
+  h += '</div><div class="ms-foot"><button class="btn sm" id="msOpen">Open owner profile</button><button class="btn sm" id="msAll">Back to all owners</button></div>';
+  el.innerHTML = h;
+  var back = function () { MS.owner = -1; MS.hq = false; renderBigMap(); };
+  $("msBack").onclick = back; $("msAll").onclick = back;
+  $("msOpen").onclick = function () { openOwner(MS.owner); };
+  var hb = $("msHq");
+  if (hb) hb.onclick = function () {
+    if (hqNear(hq) && !MS.hq) { _bmap.setView(hq.ll, hq.ap ? 12 : 15, {animate: false}); return; }
+    MS.hq = !MS.hq; renderBigMap();
+  };
+  el.querySelectorAll(".mp").forEach(function (r) { r.onclick = function () {
+    var m = MS.marks[r.dataset.p]; if (!m) return;
+    _bmap.setView(m.getLatLng(), Math.max(_bmap.getZoom(), 15), {animate: false}); m.openPopup();
+  }; });
 }
 
 /* ----------------------------------------------------- property drawer --- */
@@ -3044,7 +3266,18 @@ function openProp(id) {
   if ((p.D || []).length) h += '<div class="dr-sec">Substitute trustee filings (DC Recorder)</div><table class="dtab"><thead><tr><th>Recorded</th><th>Lender / trustee</th><th>Borrower</th></tr></thead><tbody>' +
     p.D.map(function (f) { return '<tr><td class="nw">' + esc(fmtDate(f.date)) + '<div class="muted small">' + esc(rel(f.date)) + "</div></td><td>" + esc((f.lenders || []).join(", ") || "-") +
       '<div class="muted small">Trustee: ' + esc((f.trustees || []).join(", ") || "-") + (f.deed ? " · deed of trust " + esc(f.deed) : "") + "</div></td><td>" + esc((f.borrowers || []).join(", ") || "-") +
-      (f.link ? '<div class="small"><a target="_blank" rel="noopener" href="' + esc(f.link) + '">Filing ' + esc(f.doc) + "</a></div>" : "") + "</td></tr>"; }).join("") + "</tbody></table>";
+      (f.link ? '<div class="small"><a target="_blank" rel="noopener" href="' + esc(f.link) + '">Filing ' + esc(f.doc) + "</a></div>" : "") + "</td></tr>"; }).join("") + "</tbody></table>" +
+    (function () {
+      /* what the land records say happened next (LoanID reads the chain of title), once per distinct story */
+      var seen = {}, out = "";
+      p.D.forEach(function (f) {
+        if (!f.st || seen[f.st + "|" + (f.sum || "")]) return; seen[f.st + "|" + (f.sum || "")] = 1;
+        out += '<div class="citem"><div class="ct"><span class="sp ' + (ROD_RESOLVED[f.st] ? "hold" : "distress") + '">' + esc(ROD_STATUS[f.st] || f.st) + "</span>" +
+          (f.sale && !ROD_RESOLVED[f.st] ? " Sale " + (f.sale >= TODAY_ISO ? "scheduled " : "was set for ") + esc(fmtDate(f.sale)) : "") + (ROD_RESOLVED[f.st] ? ' <span class="muted small">not counted in the score</span>' : "") + "</div>" +
+          (f.sum ? '<div class="muted">' + esc(f.sum) + "</div>" : "") + "</div>";
+      });
+      return out;
+    })();
   (p.Y || []).forEach(function (y) {
     h += '<div class="dr-sec">Yardi Matrix</div><div class="statbox">' + row("Property", esc(y.name || "-")) + row("Owner", esc(y.owner || "-") + (y.web ? ' <span class="muted small">' + esc(y.web) + "</span>" : "")) +
       row("Manager", esc(y.mgr || "-")) + row("Ratings", esc(["improvement " + (y.impr || "-"), "location " + (y.loc || "-")].join(" · "))) +
@@ -3276,7 +3509,7 @@ async function rebuild() {
     var lm = await apiGet("/owner360/manifest?fresh=1"), tm = await apiGet("/topa/manifest?fresh=1");
     var base = lm.files["owners.json"] || null;
     var regions = Object.keys(O360Build.REGIONS), lfiles = [];
-    regions.forEach(function (r) { ["reonomy", "trepp", "costar", "yardi", "rod", "salesforce"].forEach(function (f) { var p = r + "/data_" + f + ".json"; if (lm.loanid[p]) lfiles.push(p); }); });
+    regions.forEach(function (r) { ["reonomy", "trepp", "costar", "yardi", "rod", "rod_lots", "salesforce"].forEach(function (f) { var p = r + "/data_" + f + ".json"; if (lm.loanid[p]) lfiles.push(p); }); });
     var topaIdx = tm.files["index.json"];
     total = 3 + lfiles.length + 2 + 20;
     var get = function (path, label) { return apiGet(path).then(function (j) { tick("Loaded " + label); return j; }); };
