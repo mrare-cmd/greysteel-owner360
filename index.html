@@ -987,7 +987,7 @@ function isPerson(n) {
 var GROUND_RE = /\b(TENANTS? ASSOCIATION|TENANTS? ASSN|UNIVERSITY|CHURCH|SUPREME COUNCIL|LAND ONLY|GROUND (OWNER|LESSOR|LEASE)|COOPERATIVE|CO ?OP|ASSIGNMENT CORP|HOUSING FINANCE|BAPTIST|DIOCESE|ARCHDIOCESE|TEMPLE|MINISTRIES|CONGREGATION)\b/;
 /* tax-credit investors and banks Yardi sometimes lists as "owner" (Bank of America on Enterprise's
    Meadowbrook Run): never a sponsor, never an owner link, never a domain link */
-var INVESTOR_RE = /\b(BANK OF AMERICA|BANK NA|BANK N A|NATIONAL BANK|SAVINGS BANK|BANCORP|WELLS FARGO|JPMORGAN|JP MORGAN|CHASE BANK|JPMORGAN CHASE|CITIBANK|CITIGROUP|PNC BANK|PNC REAL ESTATE|CAPITAL ONE|TRUIST|SUNTRUST|BB AND T|US BANCORP|US BANK|M AND T BANK|RAYMOND JAMES|BOSTON CAPITAL|NATIONAL EQUITY FUND|HUNT CAPITAL|R4 CAPITAL|RICHMAN GROUP|RICHMAN TAX|MERRITT COMMUNITY CAPITAL|AEGON|TAX CREDIT|HOUSING EQUITY FUND|ENTERPRISE COMMUNITY INVESTMENT|ENTERPRISE HOUSING CREDIT|NATIONAL AFFORDABLE HOUSING TRUST|AFFORDABLE HSNG|AFFORDABLE HOUSING COMMUNITY DEV)\b/;
+var INVESTOR_RE = /\b(BFIM|BOSTON FINANCIAL|BANK OF AMERICA|BANK NA|BANK N A|NATIONAL BANK|SAVINGS BANK|BANCORP|WELLS FARGO|JPMORGAN|JP MORGAN|CHASE BANK|JPMORGAN CHASE|CITIBANK|CITIGROUP|PNC BANK|PNC REAL ESTATE|CAPITAL ONE|TRUIST|SUNTRUST|BB AND T|US BANCORP|US BANK|M AND T BANK|RAYMOND JAMES|BOSTON CAPITAL|NATIONAL EQUITY FUND|HUNT CAPITAL|R4 CAPITAL|RICHMAN GROUP|RICHMAN TAX|MERRITT COMMUNITY CAPITAL|AEGON|TAX CREDIT|HOUSING EQUITY FUND|ENTERPRISE COMMUNITY INVESTMENT|ENTERPRISE HOUSING CREDIT|NATIONAL AFFORDABLE HOUSING TRUST|AFFORDABLE HSNG|AFFORDABLE HOUSING COMMUNITY DEV)\b/;
 var INVESTOR_DOM = /^(bankofamerica|bofa|wellsfargo|jpmorgan|chase|citi|pnc|capitalone|truist|usbank|mtb|raymondjames|rjfinancial|bostoncapital|nefinc|huntcompanies|r4cap|enterprisecommunity)\./;
 /* housing authorities sponsor through their own affiliates (HOC: RAD 6 Development Corp): they may
    name their group even when affiliates hold most of it */
@@ -1405,7 +1405,7 @@ function build(input, log) {
      Yardi (one row per apartment complex, leasing address) is assigned after,
      one row per property, best evidence first - see the reviewer notes in
      CLAUDE.md for why each guard exists. */
-  var P = new DSU(), streets = {};
+  var P = new DSU(), streets = {}, streetsND = {};
   /* Reonomy's apn "5729-W000-0006" and the recorder's key "5729W-0006" are the same lot */
   function apnKey(a) {
     var m = /^\s*(PAR|\d{4})-([A-Z0-9]{4})-(\d{4})\s*$/.exec(s(a).toUpperCase());
@@ -1444,7 +1444,8 @@ function build(input, log) {
       var unitsEq = r.units && q.units && Math.min(r.units, q.units) >= 20 && Math.abs(r.units - q.units) <= 0.05 * Math.max(r.units, q.units);
       /* the same complex name ("Poquoson Place Apartments" / "Poquoson Pl") */
       var na = cplxName(r.name), nb = cplxName(q.name);
-      var sameName = na.length >= 6 && nb.length >= 6 && (na === nb || na.indexOf(nb) === 0 || nb.indexOf(na) === 0);
+      var stSq = site.street.replace(/[^A-Z0-9]/g, ""), isName = function (x) { return x.length >= 6 && !/^\d/.test(x) && stSq.indexOf(x) !== 0 && x.indexOf(stSq.replace(/(ST|AVE|RD|DR|PL|CT|LN|BLVD|TER|WAY|CIR)?(NW|NE|SW|SE)?$/, "")) !== 0; };
+      var sameName = isName(na) && isName(nb) && (na === nb || (Math.min(na.length, nb.length) >= 8 && (na.indexOf(nb) === 0 || nb.indexOf(na) === 0)));
       /* dist() is 0 both for "no coordinates" and for identical pins: hasLL tells them apart */
       var dd = dist(r, q), hasLL = !!(r.lat && r.lng && q.lat && q.lng && inBox(r.reg, r.lat, r.lng) && inBox(q.reg, q.lat, q.lng));
       /* a wrong geocode is forgiven only with the zip or the complex name agreeing; a range against its
@@ -1470,6 +1471,18 @@ function build(input, log) {
       P.union("r" + o, "r" + r.i);
     }
     list.push(r.i);
+    var tk9 = site.street.split(" ");
+    if (tk9.length > 2 && /^(N|S|E|W|NE|NW|SE|SW)$/.test(tk9[tk9.length - 1])) tk9.pop();
+    if (tk9.length > 2 && /^(N|S|E|W)$/.test(tk9[0])) tk9.shift();
+    var kd = r.reg + "|" + tk9.join(" "), listD = streetsND[kd] || (streetsND[kd] = []);
+    if (site.hi === site.lo) {
+      for (var jd = 0; jd < listD.length; jd++) {
+        var qd = recs[listD[jd]];
+        if (qd.skey === k || qd.site.lo !== site.lo) continue;
+        if (r.lat && r.lng && qd.lat && qd.lng && inBox(r.reg, r.lat, r.lng) && inBox(qd.reg, qd.lat, qd.lng) && dist(r, qd) <= 0.15) P.union("r" + qd.i, "r" + r.i);
+      }
+      listD.push(r.i);
+    }
   });
 
   recs.forEach(function (x) {
@@ -1656,7 +1669,7 @@ function build(input, log) {
   /* ids must be unique (the page and the connector look properties up by id); the order of props is
      left alone because owner grouping breaks ties by it */
   var idSeen = {};
-  props.slice().sort(function (a, b) { return a.id < b.id ? -1 : a.id > b.id ? 1 : b.src.length - a.src.length || (b.u || 0) - (a.u || 0) || (a.a < b.a ? -1 : a.a > b.a ? 1 : 0); })
+  props.slice().sort(function (a, b) { return a.id < b.id ? -1 : a.id > b.id ? 1 : b.src.length - a.src.length || Math.max.apply(null, b.src.map(function (x) { return SRC_RANK[x] || 0; })) - Math.max.apply(null, a.src.map(function (x) { return SRC_RANK[x] || 0; })) || (b.u || 0) - (a.u || 0) || (a.a < b.a ? -1 : a.a > b.a ? 1 : 0); })
        .forEach(function (p) { var n = idSeen[p.id] = (idSeen[p.id] || 0) + 1; if (n > 1) p.id += "x" + n; });
   log("properties: " + props.length);
 
@@ -1727,12 +1740,15 @@ function build(input, log) {
       if (cosC && c === lead && (c.srcCode === "R" || c.srcCode === "T") && cosC.start) {
         var tk2 = nameKey(cosC.trueCo), sameSale = false;
         if (c.srcCode === "R") sameSale = !!(p.R[0] && p.C[0] && p.R[0].price && p.R[0].price === p.C[0].price && p.R[0].sale && p.R[0].sale >= addDays(cosC.start, -30) && p.R[0].sale <= addDays(cosC.start, 120));
-        else sameSale = !!(p.T[0] && p.T[0].lastSale && p.T[0].lastSale === cosC.start);
+        /* Trepp keeps the old sponsor's contact on a loan that was assumed (Solaire Wheaton: a Clarion
+           contact on a 2016 loan, sold to 29th Street Capital in 2023), and sometimes the seller's entity */
+        else sameSale = !!(p.T[0] && p.T[0].lastSale && p.T[0].lastSale === cosC.start && nk !== nameKey(p.T[0].lastSeller) &&
+          !(isPerson(c.name) && ((p.T[0].loans || []).map(function (l) { return l.od || ""; }).sort().pop() || "9") < addDays(cosC.start, -365)));
         /* not the seller's name left on the loan, and not a brokerage or law firm CoStar put in the buyer field */
         var sellerK = nameKey(p.C[0] && p.C[0].seller);
-        if (sameSale && tk2 && tk2 !== nk && nk !== sellerK && !/\b(RE MAX|REMAX|KELLER WILLIAMS|CENTURY 21|COLDWELL BANKER|LONG AND FOSTER|BERKSHIRE HATHAWAY|SOTHEBY|EXP REALTY|HOWARD HANNA|ROSE AND WOMBLE|LAWYERS?|ATTORNEYS?|LAW FIRM|LAW OFFICES?|LAW GROUP)\b/.test(tk2) &&
+        if (sameSale && tk2 && tk2 !== nk && nk !== sellerK && !/\b(RE MAX|REMAX|KELLER WILLIAMS|CENTURY 21|COLDWELL BANKER|LONG AND FOSTER|BERKSHIRE HATHAWAY|SOTHEBY|EXP REALTY|HOWARD HANNA|ROSE AND WOMBLE|LAWYERS?|ATTORNEYS?|LAW FIRM|LAW OFFICES?|LAW GROUP|HIRSCHLER|WILLIAMS MULLEN|KAUFMAN AND CANOLES)\b/.test(tk2) &&
             !PUBLIC_RE.test(tk2) && !PUBLIC_RE.test(nk) && !GROUND_RE.test(nk) && !INVESTOR_RE.test(nk)) {
-          link("n:" + nk, "n:" + tk2, "costar", cosC.trueCo + " (same sale)"); trueCoTarget[tk2] = 1; trueCoTarget[nk] = 1;
+          link("n:" + nk, "n:" + tk2, "costar", cosC.trueCo + " (same sale)"); trueCoTarget[tk2] = 1;
         }
       }
       var isPub = PUBLIC_RE.test(nk), noHub = isPub || GROUND_RE.test(nk) || INVESTOR_RE.test(nk) || COOP_RE.test(nk) || coopKey[nk];
@@ -2088,6 +2104,29 @@ function build(input, log) {
   });
   if (merged) owners = makeOwners();
   log("same-parent groups merged: " + merged);
+  /* owner ids are in saved and shared links (?o=) and in the Claude connector: a group keeps the id it
+     had in the previous build (input.prev = the owners.json being replaced). Each new group takes the
+     id of the previous group most of its names came from (weighted by properties), biggest group first;
+     only a group with no history gets a fresh hash */
+  var prevBy = {}, prevWas = {}, takenId = {}, kept = 0;
+  ((input.prev && input.prev.owners) || []).forEach(function (po) { prevWas[po.id] = po.was || []; (po.al || []).forEach(function (a) { if (a && a.k && po.id && !prevBy[a.k]) prevBy[a.k] = po.id; }); });
+  owners.slice().sort(function (a, b) { return b.props.length - a.props.length || (a.id < b.id ? -1 : 1); }).forEach(function (o) {
+    var votes = {};
+    (o.aliases || []).forEach(function (a) { var pid = prevBy[a.k]; if (pid) votes[pid] = (votes[pid] || 0) + (a.np || 0) + 0.01; });
+    var best = Object.keys(votes).filter(function (x) { return !takenId[x]; }).sort(function (x, y) { return votes[y] - votes[x] || (x < y ? -1 : 1); })[0];
+    if (best) { if (best !== o.id) kept++; o.id = best; }
+    for (var n9 = 2; takenId[o.id]; n9++) o.id = hash(o.name + "|" + n9);
+    takenId[o.id] = 1;
+    o._votes = votes;
+  });
+  /* ids of previous groups that merged into this one still open it (was[]) */
+  owners.forEach(function (o) {
+    var w = {};
+    Object.keys(o._votes || {}).sort(function (x, y) { return o._votes[y] - o._votes[x]; }).forEach(function (pid) { [pid].concat(prevWas[pid] || []).forEach(function (x) { if (x && !takenId[x]) w[x] = 1; }); });
+    Object.keys(w).forEach(function (x) { takenId[x] = 1; });       /* one home per retired id */
+    o.was = Object.keys(w).slice(0, 12);
+  });
+  if (input.prev) log("owner ids carried over from the previous build: " + kept + " that the hash alone would have changed");
   /* shared mail drops are listed for the page, not used */
   log("owner groups: " + owners.length);
 
@@ -2099,7 +2138,7 @@ function build(input, log) {
       other: p.other, R: p.R, T: p.T, C: p.C, Y: p.Y, P: p.P, D: p.D, X: p.X};
   });
   var outOwners = owners.map(function (o) {
-    return {id: o.id, n: o.name, nb: o.basis, al: o.aliases, why: o.why, mail: o.mail, em: o.emails, ph: o.phones, ct: o.contacts,
+    return {id: o.id, was: o.was && o.was.length ? o.was : undefined, n: o.name, nb: o.basis, al: o.aliases, why: o.why, mail: o.mail, em: o.emails, ph: o.phones, ct: o.contacts,
       ty: o.types, kd: o.kind, hud: o.hud, hq: o.hq || undefined, p: o.props};
   });
   var srcInfo = {pbs8: pbsAsof, topa: topa.index && topa.index.updated || "", loanid: input.loanidSources || {}};
@@ -2181,7 +2220,7 @@ function mergeProp(rs, today) {
   rs.forEach(function (r) { if (r.src === "D" && r.rodKey && r.units) lotUnits[r.rodKey] = r.units; });
   Object.keys(lotUnits).forEach(function (k) { sumD += lotUnits[k]; });
   if (sumD > (p.u || 0) && !rs.some(function (r) { return (r.src === "P" || r.src === "T" || r.src === "Y") && r.units; })) { p.u = sumD; p.ue = false; }
-  p.id = hash(p.r + "|" + (main.site ? main.site.street + "|" + main.site.lo : main.line || "~" + s(main.d && main.d.real) + "|" + s(p.n) + "|" + s(main.zip)));
+  p.id = hash(p.r + "|" + (main.site ? main.site.street + "|" + main.site.lo : s(main.line) + "~" + s(main.d && main.d.real) + "|" + s(p.n) + "|" + s(main.zip)));
 
   /* owner claims: every source's idea of who owns it */
   var newestSale = p.C[0] ? p.C[0].date : "";
@@ -3259,7 +3298,7 @@ async function rebuild() {
     var ovl = await apiGet("/owner360/data/overlay.json" + (lm.files["overlay.json"] ? "?v=" + lm.files["overlay.json"] : ""));
     msg.textContent = "Joining and grouping owners...";
     await new Promise(function (r) { setTimeout(r, 30); });
-    var out = O360Build.build({pbs8: pbs8, pbs8Coords: coords, loanid: loanid, loanidSources: loanidSources, topa: {sheets: sheets, overlay: tov, index: index}, overlay: ovl, by: S.me.email, today: TODAY_ISO});
+    var out = O360Build.build({pbs8: pbs8, pbs8Coords: coords, loanid: loanid, loanidSources: loanidSources, topa: {sheets: sheets, overlay: tov, index: index}, overlay: ovl, by: S.me.email, today: TODAY_ISO, prev: S.data});
     tick("Saving " + fmtN(out.owners.length) + " owner groups...");
     var j = await apiPost("/owner360/publish", {content: b64FromString(JSON.stringify(out)), base: base, message: out.props.length + " properties, " + out.owners.length + " owner groups"});
     bar.style.width = "100%";
@@ -3398,7 +3437,9 @@ async function boot() {
   renderOwnerList();
   $("boot").style.display = "none";
   var hm = /#o=([^&]+)/.exec(location.hash), qo = new URLSearchParams(location.search).get("o");   /* #o= is the pre-v8 form */
-  if (qo || hm) { var id = qo || decodeURIComponent(hm[1]); var ix = S.data.owners.findIndex(function (o) { return o.id === id; }); if (ix >= 0) openOwner(ix); }
+  if (qo || hm) { var id = qo || decodeURIComponent(hm[1]); var ix = S.data.owners.findIndex(function (o) { return o.id === id; });
+    if (ix < 0) ix = S.data.owners.findIndex(function (o) { return o.was && o.was.indexOf(id) >= 0; });      /* a group that has since merged into another */
+    if (ix >= 0) openOwner(ix); }
   setInterval(poll, 30000);
   setTimeout(snapSync, 6000);       /* the Claude connector's snapshot, in the background */
 }
