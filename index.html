@@ -777,7 +777,7 @@ tr.hidden-row td{opacity:.45}
     <div class="mark">O</div>
     <span class="brand-name">Greysteel</span><span class="brand-sep">|</span>
     <span class="brand-page">Owner 360</span>
-    <span id="verBadge" title="Page version">v9</span>
+    <span id="verBadge" title="Page version">v10</span>
   </div>
   <nav class="tabs">
     <button class="tab active" data-view="owners"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span class="tl">Owners</span></button>
@@ -2856,7 +2856,7 @@ function renderProfile() {
     '<div class="acts"><span class="score lg ' + scoreCls(st.score) + '" title="Why-call-now score (0-100)">' + st.score + "</span>" +
     '<button class="ibtn' + (ov.stars[me] ? " on" : "") + '" id="pStar" title="Star (just for you)"><svg viewBox="0 0 24 24" fill="' + (ov.stars[me] ? "currentColor" : "none") + '" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>' +
     '<button class="lid-btn" id="pLink" title="Copy a link that opens this owner for a colleague"><span class="lb-idle">' + LINK_SVG + 'Copy link</span><span class="lb-done">' + CHECK_SVG + 'Link copied</span></button>' +
-    '<button class="btn sm" id="pMap" title="Show the properties and headquarters of this owner on the map">Map</button><button class="btn sm" id="pBrief" title="Copy a call brief to the clipboard">Copy call brief</button><button class="btn sm" id="pCsv">Export</button></div></div>';
+    '<button class="btn sm" id="pOnMap" title="Show the properties and headquarters of this owner on the map">Map</button><button class="btn sm" id="pBrief" title="Copy a call brief to the clipboard">Copy call brief</button><button class="btn sm" id="pCsv">Export</button></div></div>';
 
   var nextTxt = st.next ? '<div class="k-v sm">' + esc(fmtMon(st.next.d)) + '</div><div class="k-d" title="' + esc(st.next.l + " · " + (st.next.p.n || st.next.p.a)) + '">' + esc(shortLabel(st.next).replace(/ [A-Z][a-z]{2} '\d\d$/, "")) + " · " + esc(st.next.p.n || st.next.p.a) + "</div>" : '<div class="k-v sm">-</div><div class="k-d">Nothing dated ahead</div>';
   h += '<div class="grid g-kpi6">' +
@@ -2924,7 +2924,7 @@ function renderProfile() {
   $("pStar").onclick = function () { edit([{t: "star", k: ownerKeyFor(i), on: !ov.stars[me]}]); };
   $("pLink").onclick = function () { copyLink(ownerUrl(i), this); };
   $("pBrief").onclick = function () { copyBrief(i); };
-  $("pMap").onclick = function () { MS.owner = i; MS.hq = false; setView("map"); };
+  $("pOnMap").onclick = function () { MS.owner = i; MS.hq = false; setView("map"); };
   $("pCsv").onclick = function () { exportOwner(i); };
   $("omain").querySelectorAll("[data-detach]").forEach(function (el) {
     el.onclick = function (e) {
